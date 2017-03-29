@@ -195,3 +195,43 @@
 此处简单地打印出标签和内容，但是可以看到继承ContentHandler要复写很多方法，较为繁琐
 
 那有木有好的方法呢？当然是有的，就是适配器设计模式。
+
+##### 2.3.2 适配器模式
+
+何为适配器设计模式？简单的说就是这个类已经实现了ContentHandler接口，我们使用这个类时不需要复写所有的方法，只将自己需要的方法复写即可。
+
+```java
+1.//适配器设计模式  
+2.class MyHandler  extends DefaultHandler{      
+3.    //定义一字符串，用于保存标签名称     
+4.    private String eleName = null;   
+5.      
+6.    //如果只想打印第二个符合条件的标签主体内容，可以加上计数器   
+7.    private int    iNum = 0;       
+8.      
+9.    @Override     
+10.    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {   
+11.        //将开始标签名称保存           
+12.        eleName = qName;      
+13.    }     
+14.      
+15.    @Override     
+16.    public void characters(char[] ch, int start, int length) throws SAXException {   
+17.        //判断是哪一个标签，并采取相应的动作   
+18.        //  if("capital".equals(eleName))   
+19.        //  System.out.println(new String(ch,start,length));      
+20.          
+21.        //如果只想打印第二个符合条件的标签主体内容，可以加上计数器        
+22.        if("capital".equals(eleName) && iNum++ == 1)              
+23.            System.out.println(new String(ch,start,length));      
+24.    }     
+25.      
+26.    @Override     
+27.    public void endElement(String uri, String localName, String qName)  throws SAXException {     
+28.        //结束标签后要将字符串初始化，否则会打印结束标签到下一开始标签前的空格内容        
+29.        eleName = null;       
+30.    }     
+31.    
+32.}  
+```
+
