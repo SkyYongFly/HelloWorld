@@ -235,3 +235,213 @@
 32.}  
 ```
 
+### 3. **DOM解析xml文档**
+
+#### 3.1. **基础概念**
+
+**1) DOM模型 **(document object model)
+
+DOM解析器在解析XML文档时，会把文档中的所有元素，按照其出现的层次关系，解析成一个个Node对象(节点)，并以树的结构组织起来，存储到内存中。
+
+**2) JAXP中的文档对象**
+
+Document：文档
+
+Element：元素
+
+Attr：属性
+
+CharacterData：标签体
+
+**3) Node节点**
+
+Node是一个接口，代表文档树中的单个节点，其他文档类都是Node接口的实现
+
+Node接口上提供了获取父节点、获取子节点的方法，由此可以遍历文档树。
+
+Node接口定义了增删改查节点方法由此可以修改文档树。
+
+#### 3.2. **DOM解析的优缺点**
+
+1) 优点
+
+> 十分便于增删改查的操作
+
+> 只需一次解析拿到dom对象后可以重复使用，减少解析次数
+
+2) 缺点
+
+> 解析过程慢，需要将整个文档解析完成后才能进行操作
+
+> 需要将整个文档载入内存中，消耗内存 ，尤其当文档较大时候
+
+#### 3.3. **示例代码**
+
+xml文档:
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.  
+3.<jiyou>   
+4.  <country name="America" 政治体制="资产阶级民主制" president="奥巴马">   
+5.    <weapon>核弹</weapon>    
+6.    <advantage>妹子多</advantage>    
+7.    <land>就是大</land>  
+8.  </country>    
+9.  <country name="Russia">   
+10.    <weapon>宙斯盾</weapon>    
+11.    <advantage>哥有钱</advantage>   
+12.  </country>   
+</jiyou>  
+```
+
+Java代码：
+
+```java
+1.package com.example.xmlTest;  
+2.  
+3.import java.io.FileInputStream;  
+4.import java.io.FileOutputStream;  
+5.import java.io.FileWriter;  
+6.import java.text.Format;  
+7.import java.util.List;  
+8.  
+9.import javax.swing.ListModel;  
+10.  
+11.import org.dom4j.Attribute;  
+12.import org.dom4j.Document;  
+13.import org.dom4j.DocumentHelper;  
+14.import org.dom4j.Element;  
+15.import org.dom4j.io.OutputFormat;  
+16.import org.dom4j.io.SAXReader;  
+17.import org.dom4j.io.XMLWriter;  
+18.import org.junit.Test;  
+19.  
+20./* 
+21. * 利用dom方式解析xml文档 
+22. */  
+23.public class XmlDom {  
+24.  
+25.    @Test  
+26.    public   void test() throws Exception{  
+27.        //获取解析器  
+28.        SAXReader reader = new SAXReader();  
+29.        //读取xml文档获取其整个dom对象  
+30.        Document document = reader.read("war.xml");  
+31.        //获取根元素  
+32.        Element root = document.getRootElement();  
+33.        //获取标签体内容  
+34.        String name = root.element("country").element("weapon").getText();  
+35.        System.out.println(name);       
+36.    }  
+37.      
+38.    /* 
+39.     * 查找 
+40.     */  
+41.    @Test  
+42.    public  void  find() throws Exception {  
+43.        SAXReader reader = new SAXReader();  
+44.        Document document = reader.read("war.xml");  
+45.          
+46.        Element root = document.getRootElement();  
+47.        List<Element>  list =  root.elements();  
+48.        String advString  = list.get(1).element("advantage").getText();  
+49.        System.out.println(advString);  
+50.    }  
+51.      
+52.    /* 
+53.     * 增加标签元素 
+54.     */  
+55.    @Test  
+56.    public void add() throws Exception{  
+57.        SAXReader   reader = new SAXReader();  
+58.        Document    document = reader.read("war.xml");  
+59.        Element   root = document.getRootElement();  
+60.          
+61.        //利用DocumentHelper创建新的标签元素  
+62.        Element  land = DocumentHelper.createElement("land");  
+63.        land.setText("就是大");  
+64.        //将新的元素添加到对应结节点中  
+65.        Element  country = root.element("country");  
+66.        country.add(land);  
+67.          
+68.        //上面的修改只是改变的加载在内存中的dom树，还需要通过文件写如将更改应用到实际文档  
+69.//      FileWriter writer = new FileWriter("war.xml");  
+70.//      document.write(writer);  
+71.//      writer.flush();  
+72.//      writer.close();  
+73.          
+74.        XMLWriter  writer =  new XMLWriter(new FileOutputStream("war.xml"),OutputFormat.createPrettyPrint());  
+75.        writer.write(document);  
+76.        writer.close();  
+77.    }  
+78.      
+79.    /* 
+80.     * 删除标签元素 
+81.     */  
+82.    @Test  
+83.    public  void delete() throws Exception{  
+84.        SAXReader   reader = new SAXReader();  
+85.        Document    document = reader.read("war.xml");  
+86.        Element   root = document.getRootElement();  
+87.          
+88.        @SuppressWarnings("unchecked")  
+89.        List<Element>  list = root.elements();  
+90.        Element  adv  = list.get(1).element("advantage");  
+91.        adv.getParent().remove(adv);  
+92.          
+93.        XMLWriter  writer =  new XMLWriter(new FileOutputStream("war.xml"));  
+94.        writer.write(document);  
+95.        writer.close();  
+96.    }  
+97.      
+98.      
+99.    /* 
+100.     * 修改标签元素 
+101.     */  
+102.    @Test  
+103.    public void modify() throws Exception{  
+104.        SAXReader   reader = new SAXReader();  
+105.        Document    document = reader.read("war.xml");  
+106.        Element   root = document.getRootElement();  
+107.          
+108.        List<Element>  list = root.elements();  
+109.        Element  adv  = list.get(1).element("weapon");  
+110.        adv.setText("宙斯盾");  
+111.          
+112.        XMLWriter writer = new XMLWriter(new FileOutputStream("war.xml"));  
+113.        writer.write(document);  
+114.        writer.close();           
+115.    }  
+116.      
+117.    /* 
+118.     * 为标签   增删改查    属性 
+119.     */  
+120.    @Test  
+121.    public void attribute() throws Exception{  
+122.        SAXReader   reader = new SAXReader();  
+123.        Document    document = reader.read("war.xml");  
+124.        Element   root = document.getRootElement();  
+125.        Element countryElement = root.element("country");  
+126.          
+127.        //增  
+128.        countryElement.addAttribute("政治体制", "资产阶级民主制");  
+129.          
+130.        //查  
+131.        String  name = countryElement.attributeValue("name");  
+132.        System.out.println(name);  
+133.          
+134.        //删  
+135.        Attribute   president  = countryElement.attribute("president");  
+136.        president.getParent().remove(president);  
+137.          
+138.        //改  
+139.        //可由上得出      
+140.        XMLWriter writer = new XMLWriter(new FileOutputStream("war.xml"));  
+141.        writer.write(document);  
+142.        writer.close();        
+143.    }  
+144.  
+145.}  
+```
+
