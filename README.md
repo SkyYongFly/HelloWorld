@@ -624,3 +624,54 @@ Servlet定义了5个方法：
 
 ![1491012762025](README.assets/1491012762025.png)
 
+#### 4.6. ServletConfig
+
+* ServletConfig封装可以通过@WebServlet或者web.xml传给一个Servlet的配置信息，以这种方式传递的每一条信息都称做初始化信息，初始化信息就是一个个K-V键值对。
+
+* 为了从一个Servlet内部获取某个初始参数的值，init方法中调用ServletConfig的getInitParameter方法或getInitParameterNames方法获取，除此之外，还可以通过getServletContext获取ServletContext对象。方法签名：
+
+![1491017151773](README.assets/1491017151773.png)
+
+* 通过WebServlet传递配置信息示例：
+
+```java
+1./** 
+2. * 测试ServletConfig 
+3. *  
+4. * @author zhuyong 
+5. */  
+6.@WebServlet(name="MyServlet2",  
+7.        urlPatterns="/myServlet2",  
+8.        initParams={  
+9.                @WebInitParam(name = "name", value="小明"),  
+10.                @WebInitParam(name = "address", value="江苏省")  
+11.        }  
+12.)  
+13.public class MyServlet2 implements Servlet{  
+14.    private ServletConfig servletConfig = null;  
+15.  
+16.     
+17.    @Override  
+18.    public void service(ServletRequest servletRequest, ServletResponse servletResponse) 
+19.                 throws ServletException, IOException {  
+20.        //获取初始化参数  
+21.        ServletConfig servletConfig = getServletConfig();  
+22.        String name = servletConfig.getInitParameter("name");  
+23.        String address = servletConfig.getInitParameter("address");  
+24.          
+25.        //设置输出属性  
+26.        servletResponse.setCharacterEncoding("UTF-8");  
+27.        servletResponse.setContentType("text/html");  
+28.          
+29.        PrintWriter printWriter = servletResponse.getWriter();  
+30.        printWriter.write("<html><head></head><body>姓名：" + name + "</br>地址：" + address + "</body></html>");  
+31.          
+32.        printWriter.close();  
+33.    }  
+34.     
+35.   //*****其他方法和上面的一致，不再给出*********************** 
+  } 
+```
+
+![1491017181512](README.assets/1491017181512.png)
+
