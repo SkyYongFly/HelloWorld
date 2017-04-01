@@ -445,3 +445,156 @@ Java代码：
 145.}  
 ```
 
+### 4. Servlets
+
+#### 4.1. Servlet API
+
+![1491012282282](README.assets/1491012282282.png)
+
+*  Servlet接口是核心接口，是所有Serlvet都必须直接或间接实现的一个接口
+
+* Servlet接口定义了Servlet与Servlet容器之间的约定，总的来说就是Servlet容器会把Servlet类加载到内存中，并在Servlet实例中调用特定方法，在一个应用程序中，每个Servlet类型只能有一个实例。当用户的请求引发service方法，并给这个方法传入一个ServletRequest实例和一个ServletResponse实例。
+
+* ServletRequest封装当前的HTTP请求，让开发者不必去解析和操作原始的HTTP数据
+
+* ServletResponse表示当前用户的HTTP响应，它的作用是使得将响应回传给用户更容易。
+
+* Servlet容器还为每个应用程序创建一个ServletContext实例。这个对象封装context（应用程序）的环境细节，而每个context只有一个ServletContext。
+
+* 每个Servlet实例还有一个封装Servlet配置信息的ServletConfig。
+
+#### 4.2. **Servlet**
+
+Servlet定义了5个方法：
+
+![1491012354677](README.assets/1491012354677.png)
+
+* init 第一次请求我们编写的Serlvet时，Servlet容器调用此方法，后续不在调用，可以利用这个方法做一些初始化的工作。在调用这个方法时，Servlet容器会传递一个ServletConfig。一般会将这个ServletConfig赋给一个类级变量，以方便其他方法也可以使用这个对象。
+
+* service 每次用户请求service时，servlet容器都会调用这个方法，我们对请求的处理就是在这里完成的。
+
+* destroy 要销毁Servlet时，Servlet容器就会调用这个方法，它通常发生在卸载应用程序，或者关闭Servlet容器的时候，这里一般我们会写一些资源清理相关的代码
+
+* getServletInfo 就是字面意思，返回Servlet的描述
+
+* getServletConfig 这个方法返回由Servlet容器传给init方法的ServletConfig，上面说了，一般在init方法中将ServletConfig赋给一个类级变量，免得本方法返回null。
+
+**TIP**:
+
+注意Servlet线程安全性，Servlet不是线程安全的，而一个应用程序中所有的用户公用一个Servlet实例，因此不建议使用类级别的变量（只使用局部变量最好），除非是只读的或者java.utilconcurrent.atomic包中的成员。
+
+#### 4.3.  编写Servlet应用
+
+1) Servlet需要运行在Servlet容器中，所以需要一个Servlet容器，我们使用免费且强大的Tomcat
+
+2) 示例程序
+
+​	目录结构：
+
+![1491012448108](README.assets/1491012448108.png)
+
+Ø 应用程序中一般会有JSP、HTML、图像等其他资源，这些都应该放在应用程序的目录下面，并且经常放在子目录下，如上图，html放在html文件下，jsp放在jsp目录下。
+
+Ø 放在应用程序目录下的任何资源，用户可以通过资源的URL直接访问（放在应用程序目录下当然要可以访问了）
+
+Ø 如果希望某个资源可以被Servlet访问，但不能被用户访问，那就应该放在WEB-INF目录下（是不是找到该目录的作用了）。
+
+* 程序
+
+```java
+1.package com.example.servlet;  
+2.  
+3.import java.io.IOException;  
+4.import java.io.PrintWriter;  
+5.  
+6.import javax.servlet.Servlet;  
+7.import javax.servlet.ServletConfig;  
+8.import javax.servlet.ServletException;  
+9.import javax.servlet.ServletRequest;  
+10.import javax.servlet.ServletResponse;  
+11.import javax.servlet.annotation.WebServlet;  
+12.  
+13./** 
+14. * 自定义Servlet，实现Servlet接口 
+15. *  
+16. * @author zhuyong 
+17. */  
+18.@WebServlet(name="MyServlet",urlPatterns="/myServlet")  
+19.public class MyServlet implements Servlet{  
+20.    //Servlet配置信息对象  
+21.    private ServletConfig servletConfig = null;  
+22.  
+23.    /** 
+24.     * 初始化方法，第一次请求时调用 
+25.     */  
+26.    @Override  
+27.    public void init(ServletConfig config) throws ServletException {  
+28.        this.servletConfig = config;  
+29.          
+30.        System.out.println("MyServlet 被初始化了...");  
+31.    }  
+32.  
+33.    /** 
+34.     * 核心逻辑方法，每次请求都调用 
+35.     */  
+36.    @Override  
+37.    public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {  
+38.        servletResponse.setCharacterEncoding("UTF-8");  
+39.        servletResponse.setContentType("text/html");  
+40.          
+41.        PrintWriter printWriter = servletResponse.getWriter();  
+42.        printWriter.write("<html><head></head><body>Hello ,This Is MyServlet!</body></html>");  
+43.          
+44.        printWriter.close();  
+45.    }  
+46.      
+47.    /** 
+48.     * 销毁方法 
+49.     */  
+50.    @Override  
+51.    public void destroy() {  
+52.        System.out.println("MyServlt被销毁了...");  
+53.    }  
+54.  
+55.    /** 
+56.     * 获取ServletConfig方法 
+57.     */  
+58.    @Override  
+59.    public ServletConfig getServletConfig() {  
+60.        return servletConfig;  
+61.    }  
+62.  
+63.    /** 
+64.     * 获取Servlet的基本描述 
+65.     */  
+66.    @Override  
+67.    public String getServletInfo() {  
+68.        return "This is MyServlet!";  
+69.    }  
+70.}  
+```
+
+Ø 这里我们定义了一个MyServlet，实现了Servlet接口，在初始化方法init()中简单的输出提示信息。
+
+Ø 在核心的service()中，我们通过输出对象ServletResponse输出了一段HTML文本，这段文本被浏览器接收到的话，将被解析展示成对应的网页内容，其实我们定义了返回内容格式：servletResponse.setContentType("text/html")。
+
+Ø 需要注意的是MyServlet上面的注解：@WebServlet(name="MyServlet",urlPatterns="/myServlet") 
+
+@WebServlet 定义了MyServlet要被访问的URL名称，即我们在访问的时候可以通过 /myServlet 来请求到这个Servlet
+
+* 部署访问
+
+将应用部署到Tomcat中，启动Tomcat，然后输入地址：
+
+*http://localhost:8080/Servlet_1/myServlet*
+
+我们的浏览器输出如下内容：
+
+![1491012523472](README.assets/1491012523472.png)
+
+* 我们注意到当第一次请求这个Servlet的时候，后台输出：
+
+![1491012544406](README.assets/1491012544406.png)
+
+而第二次以及之后的请求都不再输出了，说明只有在第一次请求Servlet的时候才调用init()方法。
+
