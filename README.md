@@ -598,3 +598,19 @@ Servlet定义了5个方法：
 
 而第二次以及之后的请求都不再输出了，说明只有在第一次请求Servlet的时候才调用init()方法。
 
+#### **4.4.  **ServletRequest
+
+* 对于每一个HTTP请求，servlet容器会创建一个封装了HTTP请求的ServletRequest实例传递给servlet的service方法
+
+* 以下为ServletRequest大部分方法：
+
+![1491012660535](README.assets/1491012660535.png)
+
+* ServletRequest中最常用的方法就是：getParameter()，用于返回HTML表单域的值，或者HTTP请求URL查询字符串的值，例如：
+
+  *http**://example/context/servlet?id=123*
+
+​	那我们就可以用如下方法获取请求中id对应的值：
+
+​	String id = request.getParameter(“id);
+
