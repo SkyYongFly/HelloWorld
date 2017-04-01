@@ -614,3 +614,13 @@ Servlet定义了5个方法：
 
 ​	String id = request.getParameter(“id);
 
+#### 4.5. ServletResponse
+
+* ServletResponse则表示一个Servlet响应，其影藏了将响应发给浏览器的复杂性。通过ServletRequest的方法你可以获取一些请求相关的参数，而ServletResponse则可以将设置一些返回参数信息，并且设置返回内容。返回内容之前一般会调用setContentType方法设置响应的内容类型，如果没有设置，大多数浏览器会默认以html的形式响应，不过为了避免出问题，我们一般都设置该项。
+
+* 值得注意的是ServletResponse中定义的getWriter方法，它返回可以将文本传给客户端的java.io.PrintWriter。在默认的情况下，PrintWriter对象使用ISO-8859-1编码，这有可能引起乱码。
+
+* 以下为ServletResponse大部分方法：
+
+![1491012762025](README.assets/1491012762025.png)
+
