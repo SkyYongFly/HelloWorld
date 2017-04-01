@@ -675,3 +675,60 @@ Servlet定义了5个方法：
 
 ![1491017181512](README.assets/1491017181512.png)
 
+#### 4.7. ServletContext
+
+* ServletContext是代表了Servlet应用程序。每个Web应用程序只有一个context。
+
+* 在分布式环境中，一个应用程序同时部署到多个容器中，并且每台Java虚拟机都有一个ServletContext对象。
+
+* 有了ServletContext对象后，就可以共享能通过应用程序的所有资源访问的信息，促进Web对象的动态注册，共享的信息通过一个内部Map中的对象保存在ServiceContext中来实现。
+
+* ServletContext中的属性的生命周期从创建开始，到服务器关闭而结束
+
+* 注意事项:因为存在ServletContext中的数据会长时间的保存在服务器，会占用内存，因此我们建议不要想serveltContext中添加过大的数据
+
+* 保存在ServletContext中的对象称作属性。操作属性的方法：
+
+![1491029999797](README.assets/1491029999797.png)
+
+* 因为ServletContext代表整个Servlet应用程序，所以在不同的servlet中设置的属性可以在其它servlet中获取。示例程序：
+
+​	MyServletContext1:
+
+```java
+1.@Override  
+2.    public void service(ServletRequest request, ServletResponse response)   
+3.            throws ServletException, IOException {  
+4.        //获取ServletContext  
+5.        ServletContext context = this.servletConfig.getServletContext();  
+6.          
+7.        //设置属性值  
+8.        context.setAttribute("name", "小红");  
+9.        System.out.println("MyServletContext1成功设置属性！");  
+10.    }  
+```
+
+MyServletContext2:
+
+```java
+1.@Override  
+2.    public void service(ServletRequest request, ServletResponse response)   
+3.            throws ServletException, IOException {  
+4.        //获取ServletContext  
+5.        ServletContext context = this.servletConfig.getServletContext();  
+6.          
+7.        //获取context1中设置的属性值  
+8.        String name = (String) context.getAttribute("name");  
+9.          
+10.        System.out.println("获取设置的属性值name:" + name);  
+11.    }  
+```
+
+当我们先访问MyServletContext1,设置了属性：
+
+![1491030052779](README.assets/1491030052779.png)
+
+当我们再访问MyServletContext2，获取属性：
+
+![1491030065979](README.assets/1491030065979.png)
+
