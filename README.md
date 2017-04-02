@@ -861,3 +861,135 @@ void sendRedirect(String location)
 
 ![1491097104847](README.assets/1491097104847.png)
 
+#### 4.10.  **部署描述符**
+
+前面我们设置servlet访问的URL地址或者初始化参数都是用的@WebServlet注解的方式，其实我们还可以用另外一种方式：部署描述符——即配置在应用中的web.xml文件。
+
+部署描述符好处：
+
+① 可以使用@WebServlet中没有的配置元素，例如  load-on-startup
+
+② 需要修改配置值的话，如Servlet的路径，部署描述符不需要重新编译Servlet类
+
+③ 可以将一个初始化参数传递给Servlet，，而不需要重新编译Servlet类
+
+④ 部署描述符中的配置会覆盖Servlet标注中定义的值
+
+示例程序：
+
+1)  应用结构
+
+![1491119190847](README.assets/1491119190847.png)
+
+2) Web.xml
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">  
+3.  <display-name>Servlet_3</display-name>  
+4.    
+5.  <!-- 默认首页 -->  
+6.  <welcome-file-list>  
+7.    <welcome-file>index.html</welcome-file>  
+8.  </welcome-file-list>  
+9.    
+10.  <!-- 定义应用级别的初始化参数 -->  
+11.  <context-param>  
+12.    <param-name>appname</param-name>  
+13.    <param-value>PersonInfo</param-value>  
+14.  </context-param>  
+15.    
+16.  <!-- 定义servlet描述符信息 -->  
+17.  <servlet>  
+18.    <servlet-name>PersonInfo</servlet-name>  
+19.    <servlet-class>com.example.servlet.PersonInfoServlet</servlet-class>  
+20.      
+21.    <!-- 定义servlet内的初始化参数，必须定义定义在 load-on-startup 前面 -->  
+22.    <init-param>  
+23.        <param-name>name</param-name>  
+24.        <param-value>小明</param-value>  
+25.    </init-param>  
+26.      
+27.    <init-param>  
+28.        <param-name>address</param-name>  
+29.        <param-value>淮安</param-value>  
+30.    </init-param>  
+31.      
+32.    <!-- 定义servlet在应用启动的时候就加载 -->  
+33.    <load-on-startup>5</load-on-startup>  
+34.      
+35.  </servlet>  
+36.    
+37.  <servlet-mapping>  
+38.    <servlet-name>PersonInfo</servlet-name>  
+39.    <url-pattern>/personInfo</url-pattern>  
+40.  </servlet-mapping>  
+41.</web-app>  
+```
+
+PersonInfoServlet:
+
+```java
+1.package com.example.servlet;  
+2.  
+3.import java.io.IOException;  
+4.import java.util.Enumeration;  
+5.  
+6.import javax.servlet.ServletConfig;  
+7.import javax.servlet.ServletException;  
+8.import javax.servlet.http.HttpServlet;  
+9.import javax.servlet.http.HttpServletRequest;  
+10.import javax.servlet.http.HttpServletResponse;  
+11.  
+12./** 
+13. * 示例程序，获取用户信息的Servlet 
+14. *  
+15. * @author zhuyong 
+16. */  
+17.public class PersonInfoServlet extends HttpServlet {  
+18.    private static final long serialVersionUID = -7442227301433035924L;  
+19.      
+20.    @Override  
+21.    public void init() throws ServletException {  
+22.        System.out.println("PersonInfoServlet初始化了...");  
+23.    }  
+24.  
+25.    @Override  
+26.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)   
+27.            throws ServletException, IOException {  
+28.        //获取URL请求地址中携带的参数  
+29.        String urlPara = req.getParameter("id");  
+30.        System.out.println("获取到URL请求参数id的值：" + urlPara + "\n");  
+31.          
+32.        //获取部署描述符中的应用级别初始参数  
+33.        String appname = this.getServletContext().getInitParameter("appname");  
+34.        System.out.println("获取到应用级别初始化参数 appname的值：" + appname + "\n");  
+35.          
+36.        //获取配置在servlet里的初始化参数  
+37.        ServletConfig config = this.getServletConfig();  
+38.        Enumeration<String> initParaNames =  config.getInitParameterNames();  
+39.        while (initParaNames.hasMoreElements()) {  
+40.            //获取参数名称  
+41.            String initPara = (String) initParaNames.nextElement();  
+42.            //根据名称获取值  
+43.            String initParaValue = config.getInitParameter(initPara);  
+44.              
+45.            System.out.println("获取到初始化参数，名称：" + initPara + "，值：" + initParaValue);  
+46.        }  
+47.    }  
+48.}  
+```
+
+3) 输出结果
+
+![1491119243689](README.assets/1491119243689.png)
+
+后台打印信息：
+
+![1491119265943](README.assets/1491119265943.png)
+
+我们可以看到在应用启动的时候打印了我们在init方法中的设置的信息，说明servlet确实被设置到应用启动的时候加载。然后我们请求这个servlet，获取打印了不同域的初始化参数信息。
+
+**Servlet级别的信息保存在ServletConfig 中**
+
+**整个应用级别的信息保存在ServletContext中**
