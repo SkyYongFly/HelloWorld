@@ -732,3 +732,24 @@ MyServletContext2:
 
 ![1491030065979](README.assets/1491030065979.png)
 
+#### 4.8. GenericServlet
+
+* 前面编写的Servlet应用中通过实现Servlet接口来编写Servlet，但是我们每次都必须为Servlet中的所有方法都提供实现，还需要将ServletConfig对象保存到一个类级别的变量中，GenericServlet抽象类就是为了为我们省略一些模板代码，实现了Servlet和ServletConfig，完成了一下几个工作：
+
+* 将init方法中的ServletConfig赋给一个类级变量，使的可以通过getServletConfig来获取。
+
+```java
+public void init(ServletConfig config) throws ServletException {
+     this.config = config;
+     this.init();
+}
+```
+
+* 同时为避免覆盖init方法后在子类中必须调用super.init(servletConfig)，GenericServlet还提供了一个不带参数的init方法，当ServletConfig赋值完成就会被第带参数的init方法调用。这样就可以通过覆盖不带参数的init方法编写初始化代码，而ServletConfig实例依然得以保存（这难道不是适配器模式吗？）
+
+  Ø 为Servlet接口中的所有方法提供默认实现。
+
+  Ø 提供方法来包装ServletConfig中的方法。
+
+* 我们可以通过继承GenericServlet来自定义Servlet(这里不再给出示例程序。。。)
+
