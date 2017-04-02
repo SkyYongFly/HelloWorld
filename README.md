@@ -753,3 +753,111 @@ public void init(ServletConfig config) throws ServletException {
 
 * 我们可以通过继承GenericServlet来自定义Servlet(这里不再给出示例程序。。。)
 
+#### 4.9. **HTTPServlet**
+
+* 在编写Servlet应用程序时，大多数都要用到HTTP，也就是说可以利用HTTP提供的特性，javax.servlet.http包含了编写Servlet应用程序的类和接口，其中很多覆盖了javax.servlet中的类型，我们自己在编写应用时大多时候也是继承的HttpServlet，以下为其中的重要成员:
+
+![1491096982295](README.assets/1491096982295.png)
+
+* 从上图看，HttpServlet继承了GenericServlet，HttpServletRequest/Response继承了覆盖了ServletRequest/Response，成为了新的Servlet请求和响应的代表。在HttpServlet中覆盖了GenericServlet的service方法，并用新的Servlet请求和响应代表作为参数添加了一个service方法：
+
+```java
+1.//覆盖GenereicServlet中的service  
+2.public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException{
+3.           HttpServletRequest  request;  
+4.           HttpServletResponse response;         
+5.           if (!(req instanceof HttpServletRequest &&  
+6.                   res instanceof HttpServletResponse)) {  
+7.               throw new ServletException("non-HTTP request or response");  
+8.           }  
+9.           request = (HttpServletRequest) req;  
+10.           response = (HttpServletResponse) res;  
+11.           service(request, response);  
+12.       }  
+13.}  
+14.  
+15.//新service方法签名  
+16.protected void service(HttpServletRequest req, HttpServletResponse resp)  
+```
+
+* 原始的service方法将请求和响应进行向下转换，分别为HttpServletRequest和HttpServletResponse，并调用新的service方法。看了下2.5版本中的实现，发现没有加以上代码是中的instanceof判断，恩，看来2.5中直接向下转型确实暴力了点，考虑容器不一定总是把请求当做HTTP请求，这样做看起来稳妥了些。新的service方法会查寻HTTP请求的方法从而调用do{Method}来处理请求。
+
+* 总之HttpServlet中有两项特性是GenericServlet中没有的：
+
+> 不覆盖service方法，而是覆盖doGet、doPost等。
+
+> 用HttpServletRequest\Response 替代ServletRequest\Response
+
+* HttpServletRequest，HttpServletResponse由于带有了HTTP的特性，因此除了ServletRequest，ServletResponse中的方法之外还增加了几个可以获取HTTP特性信息的方法。
+
+```java
+//获取context的请求URI部分
+java.lang.String getContextPath()
+//获取Cookie对象数组
+Cookie [] getCookies()
+
+//返回指定HTTP标头的值
+java.lang.String getHeader(java.lang.String name)
+//返回发出这条请求的HTTP方法的名称
+java.lang.String getMethod()
+//返回请求URL中的查询字符串
+java.lang.String getQueryString()
+//获取session对象，没找到就新创建
+HttpSession getSession()
+//返回与这个请求相关的session对象，如果没有，并且create参数为true，创建新的session对象
+```
+
+```java
+//响应对象添加cookie
+void addCookie(Cookie cookie)
+//添加标头
+void addheader(String name,String value)
+//重定向
+void sendRedirect(String location)
+```
+
+* 示例程序
+
+```java
+1.package com.example.servlet;  
+2.  
+3.import java.io.IOException;  
+4.import java.io.PrintWriter;  
+5.  
+6.import javax.servlet.ServletException;  
+7.import javax.servlet.annotation.WebServlet;  
+8.import javax.servlet.http.HttpServlet;  
+9.import javax.servlet.http.HttpServletRequest;  
+10.import javax.servlet.http.HttpServletResponse;  
+11.  
+12./** 
+13. * 继承HttpServlet定义一个Servlet 
+14. *  
+15. * @author zhuyong 
+16. */  
+17.@WebServlet(urlPatterns="/myHttpServlet")  
+18.public class MyHttpServlet extends HttpServlet{  
+19.    private static final long serialVersionUID = 927677281600473562L;  
+20.  
+21.    @Override  
+22.    public void init() throws ServletException {  
+23.        System.out.println("MyHttpServlet被初始化了...");  
+24.    }  
+25.      
+26.    @Override  
+27.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)   
+28.            throws ServletException, IOException {  
+29.        resp.setContentType("text/html");  
+30.        resp.setCharacterEncoding("UTF-8");  
+31.          
+32.        PrintWriter writer = resp.getWriter();  
+33.        writer.write("<html><head></head><body>Hello ,This Is MyHttpServlet!</br>"  
+34.                + "Impossible Is Nothing!</body></html>");  
+35.          
+36.        writer.close();  
+37.    }  
+38.}  
+```
+
+![1491097104847](README.assets/1491097104847.png)
+
