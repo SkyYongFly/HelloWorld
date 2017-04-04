@@ -861,7 +861,7 @@ void sendRedirect(String location)
 
 ![1491097104847](README.assets/1491097104847.png)
 
-#### 4.10.  **部署描述符**
+#### 4.10.  部署描述符
 
 前面我们设置servlet访问的URL地址或者初始化参数都是用的@WebServlet注解的方式，其实我们还可以用另外一种方式：部署描述符——即配置在应用中的web.xml文件。
 
@@ -993,3 +993,74 @@ PersonInfoServlet:
 **Servlet级别的信息保存在ServletConfig 中**
 
 **整个应用级别的信息保存在ServletContext中**
+
+### 5. Servlet应用
+
+#### 5.1.  **基础概念**
+
+Servlet: 由SUN公司提供的一种动态web资源开发技术.本质上就是一段java小程序.可以将Servlet加入到Servlet容器中运行.
+
+#### 5.2. 步骤
+
+主要分为两步：
+
+1) 写一个java程序实现Servlet接口（此处直接继承了默认实现类GenericServlet，因为如果直接实现Servlet接口需要复写其中所有的方法）
+
+2) 将编译好的带包的.class放到WEB-INF/classes下以外，还要配置web应用的 web.xml注册Servlet
+
+#### 5.3. **示例步骤**
+
+##### 5.3.1. 编写FirstServlet.java程序
+
+为了对相关步骤结构由深入的认识，当然用记事本写啦  
+
+```java
+1.package  com.example.servlet;  
+2.  
+3.import javax.servlet.*;  
+4.import java.io.*;  
+5.  
+6.public class FirstServlet  extends  GenericServlet{  
+7.  
+8.    public void service(ServletRequest  req,ServletResponse  res) 
+9.                                               throws IOException,ServletException {  
+10.      
+11.        res.getWriter().write("Hello ,this is my first servlet !");  
+12.    }  
+13.}   
+```
+
+##### 5.3.2.  编译FirstServlet.java
+
+打开 命令提示符窗口，切换到文件所在目录，输入javac  FirstServlet.java  ,但是显示错误
+
+![1491307801383](README.assets/1491307801383.png)
+
+仔细一看是缺少javax.servlet这个程序包，想一想，我们编译用的是jdk默认的编译环境，并没有这个包，所以需要将相关的包导入编译路径查看现有的编译路径 set classpath
+
+![1491307820304](README.assets/1491307820304.png)
+
+如何将所需要的包加进来呢？
+
+找到Tomcat安装目录下的lib/ servlet-api.jar包，复制其路径
+
+set classpath=%classpath%; (包的详细路径)
+
+![1491307856414](README.assets/1491307856414.png)
+
+这个是临时配置，下次重新启动会失效。再次编译
+
+![1491307873057](README.assets/1491307873057.png)
+
+会看到在目录下生成.class文件，但是我们要直接生成包路径结构，以便于后面配置web应用
+
+***javac  -d  .  FirstServlet.java***
+
+表示在当前目录下生成
+
+![1491307896528](README.assets/1491307896528.png)
+
+可以在目录下看到生成的包名路径文件夹，结构为
+
+***com/example/servlet/FirstServlet.class***
+
