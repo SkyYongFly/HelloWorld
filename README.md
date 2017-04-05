@@ -1064,3 +1064,58 @@ set classpath=%classpath%; (包的详细路径)
 
 ***com/example/servlet/FirstServlet.class***
 
+##### 5.3.3.  在Tomcat中配置web应用
+
+在 Tomcat安装目录下的webapps下新建文件夹servlet
+
+我们知道web应用目录为
+
+**servlet  |**
+
+  			**|------WEB-INF** 
+
+  						**|----classes   此处将上面的com文件夹拷贝进来** 
+
+ 						 **|----lib      所需依赖库，默认使用Tomcat的，可为空**
+
+ 						 **|----web.xml   配置文件**
+
+关键在于配置web.xml文件:
+
+```java
+1.<?xml version="1.0" encoding="ISO-8859-1"?>    
+2.<web-app xmlns="http://java.sun.com/xml/ns/javaee"    
+3.   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"    
+4.   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"    
+5.   version="2.5">     
+6.    
+7.    <servlet>    
+8.        <servlet-name>FirstServlet</servlet-name>    
+9.        <servlet-class>com.example.servlet.FirstServlet</servlet-class>    
+10.    </servlet>    
+11.    <servlet-mapping>    
+12.        <servlet-name>FirstServlet</servlet-name>    
+13.        <url-pattern>/FirstServlet</url-pattern>    
+14.    </servlet-mapping>    
+15.    
+16.</web-app>    
+```
+
+开头不会写没关系直接到其他web应用中找到复制一下
+
+下面两个标签配置:
+
+<servlet-name>起一个名称，上下两个要相同
+
+<servlet-class>中是.class具体路径，也就相当于 包名.（文件.class名）
+
+<url-pattern>里面是映射名称，即在浏览器中输入访问的名称，可以随便起
+
+##### 5.3.4. 浏览器访问
+
+输入http://localhost:8080/servlet/FirstServlet
+
+( [http://本地](Http://本地)端口/(web应用名)/映射名称 )
+
+![1491391894263](README.assets/1491391894263.png)
+
