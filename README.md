@@ -1119,3 +1119,124 @@ set classpath=%classpath%; (包的详细路径)
 
 ![1491391894263](README.assets/1491391894263.png)
 
+### 6. ServletConfig
+
+#### 6.1. 基础概念
+
+代表当前Servlet在web.xml中的配置信息，可以在web.xml中<servlet>中配置
+
+```xml
+1.<servlet>  
+2.        <servlet-name>Demo5Servlet</servlet-name>  
+3.        <servlet-class>cn.itheima.Demo5Servlet</servlet-class>  
+4.        <init-param>  
+5.            <param-name>data1</param-name>  
+6.            <param-value>value1</param-value>  
+7.        </init-param>  
+8.  </servlet>  
+```
+
+#### 6.3. **相关方法**
+
+> String getServletName()：获取当前Servlet在web.xml中配置的名字
+
+> String getInitParameter(String name)：获取当前Servlet指定名称的初始化参数的值
+
+> Enumeration getInitParameterNames()：获取当前Servlet所有初始化参数的名字组成的枚举
+
+> ServletContext getServletContext()：获取代表当前web应用的ServletContext对象
+
+#### 6.3. 作用
+
+不想在servlet中写死的内容可以配置到此处。
+
+#### 6.4. 程序
+
+作为Init的参数，可以先定义类变量，复写父类Init()方法，在  doGet() 方法中进行相关操作
+
+```java
+1.package com.example.servlet;  
+2.  
+3.import java.io.IOException;  
+4.import java.util.Date;  
+5.  
+6.import javax.servlet.ServletConfig;  
+7.import javax.servlet.ServletException;  
+8.import javax.servlet.http.HttpServlet;  
+9.import javax.servlet.http.HttpServletRequest;  
+10.import javax.servlet.http.HttpServletResponse;  
+11.  
+12.public class ServletDemo extends HttpServlet {  
+13.    private ServletConfig config = null;  
+14.
+15.    @Override  
+16.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+17.            throws ServletException, IOException {  
+18.        //对config进行相关操作  
+19.    }  
+20.  
+21.    @Override  
+22.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+23.            throws ServletException, IOException {  
+24.        // TODO Auto-generated method stub  
+25.        super.doPost(req, resp);  
+26.    }  
+27.  
+28.    @Override  
+29.    public void init(ServletConfig config) throws ServletException {  
+30.        this.config = config;  
+31.    }  
+32.  
+33.      
+34.}  
+```
+
+但是每次需要重写方法等较为麻烦，好在HttpServlet的父类GenericServlet中封装了getServletConfig方法，可以直接调用
+
+```java
+1.package com.example.servlet;  
+2.  
+3.import java.io.IOException;  
+4.import java.util.Enumeration;  
+5.  
+6.import javax.servlet.ServletConfig;  
+7.import javax.servlet.ServletException;  
+8.import javax.servlet.http.HttpServlet;  
+9.import javax.servlet.http.HttpServletRequest;  
+10.import javax.servlet.http.HttpServletResponse;  
+11.  
+12.public class ServletDemo extends HttpServlet {  
+13.  
+14.    @Override  
+15.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+16.            throws ServletException, IOException {  
+17.        //对config进行相关操作  
+18.        ServletConfig config = this.getServletConfig();  
+19.          
+20.        //获取Servlet在配置中的名称  
+21.        String  name = config.getServletName();  
+22.        System.out.println(name);  
+23.          
+24.        //获取当前Servlet指定名称的初始化参数的值  
+25.        String  value = config.getInitParameter("demo1");  
+26.        System.out.println(value);  
+27.          
+28.        //获取当前servlet所有初始化名称的枚举  
+29.        Enumeration<String>  en = config.getInitParameterNames();  
+30.        while(en.hasMoreElements()){  
+31.            String nam = en.nextElement();  
+32.            String valu = config.getInitParameter(nam);  
+33.            System.out.println(nam+" : "+valu);  
+34.        }  
+35.    }  
+36.  
+37.    @Override  
+38.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+39.            throws ServletException, IOException {  
+40.        super.doPost(req, resp);  
+41.    }  
+42.  
+43.  
+}  
+```
+
