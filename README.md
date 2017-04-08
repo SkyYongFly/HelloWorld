@@ -1240,3 +1240,59 @@ set classpath=%classpath%; (包的详细路径)
 }  
 ```
 
+### 7. ServletContext
+
+#### 7.1. **基础概念**
+
+代表当前web应用对象
+
+#### 7.2. 作用
+
+**1) 域对象**
+
+作为域对象使用，在不同servlet之间传递数据,作用范围是整个web应用
+
+**2) 生命周期**
+
+当web应用被加载进容器时创建代表整个web应用的ServletContext对象。当服务器关闭或web应用被移除出容器时，ServletContext对象跟着销毁。
+
+**3) 域**
+
+一个域就理解为一个框，这里面可以放置数据，一个域既然称作域，他就有一个可以被看见的范围，这个范围内都可以对这个域中的数据进行操作，那这样的对象就叫做域对象。
+
+**4) 初始化参数**
+
+在web.xml可以配置整个web应用的初始化参数，利用ServletContext去获得
+
+```xml
+1.<context-param>  
+2.    <param-name>param1</param-name>  
+3.    <param-value>pvalue1</param-value>  
+4.</context-param>  
+```
+
+​	this.getServletContext().getInitParameter("param1")
+
+​	this.getServletContext().getInitParameterNames()
+
+**5) 在不同servlet之间进行转发**
+
+​	this.getServletContext().getRequestDispatcher("/servlet/Demo10Servlet").forward(request, response);
+
+​	方法执行结束，service就会返回到服务器，再有服务器去调用目标servlet，其中request会重新创建，并将之前的request的数据拷贝进去。
+
+**6) 读取资源文件**
+
+* 由于相对路径默认相对的是java虚拟机启动的目录，所以我们直接写相对路径将会是相对于tomcat/bin目录，所以是拿不到资源的。如果写成绝对路径，当项目发布到其他环境时，绝对路径就错了。
+
+* 为了解决这个问题ServletContext提供了this.getServletContext().getRealPath("/1.properties")，给进一个资源的虚拟路径，将会返回该资源在当前环境下的真实路径。this.getServletContext().getResourceAsStream("/1.properties")，给一个资源的虚拟路径返回到该资源真实路径的流。
+
+* 当在非servlet下获取资源文件时，就没有ServletContext对象用了，此时只能用类加载器。
+
+  classLoader.getResourceAsStream("../../1.properties")
+
+  此方法利用类加载器直接将资源加载到内存中，有更新延迟的问题，以及如果文件太大，占用内存过大。
+
+  ​	classLoader.getResource("../1.properties").getPath()
+
+  直接返回资源的真实路径，没有更新延迟的问题。
