@@ -1447,3 +1447,85 @@ Xml:
 浏览器访问：
 
 ![1491642267436](README.assets/1491642267436.png)
+
+**4) 加载资源文件**
+
+* 例如读取工程目录中的context.properties文件
+
+  其在工程中的具体位置如下：
+
+![1491642284711](README.assets/1491642284711.png)
+
+内容：
+
+*name=zhangsan*
+
+*home=Earth*
+
+ServletContextDemo6.java :
+
+```
+1.public class ServletContextDemo6 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        Properties prop = new Properties();  
+7.        prop.load(new  FileReader(this.getServletContext().getRealPath("context.properties")));  
+8.        System.out.println("name = "+prop.getProperty("name"));  
+9.        System.out.println("home = "+prop.getProperty("home"));  
+10.    }  
+11.  
+12.}  
+```
+
+​	浏览器访问，程序输出：
+
+![1491642315534](README.assets/1491642315534.png)
+
+* 当在非servlet下获取资源文件时，就没有ServletContext对象用了，此时只能用类加载器
+
+  Context.properties 所在目录
+
+![1491642329124](README.assets/1491642329124.png)
+
+ServletContextDemo7.java  :
+
+```
+1.public class ServletContextDemo7 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        try {  
+7.            new service().method1();  
+8.        } catch (Exception e) {  
+9.            e.printStackTrace();  
+10.        }  
+11.    }  
+12.  
+13.}  
+```
+
+method():
+
+```
+1.package com.example.servlet1;  
+2.  
+3.import java.io.FileReader;  
+4.import java.util.Properties;  
+5.  
+6.public class service {  
+7.    public void method1() throws Exception{  
+8.        Properties prop = new Properties();  
+9.        prop.load(new FileReader(service.class.getClassLoader().getResource("com/example/servlet/context.properties").getPath()));  
+10.        System.out.println(prop.getProperty("name"));  
+11.        System.out.println(prop.getProperty("home"));  
+12.    }  
+13.}  
+```
+
+输出：
+
+![1491642372864](README.assets/1491642372864.png)
+
