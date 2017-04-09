@@ -1296,3 +1296,154 @@ set classpath=%classpath%; (包的详细路径)
   ​	classLoader.getResource("../1.properties").getPath()
 
   直接返回资源的真实路径，没有更新延迟的问题。
+
+#### 7.3.示例代码
+
+**1)** 作用一：**作为域对象可以在整个web应用范围共享数据**
+
+ServletContextDemo1.java:
+
+```java
+1.public class ServletContextDemo1 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        this.getServletContext().setAttribute("xiaoming", "child");  
+7.  
+8.    }  
+9.}  
+```
+
+ServletContextDemo2.java:
+
+```java
+1.public class ServletContextDemo2 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        String value =  (String)this.getServletContext().getAttribute("xiaoming");  
+7.        System.out.println(value);  
+8.    }  
+9.}  
+```
+
+在览器中先访问1（http://localhost:8080/day04/servlet1），
+
+再访问2 ，访问的url设置如下
+
+```xml
+1. <servlet>  
+2.        <servlet-name>ServletDemo1</servlet-name>  
+3.        <servlet-class>com.example.servlet.ServletContextDemo1</servlet-class>  
+4.</servlet>  
+5.<servlet>  
+6.        <servlet-name>ServletDemo2</servlet-name>  
+7.        <servlet-class>com.example.servlet.ServletContextDemo2</servlet-class>  
+8.</servlet>  
+9.<servlet-mapping>  
+10.        <servlet-name>ServletDemo1</servlet-name>  
+11.        <url-pattern>/servlet1</url-pattern>  
+12.</servlet-mapping>  
+13.<servlet-mapping>  
+14.        <servlet-name>ServletDemo2</servlet-name>  
+15.        <url-pattern>/servlet2</url-pattern>  
+16.</servlet-mapping>  
+```
+
+可以得到输出
+
+![1491642143755](README.assets/1491642143755.png)
+
+**2)** **获取web应用初始化参数**
+
+Xml:
+
+```xml
+1.<context-param>  
+2.    <param-name>contextName</param-name>  
+3.    <param-value>contextValue</param-value>  
+4. </context-param>  
+```
+
+ServletContextDemo3.java  :
+
+```java
+1.public class ServletContextDemo3 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        String value = this.getServletContext().getInitParameter("contextName");  
+7.        System.out.println(value);  
+8.    }  
+9.}  
+```
+
+访问3，得出：
+
+![1491642178949](README.assets/1491642178949.png)
+
+**3)** **实现Servlet的转发**
+
+所请求的方法不进行处理，转而将请求转到另一个方法中进行处理
+
+ServletContextDemo4.java  :
+
+```java
+1.public class ServletContextDemo4 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        this.getServletContext().getRequestDispatcher("/servlet5").forward(req, resp); 
+7.    }  
+8.      
+9.}  
+```
+
+Xml:
+
+```xml
+1.<servlet>  
+2.    <servlet-name>ServletDemo4</servlet-name>  
+3.    <servlet-class>com.example.servlet.ServletContextDemo4</servlet-class>  
+4.</servlet>  
+5.<servlet-mapping>  
+6.    <servlet-name>ServletDemo4</servlet-name>  
+7.    <url-pattern>/servlet4</url-pattern>  
+8.</servlet-mapping>  
+```
+
+将请求转移到 /servlet5 对应的方法中
+
+```java
+1.public class ServletContextDemo5 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        resp.getWriter().write("this is zhuanfa");  
+7.    }  
+8.  
+9.}  
+```
+
+Xml:
+
+```xml
+1.</servlet>  
+2.    <servlet>  
+3.    <servlet-name>ServletDemo5</servlet-name>  
+4.    <servlet-class>com.example.servlet.ServletContextDemo5</servlet-class>  
+5.</servlet>  
+6.<servlet-mapping>  
+7.    <servlet-name>ServletDemo5</servlet-name>  
+8.    <url-pattern>/servlet5</url-pattern>  
+</servlet-mapping>     
+```
+
+浏览器访问：
+
+![1491642267436](README.assets/1491642267436.png)
