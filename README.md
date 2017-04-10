@@ -1529,3 +1529,73 @@ method():
 
 ![1491642372864](README.assets/1491642372864.png)
 
+### 8. ServletResponse
+
+#### 8.1.  基础概念
+
+1) Resonse的继承结构：ServletResponse--HttpServletResponse
+
+2) Response代表**响应**，于是响应消息中的 状态码、响应头、实体内容都可以由它进行操作,由此引伸出
+
+3) 利用Response输出数据到客户端
+
+​	**response.getOutputStream().write("中文".getBytes())输出数据**，
+
+​	这是一个字节流，是什么字节输出什么字节，而浏览器默认用平台字节码打开服务器发送的数据，如果服务器	端使用了非平台码去输出字符的字节数据就需要明确的指定浏览器编码时所用的码表，以防止乱码问题。
+
+​	**response.addHeader("Content-type","text/html;charset=gb2312")**
+
+​	response.getWriter().write(“中文”);输出数据，这是一个字符流，response会将此字符进行转码操作后输出到	浏览器，这个过程默认使用ISO8859-1码表，而ISO8859-1中没有中文，于是转码过程中用?代替了中文，导致	乱码问题。可以指定response在转码过程中使用的目标码表，防止乱码。	
+
+​	**response.setCharcterEncoding("gb2312");**
+
+​	其实response还提供了setContentType("text/html;charset=gb2312")方法，此方法会设置content-type响应	头，通知浏览器打开的码表，同时设置response的转码用码表，从而一行代码解决乱码。
+
+4) 利用Response 设置 content-disposition头实现文件下载
+
+* 设置响应头content-disposition为“attachment;filename=xxx.xxx”
+
+* 利用流将文件读取进来，再利用Response获取响应流输出
+
+* 如果文件名为中，一定要进行URL编码，编码所用的码表一定要是utf-8
+
+5) refresh头控制定时刷新
+
+* 设置响应头Refresh为一个数值，指定多少秒后刷新当前页面
+
+* 设置响应头Refresh为 3;url=/Day05/index.jsp,指定多少秒后刷新到哪个页面
+
+* 可以用来实现注册后“注册成功，3秒后跳转到主页”的功能
+
+* 在HTML可以利用<meta http-equiv= "" content="">标签模拟响应头的功能。
+
+6) 利用response设置expires、Cache-Control、Pragma实现浏览器是否缓存资源，这三个头都可以实现，但是由于历史原因，不同浏览器实现不同，所以一般配合这三个头使用
+
+* 控制浏览器不要缓存（验证码图片不缓存）设置expires为0或-1设置 Cache-Control为no-cache、Pragma为no-cache
+
+* 控制浏览器缓存资源。即使不明确指定浏览器也会缓存资源，这种缓存没有截至日期。当在地址栏重新输入地址时会用缓存，但是当刷新或重新开浏览器访问时会重新获得资源。
+
+  如果明确指定缓存时间，浏览器缓存是，会有一个截至日期，在截至日期到期之前，当在地址栏重新输入地址或重新开浏览器访问时都会用缓存，而当刷新时会重新获得资源。
+
+7) Response实现请求重定向
+
+* 古老方法：
+
+  response.setStatus(302);
+
+  response.addHeader("Location","URL");
+
+* 快捷方式：
+
+  response.sendRedirect("URL");
+
+8) 输出验证码图片
+
+9) Response注意的内容：
+
+* 对于一次请求，Response的getOutputStream方法和getWriter方法是互斥，只能  调用其一，特别注意forward后也不要违反这一规则。
+
+* 利用Response输出数据的时候，并不是直接将数据写给浏览器，而是写到了Response的缓冲区中，等到整个service方法返回后，由服务器拿出response中的信息组成HTTP响应消息返回给浏览器。
+
+  service方法返回后，服务器会自己检查Response获取的OutputStream或者Writer是否关闭，如果没有关闭，服务器自动帮你关闭，一般情况下不要自己关闭这两个流。	
+
