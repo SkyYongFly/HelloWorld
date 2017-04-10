@@ -1599,3 +1599,32 @@ method():
 
   service方法返回后，服务器会自己检查Response获取的OutputStream或者Writer是否关闭，如果没有关闭，服务器自动帮你关闭，一般情况下不要自己关闭这两个流。	
 
+#### 8.2. 示例程序
+
+#### 8.2.1. 输出数据
+
+```java
+1.public class response extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //resp.setHeader("Content-Type", "text/html;charset=utf-8");  
+7.        //resp.getOutputStream().write("中国".getBytes("utf-8"));  
+8.          
+9.        //resp.setCharacterEncoding("utf-8");  
+10.        //resp.setHeader("Content-Type", "text/html;charset=utf-8");  
+11.        //resp.getWriter().write("江苏");  
+12.          
+13.         resp.setCharacterEncoding("utf-8");//可以不写这句，但是为了让看的人更清楚  
+14.        resp.getWriter().write("世界");  
+15.    }  
+16.  
+17.    @Override  
+18.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+19.            throws ServletException, IOException {  
+20.        doGet(req, resp);  
+21.    }  
+22.}  
+```
+
