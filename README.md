@@ -1628,3 +1628,67 @@ method():
 22.}  
 ```
 
+#### 8.2.2. 设置回应头
+
+例如通知浏览器以下载方式保存图片
+
+```java
+1.public class ResponseDemo1 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //浏览器直接显示图片  
+7.        FileInputStream  inputStream = new FileInputStream(this.getServletContext().getRealPath("1.jpg"));  
+8.        OutputStream     outputStream = resp.getOutputStream();  
+9.        byte[]  bs = new byte[1024];  
+10.        int i =0;  
+11.        while((i=inputStream.read(bs))!=-1){  
+12.            outputStream.write(bs,0,i);  
+13.        }  
+14.        inputStream.close();  
+15.    }  
+16.  
+17.}  
+```
+
+```xml
+1.<servlet>  
+2.    <servlet-name>response</servlet-name>  
+3.    <servlet-class>com.example.response.ResponseDemo1</servlet-class>  
+4.</servlet>  
+5.  
+6.<servlet-mapping>  
+7.    <servlet-name>response</servlet-name>  
+8.    <url-pattern>/response</url-pattern>  
+9.</servlet-mapping>      
+```
+
+![1491996857142](README.assets/1491996857142.png)
+
+```java
+1.@Override  
+2.protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+3.            throws ServletException, IOException {  
+4.        //让浏览器以下载的方式保存图片  
+5.        //resp.setHeader("Content-Disposition", "attachment;filename="+URLEncoder.encode("1.jpg"));  
+6.      
+7.        //当文件名包含 中文时候，要制定编码方式  
+8.        resp.setHeader("Content-Disposition", "attachment;filename="+URLEncoder.encode("啊.jpg","utf-8"));  
+9.        //浏览器直接显示图片  
+10.        FileInputStream  inputStream = new FileInputStream(this.getServletContext().getRealPath("1.jpg"));  
+11.        OutputStream     outputStream = resp.getOutputStream();  
+12.        byte[]  bs = new byte[1024];  
+13.        int i =0;  
+14.        while((i=inputStream.read(bs))!=-1){  
+15.            outputStream.write(bs,0,i);  
+16.        }  
+17.        inputStream.close();  
+18.          
+19.  }  
+```
+
+![1491996882356](README.assets/1491996882356.png)
+
+![1491996892232](README.assets/1491996892232.png)
+
