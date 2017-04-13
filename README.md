@@ -1601,7 +1601,7 @@ method():
 
 #### 8.2. 示例程序
 
-#### 8.2.1. 输出数据
+##### 8.2.1. 输出数据
 
 ```java
 1.public class response extends HttpServlet {  
@@ -1628,7 +1628,7 @@ method():
 22.}  
 ```
 
-#### 8.2.2. 设置回应头
+##### 8.2.2. 设置回应头
 
 例如通知浏览器以下载方式保存图片
 
@@ -1692,3 +1692,86 @@ method():
 
 ![1491996892232](README.assets/1491996892232.png)
 
+##### 8.2.3. 定时刷新页面
+
+```java
+1.public class RefreshServlet extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //时钟显示  
+7.        //resp.getWriter().write(new Date().toLocaleString());  
+8.        //resp.setHeader("Refresh","1");  
+9.          
+10.        //刷新页面  
+11.        resp.setContentType("text/html;charset=utf-8");  
+12.        resp.getWriter().write("登录成功，三秒钟后回到主界面");  
+13.        resp.setHeader("Refresh", "3;url=/ServletResponseTest/index.jsp");  
+14.    }  
+15.  
+16.}  
+```
+
+##### 8.2.4 不缓存资源
+
+```java
+1.public class CacheServlet extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //设置头，不缓存  
+7.        resp.setIntHeader("Expires",-1);  
+8.        resp.setHeader("Cache-Control", "no-cache");  
+9.        resp.setHeader("Pragma","no-cache");  
+10.        //可以准确显示当前时间  
+11.        resp.setContentType("text/html;charset=utf-8");  
+12.        resp.getWriter().write("当前时间是"+new Date().toString());  
+13.    }  
+14.  
+15.}  
+```
+
+```java
+1.public class CacheServlet extends HttpServlet {  
+2.    @Override  
+3.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+4.            throws ServletException, IOException {        
+5.        //设置浏览器一定时间期限内使用缓存的资源  
+6.        resp.setDateHeader("Expires", System.currentTimeMillis()+10l*3600*24);//10天之内使用缓存的图片资源，注意数字后缀加l变成long型，防止int溢出  
+7.        //浏览器直接显示图片  
+8.        FileInputStream  inputStream = new FileInputStream(this.getServletContext().getRealPath("1.jpg"));  
+9.        OutputStream     outputStream = resp.getOutputStream();  
+10.        byte[]  bs = new byte[1024];  
+11.        int i =0;  
+12.        while((i=inputStream.read(bs))!=-1){  
+13.            outputStream.write(bs,0,i);  
+14.        }  
+15.        inputStream.close();  
+16.    }  
+17.  
+}  
+```
+
+##### 8.2.5. 实现请求重定向
+
+```java
+1.public class RedirectServlet extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //resp.setStatus(302);  
+7.        //resp.setHeader("Location", "/ServletResponseTest/index.jsp");  
+8.          
+9.        //可以直接设置  
+10.        resp.sendRedirect("/ServletResponseTest/index.jsp");  
+11.    }  
+12.  
+13.}  
+```
+
+当在浏览器输入http://localhost/ServletResponseTest/redirect时，浏览器自动跳转到
+
+http://localhost/ServletResponseTest/index.jsp
