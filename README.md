@@ -1868,3 +1868,164 @@ HttpServletRequest对象代表客户端的请求，当客户端通过HTTP协议�
 ```
 
 ![1492234471282](README.assets/1492234471282.png)
+
+##### 9.3.3. 实践—模拟网站防盗链
+
+* 新建一个模拟正常网站
+
+  新建开始页面 163.html
+
+  ![1492234555313](README.assets/1492234555313.png)
+
+```xml
+1.<!DOCTYPE html>  
+2.<html>  
+3.  <head>  
+4.    <title>163.html</title>  
+5.    <meta name="content-type" http-equiv="content-type" content="text/html; charset=UTF-8">  
+6.  </head>  
+7.  <body>  
+8.        <h1>163重大新闻</h1>我是广告 我是广告 我是广告  我是广告  
+9.        <a href="/ServletRequestTest/daolian">  时间的秘密</a>    我是广告  我是广告  
+10.  </body>  
+11.</html>  
+```
+
+浏览器输入 http://localhost/ServletRequestTest/163.html
+
+显示：
+
+![1492234574807](README.assets/1492234574807.png)
+
+点击“时间的秘密”进入具体内容页面：
+
+![1492234590495](README.assets/1492234590495.png)
+
+具体实现程序
+
+```java
+1.public class Daolian extends HttpServlet {  
+2.    @Override  
+3.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+4.            throws ServletException, IOException {  
+5.        resp.setContentType("text/html;charset=utf-8");  
+6.        resp.getWriter().write("在非洲每过一分钟就会消失60秒");  
+7.    }  
+8.}  
+```
+
+* 创建盗版网站 [www.165.com
+  ](http://www.165.com)修改hosts文件（C:\Windows\System32\drivers\etc下）
+
+  加入  127.0.0.1   [www.165.com](http://www.165.com)  使地址指向本地
+
+​	  在Tomcat配置文件server.xml原有 <Host> 标签下加入
+
+​	  <Host  name="www.165.com"    appBase="f:/165"/>
+
+ 	在对应的f盘下新建165文件夹，作为缺省应用，里面新建ROOT文件夹，ROOT下新建index.html，作为165网	 址的主页
+
+```xml
+1.<h1>165独家新闻</h1><hr>  
+2.我是广告  我是广告    我是广告    我是广告    我是广告    
+<a   href="http://localhost/ServletRequestTest/daolian">时间的秘密</a>我是广告    我是广告 
+```
+
+浏览器输入www.165.com显示
+
+![1492234675759](README.assets/1492234675759.png)
+
+点击“时间的秘密”跳转到
+
+![1492234686847](README.assets/1492234686847.png)
+
+作为正规的163网站要防止其它盗版网站盗用其内容，可以将程序修改为
+
+```java
+1.public class Daolian extends HttpServlet {  
+2.    @Override  
+3.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+4.            throws ServletException, IOException {  
+5.        resp.setContentType("text/html;charset=utf-8");  
+6.          
+7.        String refString = req.getHeader("Referer");  
+8.        if(refString == null  || "".equals(refString)  || !refString.startsWith("http://localhost")){  
+9.            resp.sendRedirect(req.getContextPath()+"/163.html");  
+10.            return;  
+11.        }  
+12.        resp.getWriter().write("在非洲每过一分钟就会消失60秒");  
+13.    }  
+14.}  
+```
+
+即在显示相关具体内容前判断请求来源，如果不是自家网站，将其他非法请求转到自家网站主页
+
+这样再次输入www.165.com，点击“时间的秘密”会显示163主页
+
+![1492234713126](README.assets/1492234713126.png)
+
+1) 获取请求参数
+
+请求页面 request.html
+
+```xml
+1.<!DOCTYPE html>  
+2.<html>  
+3.  <head>  
+4.    <meta http-equiv="content-type" content="text/html; charset=UTF-8">  
+5.  
+6.  </head>  
+7.    
+8.  <body>  
+9.    <h1>POST提交</h1><hr>  
+10.    <form action="/ServletRequestTest/RequestDemo2"  method="POST">  
+11.        姓名:<input type="text"  name="username"/>  
+12.        地址:<input type="text"  name="addr"/>  
+13.        <input type="submit"  value="提交"/>  
+14.    </form>  
+15.      
+16.      <h1>GET提交</h1><hr>  
+17.    <form action="/ServletRequestTest/RequestDemo2"  method="GET">  
+18.        姓名:<input type="text"  name="username"/>  
+19.        地址:<input type="text"  name="addr"/>  
+20.        <input type="submit"  value="提交"/>  
+21.    </form>  
+22.  </body>  
+23.</html>  
+```
+
+![1492234805652](README.assets/1492234805652.png)
+
+```java
+1.public class RequestDemo2 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //获取提交的名称为“username”的参数  
+7.        //对于post请求可以设置明确通知服务器以浏览器提交过来的编码方式解析，解决乱码  
+8.//      req.setCharacterEncoding("utf-8");  
+9.//      String name = req.getParameter("username");  
+10.//      System.out.println(name);  
+11.          
+12.        //对于GET提交的乱码只能手动地进行编解码解决乱码问题  
+13.        String name1 = req.getParameter("username");  
+14.        String  name = new String(name1.getBytes("iso8859-1"),"utf-8");  
+15.        System.out.println(name);  
+16.      
+17.//  Enumeration<String>  enumeration  = req.getParameterNames();  
+18.//  while(enumeration.hasMoreElements()){  
+19.//      String name = enumeration.nextElement();  
+20.//      String value = req.getParameter(name);  
+21.//      System.out.println(name+" = "+value);  
+22.//      }  
+23.    }  
+24.  
+25.    @Override  
+26.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+27.            throws ServletException, IOException {  
+28.            doGet(req, resp);  
+29.    }  
+30.}  
+```
+
