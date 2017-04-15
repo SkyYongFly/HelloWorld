@@ -1775,3 +1775,96 @@ method():
 当在浏览器输入http://localhost/ServletResponseTest/redirect时，浏览器自动跳转到
 
 http://localhost/ServletResponseTest/index.jsp
+
+### 9. ServletRequest
+
+#### 9.1. 基础概念
+
+HttpServletRequest对象代表客户端的请求，当客户端通过HTTP协议访问服务器时，HTTP请求中的所有信息都封装在这个对象中，开发人员通过这个对象的方法，可以获得客户这些信息。
+
+#### 9.2. 通过Request对象进行的常用操作
+
+* 获取客户机信息
+
+*  获取请求头信息
+
+*  获取请求参数
+
+*  利用请求域传递对象
+
+#### 9.3. **实际例子**
+
+##### 9.3.1. 获取客户机信息
+
+```java
+1.package com.example.request;  
+2./* 
+3. * request获取客户机信息 
+4. */  
+5.import java.io.IOException;  
+6.  
+7.import javax.servlet.ServletException;  
+8.import javax.servlet.http.HttpServlet;  
+9.import javax.servlet.http.HttpServletRequest;  
+10.import javax.servlet.http.HttpServletResponse;  
+11.  
+12.public class RequestDemo1 extends HttpServlet {  
+13.  
+14.    @Override  
+15.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+16.            throws ServletException, IOException {  
+17.        //1、返回客户端发出请求完整URL  
+18.        String  urlString = req.getRequestURL().toString();  
+19.        System.out.println(urlString);  
+20.          
+21.        //2、返回请求行中资源名部分  
+22.        String uriString = req.getRequestURI();  
+23.        System.out.println(uriString);  
+24.          
+25.        //3、返回请求行中参数部分  
+26.        String qString  = req.getQueryString();  
+27.        System.out.println(qString);  
+28.          
+29.        //4、得到客户机请求方式  
+30.        String  method = req.getMethod();  
+31.        System.out.println(method);  
+32.          
+33.        //5、得到当前web应用虚拟目录名称(获取web应用名称用此方法)  
+34.        String  path = req.getContextPath();  
+35.        System.out.println(path);  
+36.    }  
+37.  
+}  
+```
+
+浏览器输入 ：http://localhost/ServletRequestTest/request?name=haha
+
+输出：
+
+![1492234438966](README.assets/1492234438966.png)
+
+##### 9.3.2. 获取请求头信息
+
+```java
+1.public class RequestGetHeader extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //获取请求头中 host 的内容  
+7.        //String hostString = req.getHeader("Host");  
+8.        //System.out.println(hostString);  
+9.          
+10.        //获取所有请求头  
+11.        Enumeration<String>  headers = req.getHeaderNames();  
+12.        while(headers.hasMoreElements()){  
+13.            String nameString = (String) headers.nextElement();  
+14.            String valueString = req.getHeader(nameString);  
+15.            System.out.println(nameString+" : "+valueString);  
+16.        }  
+17.    }  
+18.  
+19.}  
+```
+
+![1492234471282](README.assets/1492234471282.png)
