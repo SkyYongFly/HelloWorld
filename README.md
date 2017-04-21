@@ -2029,3 +2029,51 @@ HttpServletRequest对象代表客户端的请求，当客户端通过HTTP协议�
 30.}  
 ```
 
+### 10.JavaServer Pages(JSP)
+
+#### 10.1. 基础概念
+
+JSP全称是Java Server Pages，它和servle技术一样，都是SUN公司定义的一种用于开发动态web资源的技术
+
+1) **JSP本质上是一个Servlet**
+
+2) 当一个JSP页面第一次被请求时，Servlet/JSP容器主要做如下两件事情：
+
+* 转换JSP页面到JSP页面实现类
+
+* 如果转换成功，Servlet/JSP容器随后编译该Servlet类，并装载和实例化该类
+
+3) 同一JSP页面后续请求，容器会检查JSP页面是否被修改过，如果是，则该JSP页面会被重新翻译、编译和执行，如果不是，则执行已经在内存中的JSP Servlet。
+
+4) JSP页面可以包含模板元素和语法元素，模板元素指HTML标记和文字
+
+5) 应用程序中的每一个JSP页面都可以直接在浏览器中输入路径页面访问
+
+#### 10.2. 简单例程
+
+1) 工程结构
+
+![1492777676272](README.assets/1492777676272.png)
+
+2）date.jsp：
+
+```html
+1.<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>  
+2.<%@ page import="java.util.Date" %>  
+3.<%@ page import="java.text.DateFormat" %>  
+4.<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">  
+5.<html>  
+6.<head>  
+7.    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">  
+8.    <title>显示日期JSP</title>  
+9.</head>  
+10.<body>  
+11.    <%  
+12.        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG);  
+13.        String s = dateFormat.format(new Date());  
+14.        out.print("今天是" + s);  
+15.    %>  
+16.</body>  
+17.</html>  
+```
+
