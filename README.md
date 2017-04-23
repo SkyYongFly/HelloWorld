@@ -2300,3 +2300,292 @@ Cookie是客户端技术，程序把每个用户的数据以cookie的形式写�
 34.}  
 ```
 
+### 12. Session
+
+#### 12.1. **基础概念**
+
+1) 在WEB开发中，服务器可以为每个用户浏览器创建一个会话对象（session对象），注意：**一个浏览器独占一个session对象**(默认情况下)。因此，在需要保存用户数据时，服务器程序可以把用户数据写到用户浏览器独占的session中，当用户使用浏览器访问其它程序时，其它程序可以从用户的session中取出该用户的数据，为用户服务。
+
+2) session是一个域对象，作用范围为整个会话。
+
+3) Session和Cookie的主要区别在于：
+
+**Cookie是把用户的数据写给用户的浏览器**。
+
+**Session技术把用户的数据写到用户独占的session中,服务器端**
+
+#### 12.2. 实际例程
+
+1) 利用session模拟网页支付
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+3.<html>  
+4.  <head>  
+5.  </head>  
+6.   
+7.  <body>  
+8.    <a href="<%=request.getContextPath() %>/scan?kind=书">书</a>  
+9.    <a href="<%=request.getContextPath() %>/scan?kind=汽车">汽车</a>  
+10.    <a href="<%=request.getContextPath() %>/pay">支付</a>  
+11.  </body>  
+12.</html>  
+```
+
+![1492936789881](README.assets/1492936789881.png)
+
+```java
+1.public class Scan extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //获取提交的类别，显示具体内容  
+7.        String  kind =  req.getParameter("kind");  
+8.        kind = new String(kind.getBytes("iso8859-1"),"utf-8");  
+9.          
+10.        //生成session  
+11.        HttpSession  session = req.getSession();  
+12.        //手动生成cookie，当用户关闭浏览器重启后依然能够利用cookie信息完成支付  
+13.        Cookie  cookie = new Cookie("JSESSIONID",session.getId());  
+14.        cookie.setMaxAge(3600*10);  
+15.        cookie.setPath(req.getContextPath());  
+16.        resp.addCookie(cookie);  
+17.          
+18.        session.setAttribute("kind",kind );  
+19.    }  
+20.  
+21.    @Override  
+22.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+23.            throws ServletException, IOException {  
+24.        doGet(req, resp);  
+25.    }  
+26.}  
+
+1.public class Pay extends HttpServlet {  
+2.    @Override  
+3.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+4.            throws ServletException, IOException {  
+5.        resp.setContentType("text/html;charset=utf-8");  
+6.        HttpSession  session = req.getSession();  
+7.        String  kind = (String)session.getAttribute("kind");  
+8.          
+9.        resp.getWriter().write("您购买的"+kind+"价值999999999999999999元");  
+10.          
+11.    }  
+12.    @Override  
+13.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+14.            throws ServletException, IOException {  
+15.        // TODO Auto-generated method stub  
+16.        super.doPost(req, resp);  
+17.    }  
+18.}  
+```
+
+![1492936803485](README.assets/1492936803485.png)
+
+URL重写
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+3.<html>  
+4.  <head>  
+5.  </head>  
+6.   
+7.  <body>  
+8.    <%  
+9.        request.getSession();  
+10.          
+11.        String url1 =  request.getContextPath()+"/scan?kind=书";  
+12.        url1 = response.encodeURL(url1);  
+13.        String url2 =  request.getContextPath()+"/scan?kind=汽车";  
+14.        url2 = response.encodeURL(url2);  
+15.        String url3 = request.getContextPath()+"/pay";  
+16.        url3 = response.encodeURL(url3);  
+17.     %>  
+18.       
+19.    <a href="<%= url1 %>">书</a>  
+20.    <a href="<%= url2 %>">汽车</a>  
+21.    <a href="<%= url3 %>">支付</a>  
+22.  </body>  
+23.</html>  
+```
+
+2) 利用seesion模拟网站登录、注销过程
+
+网站欢迎首页 welcome.jsp
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+3.<html>  
+4.  <head>  
+5.  </head>  
+6.    
+7.  <body>  
+8.        <h3>欢迎页面<h3><hr>  
+9.        <%  
+10.            String username = (String)session.getAttribute("username");  
+11.        %>  
+12.        <%   
+13.            if(username == null ||  "".equals(username)){  
+14.         %>  
+15.            欢迎您访问本网站  
+16.            <a  href="<%=request.getContextPath() %>/login.jsp">登录</a>  
+17.            <a  href="#">注册</a>  
+18.              
+19.         <%  
+20.         } else {  
+21.         %>  
+22.            欢迎您回来 <%=username %>  
+23.            <a href="<%=request.getContextPath() %>/logout">注销</a>  
+24.         <%  
+25.            }  
+26.          %>  
+27.  </body>  
+28.</html>  
+```
+
+![1492936841909](README.assets/1492936841909.png)
+
+用户登录：login.jsp
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+3.<html>  
+4.  <head>  
+5.  </head>  
+6.    
+7.  <body>  
+8.        <h3>登录界面</h3><hr>  
+9.          
+10.        <form  action="${pageContext.request.contextPath }/login"  method="POST">  
+11.            用户名：<input type="text" name="username"/>  
+12.            密码:<input type="text" name="password"/>  
+13.            <input type="submit" value="立刻登录"/>  
+14.        </form>  
+15.  </body>  
+16.</html>  
+```
+
+```java
+1.public class Login extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        req.setCharacterEncoding("utf-8");  
+7.        resp.setContentType("text/html;charset=utf-8");  
+8.        //获取提交的用户名和密码  
+9.        String username = req.getParameter("username");  
+10.        String password = req.getParameter("password");  
+11.        //查询数据库判断是否存在该用户  
+12.        if(new UsersInfo().isExist(username, password)){  
+13.        //如果正确重定向到主页  
+14.            req.getSession().setAttribute("username",username);  
+15.            resp.sendRedirect(req.getContextPath()+"/welcome.jsp");  
+16.            return;  
+17.        }else{  
+18.            //如果不正确给出提示  
+19.            resp.getWriter().write("登录错误，请重新登录");  
+20.            //resp.sendRedirect(req.getContextPath()+"/login.jsp");  
+21.        }  
+22.    }  
+23.  
+24.    @Override  
+25.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+26.            throws ServletException, IOException {  
+27.        doGet(req, resp);  
+28.          
+29.    }  
+30.  
+31.}  
+```
+
+![1492936868080](README.assets/1492936868080.png)
+
+登录成功：
+
+![1492936880316](README.assets/1492936880316.png)
+
+登录失败：
+
+![1492936964991](README.assets/1492936964991.png)
+
+注销页面：
+
+```java
+1.public class Logout extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //用户注销  
+7.        //杀死session  
+8.        if(req.getSession(false)!=null && req.getSession().getAttribute("username")!=null){  
+9.            req.getSession().invalidate();  
+10.        }  
+11.          
+12.        //重定向到开始主页  
+13.        resp.sendRedirect(req.getContextPath()+"/welcome.jsp");  
+14.    }  
+15.  
+16.    @Override  
+17.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+18.            throws ServletException, IOException {  
+19.        doGet(req, resp);  
+20.    }  
+21.  
+22.}  
+```
+
+用户信息存储及xml配置：
+
+```java
+1.package com.example.session;  
+2.  
+3.import java.util.HashMap;  
+4.import java.util.Map;  
+5.  
+6.public class UsersInfo {  
+7.    private  static Map<String, String>  userMap = new HashMap<String,String>();  
+8.      
+9.    static{  
+10.        userMap.put("奥巴马","123");  
+11.        userMap.put("xiaoming","456");  
+12.        userMap.put("我是谁","111");  
+13.    }  
+14.  
+15.     public boolean isExist(String username,String password){  
+16.         return userMap.containsKey(username)&&userMap.get(username).equals(password);  
+17.     }  
+18.}  
+```
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">  
+3.  <display-name>SessionLogin</display-name>  
+4.  <servlet>  
+5.    <servlet-name>login</servlet-name>  
+6.    <servlet-class>com.example.session.Login</servlet-class>  
+7.  </servlet>  
+8.    <servlet>  
+9.    <servlet-name>logout</servlet-name>  
+10.    <servlet-class>com.example.session.Logout</servlet-class>  
+11.  </servlet>  
+12.    
+13.  <servlet-mapping>  
+14.    <servlet-name>login</servlet-name>  
+15.    <url-pattern>/login</url-pattern>  
+16.  </servlet-mapping>  
+17.    <servlet-mapping>  
+18.    <servlet-name>logout</servlet-name>  
+19.    <url-pattern>/logout</url-pattern>  
+20.  </servlet-mapping>  
+</web-app>  
+```
+
