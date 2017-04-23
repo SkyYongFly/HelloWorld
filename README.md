@@ -2129,3 +2129,174 @@ Cookie是客户端技术，程序把每个用户的数据以cookie的形式写�
 
 ![1492908939226](README.assets/1492908939226.png)
 
+2) 利用cooie模拟图书阅读过程
+
+定义基础类对象 ：书
+
+```java
+1.package com.example.booktest;  
+2.  
+3.import java.io.Serializable;  
+4.  
+5.public class Book implements Serializable {  
+6.    private String  id;  
+7.    private String  name;  
+8.    private String author;  
+9.    private String price;  
+10.      
+11.      
+12.    public Book() {  
+13.    }  
+14.      
+15.    public Book(String id,String name, String author, String price) {  
+16.        super();  
+17.        this.id = id;  
+18.        this.name = name;  
+19.        this.author = author;  
+20.        this.price = price;  
+21.    }  
+22.    public String getId(){  
+23.        return id;  
+24.    }  
+25.    public void setId(String id){  
+26.        this.id = id;  
+27.    }  
+28.    public String getName() {  
+29.        return name;  
+30.    }  
+31.    public void setName(String name) {  
+32.        this.name = name;  
+33.    }  
+34.    public String getAuthor() {  
+35.        return author;  
+36.    }  
+37.    public void setAuthor(String author) {  
+38.        this.author = author;  
+39.    }  
+40.    public String getPrice() {  
+41.        return price;  
+42.    }  
+43.    public void setPrice(String price) {  
+44.        this.price = price;  
+45.    }  
+46.      
+47.}  
+```
+
+初始化书管理集合，并且可以获取集合或单个对象
+
+```java
+1.package com.example.booktest;  
+2.  
+3.import java.util.LinkedHashMap;  
+4.import java.util.Map;  
+5.  
+6.public class BookColleation {  
+7.    private  static Map<String,Book>  bookMap = new LinkedHashMap<String, Book>();  
+8.      
+9.    public BookColleation(){  
+10.          
+11.    }  
+12.      
+13.    static{  
+14.        bookMap.put("1", new Book("1","如何一秒钟赚一百万","巴菲特","9.9"));  
+15.        bookMap.put("2", new Book("2","通往火星","奥巴马","19.9"));  
+16.        bookMap.put("3",new Book("3","冰红茶喝出柠檬味","康帅富","1.0"));  
+17.    }  
+18.      
+19.    public static Map<String, Book>  getBookColleation(){  
+20.        return bookMap;  
+21.    }  
+22.      
+23.    public static Book  getBook(String id){  
+24.        return   bookMap.get(id);  
+25.    }  
+26.}  
+```
+
+首页，显示所有的书名和之前看过的所有书
+
+```java
+1.public class BookCookie extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        resp.setContentType("text/html;charset=utf-8");  
+7.        //显示所有的书  
+8.        Map<String, Book>  map = BookColleation.getBookColleation();  
+9.        for(Map.Entry<String, Book>  m  :  map.entrySet() ){  
+10.            Book  book = m.getValue();  
+11.            resp.getWriter().write("<a href='"+req.getContextPath()+
+12.                                "/bookInfo?id="+book.getId()+"'>"+book.getName()+"</a><br>");  
+13.        }  
+14.        resp.getWriter().write("<hr>");  
+15.          
+16.        //显示之前看过的书  
+17.        Cookie[] ck = req.getCookies();  
+18.        Cookie bkCookie = null;  
+19.        if(ck != null){  
+20.            for(Cookie  c : ck){  
+21.                if("last".equals(c.getName()))  
+22.                    bkCookie = c;  
+23.            }  
+24.        }  
+25.        if(bkCookie!=null){  
+26.            String id = bkCookie.getValue();  
+27.            Book bk = BookColleation.getBook(id);  
+28.            String name = bk.getName();  
+29.            resp.getWriter().write("您最后看过的书:<br>"+name);  
+30.        }else{  
+31.            resp.getWriter().write("没有看过任何书");  
+32.        }  
+33.    }  
+34.  
+35.    @Override  
+36.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+37.            throws ServletException, IOException {  
+38.        // TODO Auto-generated method stub  
+39.        super.doPost(req, resp);  
+40.    }  
+41.  
+42.}  
+```
+
+获取看过的书并将其存入到cookie待首页显示时调用查询
+
+```java
+1.public class BookInfo extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        resp.setContentType("text/html;charset=utf-8");  
+7.        //获取要查看的书的具体内容，根据id  
+8.        String id = req.getParameter("id");  
+9.        Book book = BookColleation.getBook(id);  
+10.        if(book == null){  
+11.            resp.getWriter().write("没有这本书");  
+12.            return;  
+13.        }else {  
+14.            resp.getWriter().write("<h1>书名："+book.getName()+"</h1>");  
+15.            resp.getWriter().write("<h3>作者:"+book.getAuthor()+"</h3>");  
+16.            resp.getWriter().write("<h3>价格："+book.getPrice()+"</h3>");  
+17.              
+18.        }  
+19.          
+20.        //将看过的书信息保存到cookie  
+21.        Cookie cookie = new Cookie("last", book.getId());  
+22.        cookie.setMaxAge(3600*10);  
+23.        cookie.setPath(req.getContextPath());  
+24.        resp.addCookie(cookie);  
+25.    }  
+26.  
+27.    @Override  
+28.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+29.            throws ServletException, IOException {  
+30.        // TODO Auto-generated method stub  
+31.        super.doPost(req, resp);  
+32.    }  
+33.  
+34.}  
+```
+
