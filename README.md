@@ -2077,3 +2077,55 @@ JSP全称是Java Server Pages，它和servle技术一样，都是SUN公司定义
 17.</html>  
 ```
 
+### 11. Cookie
+
+#### 11.1. 基础概念
+
+Cookie是客户端技术，程序把每个用户的数据以cookie的形式写给用户各自的浏览器。当用户使用浏览器再去访问服务器中的web资源时，就会带着各自的数据去。这样，web资源处理的就是用户各自的数据了
+
+#### 11.2. 实际例程
+
+1) 利用cookie判断用户是否访问过页面
+
+```java
+1.public class CookieDemo1 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        resp.setContentType("text/html;charset=utf-8");  
+7.          
+8.        //判断之前是否访问过  
+9.        Cookie[] ck = req.getCookies();  
+10.        Cookie   ck2 = null;  
+11.        if(ck != null){  
+12.            for(Cookie  c : ck){  
+13.                if("lasttime".equals(c.getName()))  
+14.                    ck2 = c;  
+15.            }  
+16.        }  
+17.        //根据访问第几次显示不同页面  
+18.        if(ck2 !=null){  
+19.            resp.getWriter().write("您上次访问的时间是"+new Date(Long.parseLong(ck2.getValue())));  
+20.        }else {  
+21.            resp.getWriter().write("您是第一次访问");  
+22.        }  
+23.          
+24.        //生成cookie  
+25.        Date date = new Date();  
+26.        Cookie  cookie = new Cookie("lasttime",date.getTime()+"");  
+27.        resp.addCookie(cookie);  
+28.    }  
+29.  
+30.    @Override  
+31.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+32.            throws ServletException, IOException {  
+33.        doGet(req, resp);  
+34.          
+35.    }  
+36.  
+37.}  
+```
+
+![1492908939226](README.assets/1492908939226.png)
+
