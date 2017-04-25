@@ -2589,3 +2589,195 @@ URL重写
 </web-app>  
 ```
 
+### 13. 会话管理
+
+#### 13.1.  概述
+
+1) HTTP是**无状态性的**，一个Web服务器无法区分一个HTTP请求是否是第一次访问
+
+2) 4种不同的状态保存技术：URL重写，隐藏域，cookies和HTTPSession对象，其实就是缓存技术
+
+#### **13.2.**  URL重写
+
+1) URL重写是一种会话跟踪技术，将一个或多个token添加到URL的查询字符串中，每个token为
+
+2) K-V形式，例如：
+
+a) url **? key-1=value-1&key-2=value-2**...
+
+3) URL重写适合tokens无需在太多URL直接传递的情况下
+
+4) URL在某些浏览器上最大长度为2000字符，这就限制了tokens数
+
+5) 某些信息是敏感的，直接放在URL请求中是不合适的，例如用户密码
+
+#### 13.3.  隐藏域
+
+1) 将信息保存到HTML表单的隐藏域中
+
+2) 当表单提交的时候，隐藏域的值也同时提交到服务器端
+
+3) 例如我们在HTML页面中定义一个隐藏标签：
+
+ <input  type=”hidden” name=”id” value=”1”/>
+
+这个标签在页面展示时候并不会显示出来，但是当表单提交的时候，它会被提交到服务端，我们在Servlet里面可以通过  request.getParameter(“id”) 来获取它的值，这里即 1
+
+#### 13.4. Cookies
+
+1) Cookies 是一个很少的信息片段，可自动的在浏览器和Web服务器之间交互，因此cookies可以存储在多个页面之间传递的信息
+
+2) Cookie作为HTTP Header的一部分，其传输由HTTP协议控制
+
+3) 浏览器通常支持每个网站20个cookies
+
+4) 创建cookies:
+
+**Cookie  cookie = new Cookie(name, value);**
+
+5) 可设置Cookie的domain、path和maxAge属性，其中maxAge属性决定cookie何时过期
+
+6) Servlet添加cookie，通过HttpServletResponse的add方法：
+
+**HttpServletResponse.addCookie(cookie)**
+
+服务器会将设置的cookie发送到浏览器
+
+7) Cookies也可以通过客户端的javascript脚本创建和删除
+
+8) 服务器端读取提交的cookies，通过HttpServletRequest的getCookies方法，若查询某个cookie，需要遍历数组
+
+9) 没有直接删除cookie的方法，只能创建一个同名的cookie，并将maxAge属性设置为0，并放到HttpServletResponse中，例如：
+
+**Cookie cookie = new Cookie(“name”, “”);**
+
+**Cookie.setMaxAge(0);**
+
+**Response.addCookie(cookie);**
+
+10)  示例程序
+
+```java
+1.package com.example.servlet;  
+2.  
+3.import java.io.IOException;  
+4.import java.io.PrintWriter;  
+5.  
+6.import javax.servlet.ServletException;  
+7.import javax.servlet.annotation.WebServlet;  
+8.import javax.servlet.http.Cookie;  
+9.import javax.servlet.http.HttpServlet;  
+10.import javax.servlet.http.HttpServletRequest;  
+11.import javax.servlet.http.HttpServletResponse;  
+12.  
+13./** 
+14. * cookie使用示例servlet 
+15. *  
+16. * @author zhuyong 
+17. */  
+18.@WebServlet(urlPatterns="/cookieInfo")  
+19.public class CookieInfoServlet extends HttpServlet{  
+20.    private static final long serialVersionUID = 7025194241125675597L;  
+21.  
+22.    @Override  
+23.    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {  
+24.        boolean hasPageCookie = false; //是否含有名称为page的cookie  
+25.        Cookie[] cookies = req.getCookies();  
+26.          
+27.        if(null != cookies){  
+28.            for(Cookie cookie : cookies){  
+29.                String cookieName = cookie.getName();  
+30.                if("page".equals(cookieName)){  
+31.                    hasPageCookie = true;  
+32.                }  
+33.            }  
+34.        }  
+35.          
+36.        if(hasPageCookie){  
+37.            showMainPage(req,resp);  
+38.        }else{  
+39.            showWelcomePage(req, resp);  
+40.        }  
+41.    }  
+42.      
+43.  
+44.    /** 
+45.     * 如果客户端并没有指定的cookie缓存，就跳转到欢迎页面 
+46.     * @param req 
+47.     * @param resp 
+48.     */  
+49.    private void showWelcomePage(HttpServletRequest req, HttpServletResponse resp) {  
+50.        Cookie cookie = new Cookie("page", "infoPage");  
+51.        resp.addCookie(cookie);  
+52.          
+53.        resp.setContentType("text/html");  
+54.        resp.setCharacterEncoding("UTF-8");  
+55.          
+56.        PrintWriter writer = null;  
+57.          
+58.        try{  
+59.            writer = resp.getWriter();  
+60.            writer.write("<html><head></head><body>你好，欢迎来到梦幻王国！</body></html>");  
+61.        }catch (Exception e) {  
+62.            e.printStackTrace();  
+63.        }finally {  
+64.            if(null != writer){  
+65.                writer.close();  
+66.            }  
+67.        }  
+68.    }  
+69.      
+70.    /** 
+71.     * 如果存在指定的cookie，则显示信息页面 
+72.     *  
+73.     * @param req 
+74.     * @param resp 
+75.     */  
+76.    private void showMainPage(HttpServletRequest req, HttpServletResponse resp) {  
+77.        resp.setContentType("text/html");  
+78.        resp.setCharacterEncoding("UTF-8");  
+79.          
+80.        PrintWriter writer = null;  
+81.          
+82.        try{  
+83.            writer = resp.getWriter();  
+84.            writer.write("<html><head></head><body>"  
+85.                    + "<h1>梦幻王国</h1>"  
+86.                    + "<hr>"  
+87.                    + "<p>在梦幻王国的每一个地方...</p>"  
+88.                    + "</body></html>");  
+89.              
+90.        }catch (Exception e) {  
+91.            e.printStackTrace();  
+92.        }finally {  
+93.            if(null != writer){  
+94.                writer.close();  
+95.            }  
+96.        }  
+97.    }  
+98.}  
+```
+
+示例程序Servlet 在接收到请求时候判断是否存在指定cookie,如果不存在就创建一个cookie，这个其实就是在第一次请求的时候，展示欢迎页面。后续再次请求，因为存在了cookie，便展示信息页面。
+
+第一次请求：
+
+![1493119445861](README.assets/1493119445861.png)
+
+第二次及后续请求：
+
+![1493119459924](README.assets/1493119459924.png)
+
+我们F12调试跟踪下网络请求：
+
+第一次：
+
+![1493119480338](README.assets/1493119480338.png)
+
+可以看到第一次请求服务器端通过response 返回给客户端cookie
+
+第二次：
+
+![1493119496673](README.assets/1493119496673.png)
+
+第二次请求在请求中携带着之前客户端缓存的cookie信息，同时服务器端也返回这个cookie了。
