@@ -2781,3 +2781,57 @@ a) url **? key-1=value-1&key-2=value-2**...
 ![1493119496673](README.assets/1493119496673.png)
 
 第二次请求在请求中携带着之前客户端缓存的cookie信息，同时服务器端也返回这个cookie了。
+
+## 13.5. HttpSession对象
+
+1) 一个用户**有且最多**有一个HttpSession，并且**不会被其他用户访问到**
+
+2) 这里的用户指客户端，一个客户端例如浏览器访问会生成对应的HttpSession,当客户端关闭或者请求一次后将缓存清除了，再次请求的时候会创建新的HttpSession。
+
+3) HttpSession对象在用户**第一次**访问网站的时候**自动被创建**
+
+4) 可使用HttpServletResponse的**getSession**方法获取该对象
+
+5) 可通过HttpSession的setAttribute方法将值放入到HttpSession中，同名的话新值会覆盖旧值
+
+6) getAttribute()可获取之前存放进去的对象
+
+7) 放入到HttpSession中的值，是存储在**内存**中的，因此不要往HttpSession中存放太多信息
+
+8) 所有存放在HttpSession的数据**不会被发送到客户端**，session是**服务器**端缓存技术
+
+9) Servlet会为每个HttpSession生成唯一的标识，并将该标识发送给给浏览器，或创建一个名为JSESSIONID的cookie，或者在URL后附加一个名为jsessionid的参数。在后续请求中，浏览器会将该标识提交给服务器。可使用HttpSession的getId()获取标识。
+
+10) 设置HttpSession的超时时间：void **setMaxInactiveInterval**(int seconds)，若设置为0，永不过期
+
+![1493211098855](README.assets/1493211098855.png)
+
+11) 示例程序
+
+```java
+1.@Override  
+2.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)   
+3.            throws ServletException, IOException {  
+4.        System.out.println(req.getSession().getId());  
+5.    }  
+```
+
+我们简单的输出创建的session 的ID，我们用不同的浏览器访问，会发现创建的HttpSession是不一样的。同一个客户端多次请求创建的session是一致的（即第一次创建了，后续同样的客户端就不会创建了）。当我们关闭浏览器或者清除浏览器缓存，再次请求，会发现生成了新的session，因为浏览器中的cookie失效了或者被清除了，服务器端识别不出所请求的客户端是之前已经请求过的，所以新建了HttpSession。
+
+我们看下浏览器请求：
+
+第一次：
+
+![1493211144816](README.assets/1493211144816.png)
+
+服务器后台输出：
+
+![1493211157168](README.assets/1493211157168.png)
+
+第一次请求服务器端生成了HttpSession，并且创建了对应名称为JSESSIONID，值为HttpSession的id 的cookie，通过response返回给客户端缓存。
+
+第二次请求：
+
+![1493211171682](README.assets/1493211171682.png)
+
+第二次客户端请求会带着session创建的cookie标识，这个就告诉了服务器端还是之前的那个客户端提交的，这样服务器就知道了不同的请求来自于同一个客户端，同时因为之前创建了这个客户端对应的HttpSession，也就不新建新的了。
