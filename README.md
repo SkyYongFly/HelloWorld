@@ -2782,7 +2782,7 @@ a) url **? key-1=value-1&key-2=value-2**...
 
 第二次请求在请求中携带着之前客户端缓存的cookie信息，同时服务器端也返回这个cookie了。
 
-## 13.5. HttpSession对象
+#### 13.5. HttpSession对象
 
 1) 一个用户**有且最多**有一个HttpSession，并且**不会被其他用户访问到**
 
@@ -2807,6 +2807,8 @@ a) url **? key-1=value-1&key-2=value-2**...
 ![1493211098855](README.assets/1493211098855.png)
 
 11) 示例程序
+
+* **示例程序一**
 
 ```java
 1.@Override  
@@ -2835,3 +2837,221 @@ a) url **? key-1=value-1&key-2=value-2**...
 ![1493211171682](README.assets/1493211171682.png)
 
 第二次客户端请求会带着session创建的cookie标识，这个就告诉了服务器端还是之前的那个客户端提交的，这样服务器就知道了不同的请求来自于同一个客户端，同时因为之前创建了这个客户端对应的HttpSession，也就不新建新的了。
+
+*** 示例程序二：用户登录**  
+
+![1493211253383](README.assets/1493211253383.png)
+
+**IndexServlet.java ：**
+
+```java
+1./** 
+2. * 应用入口 
+3. *  
+4. * @author zhuyong 
+5. */  
+6.@WebServlet(urlPatterns="/*")  
+7.public class IndexServlet extends HttpServlet{  
+8.    private static final long serialVersionUID = 2195807259091461865L;  
+9.  
+10.    /**  
+11.     * 用户请求应用处理，判断是否登录  
+12.     */  
+13.    @Override  
+14.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)   
+15.            throws ServletException, IOException {  
+16.        HttpSession session = req.getSession();  
+17.        String userName = (String) session.getAttribute("username");  
+18.        String password = (String) session.getAttribute("password");  
+19.          
+20.        if(null == userName || "".equals(userName) || null == password || "".equals(password)){  
+21.            System.out.println("该客户端：" + req.getRemoteAddr() + " 尚未登录，跳转到登录页面！");  
+22.            LoginPage.showLoginPage(req, resp, "请输入用户名或密码");  
+23.        }else{  
+24.            MainPage.showMainPage(req, resp);  
+25.        }  
+26.    }  
+27.}  
+```
+
+**LoginServlet.java：**
+
+```java
+1./** 
+2. * 登录Servlet 
+3. *  
+4. * @author zhuyong 
+5. */  
+6.@WebServlet(urlPatterns="/login")  
+7.public class LoginServlet extends HttpServlet{  
+8.    private static final long serialVersionUID = -4683621834171104969L;  
+9.      
+10.    /** 
+11.     * 直接访问而非表单提交处理（已经约定表单都用POST提交） 
+12.     */  
+13.    @Override  
+14.    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {  
+15.        HttpSession session = req.getSession();  
+16.        String userName = (String) session.getAttribute("username");  
+17.        String password = (String) session.getAttribute("password");  
+18.          
+19.        if(null == userName || "".equals(userName) || null == password || "".equals(password)){  
+20.            System.out.println("该客户端：" + req.getRemoteAddr() + " 尚未登录，跳转到登录页面！");  
+21.            LoginPage.showLoginPage(req, resp, "请输入用户名或密码");  
+22.        }else{  
+23.            MainPage.showMainPage(req, resp);  
+24.        }  
+25.    }  
+26.  
+27.    /** 
+28.     * 登录表单提交处理逻辑 
+29.     */  
+30.    @Override  
+31.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)   
+32.            throws ServletException, IOException {  
+33.        String username = req.getParameter("username");  
+34.        String password = req.getParameter("password");  
+35.          
+36.        if(null == username || "".equals(username) || null == password || "".equals(password)){  
+37.            System.out.println("该客户端：" + req.getRemoteAddr() + " 提交用户名或密码为空，跳转到登录页面！");  
+38.            LoginPage.showLoginPage(req, resp, "用户名或者密码为空");  
+39.        }else{  
+40.            System.out.println("用户：" + username + "登录成功！");  
+41.            HttpSession session = req.getSession();  
+42.            session.setAttribute("username", username);  
+43.            session.setAttribute("password", password);  
+44.            MainPage.showMainPage(req, resp);  
+45.        }  
+46.    }  
+47.}  
+```
+
+ **LoginPage.java：**
+
+```java
+1. /** 
+2. * 显示登录页面 
+3. *  
+4. * @author zhuyong 
+5. */  
+6.public class LoginPage {  
+7.    /** 
+8.     * 显示登录页面 
+9.     *  
+10.     * @param req    
+11.     * @param resp 
+12.     * @param info 提示信息 
+13.     */  
+14.    public static void showLoginPage(HttpServletRequest req, HttpServletResponse resp, String info) {  
+15.        resp.setContentType("text/html");  
+16.        resp.setCharacterEncoding("UTF-8");  
+17.          
+18.        PrintWriter writer = null;  
+19.          
+20.        try {  
+21.            writer = resp.getWriter();  
+22.            writer.write("<html>"  
+23.                    + "<head><title>用户登录</title></head>"  
+24.                    + "<body>"  
+25.                    + "<form method='POST' action='login'>"  
+26.                    + "<font color='red'>"  
+27.                    + info  
+28.                    + "</font>"  
+29.                    + "</br>"  
+30.                    + "用户名：<input name='username' style='width:400px'/>"  
+31.                    + "</br></br>"  
+32.                    + "密    码：<input name='password' style='width:400px'/>"  
+33.                    + "</br>"  
+34.                    + "<input type='submit' value='登录'>"  
+35.                    + "</form>"  
+36.                    + "</body>"  
+37.                    + "</html>");  
+38.        } catch (IOException e) {  
+39.            e.printStackTrace();  
+40.        }finally {  
+41.            if(null != writer){  
+42.                writer.close();  
+43.            }  
+44.        }  
+45.    }  
+46.}  
+```
+
+**MainPage.java：**
+
+```java
+1./** 
+2. * 显示用户登录成功后主页面 
+3. *  
+4. * @author zhuyong 
+5. */  
+6.public class MainPage {  
+7.    /** 
+8.     * 显示主页面 
+9.     *  
+10.     * @param req 
+11.     * @param resp 
+12.     */  
+13.    public static void showMainPage(HttpServletRequest req, HttpServletResponse resp) {  
+14.        resp.setContentType("text/html");  
+15.        resp.setCharacterEncoding("UTF-8");  
+16.          
+17.        PrintWriter writer = null;  
+18.          
+19.        try {  
+20.            writer = resp.getWriter();  
+21.            writer.write("<html>"  
+22.                    + "<head><title>主页面</title></head>"  
+23.                    + "<body>"  
+24.                    + "欢迎您，"   
+25.                    + req.getSession().getAttribute("username")  
+26.                    + "</body>"  
+27.                    + "</html>");  
+28.        } catch (IOException e) {  
+29.            e.printStackTrace();  
+30.        }finally {  
+31.            if(null != writer){  
+32.                writer.close();  
+33.            }  
+34.        }  
+35.    }  
+36.}  
+```
+
+  ①  请求应用：
+
+![1493216193558](README.assets/1493216193558.png)
+
+服务器后台输出：
+
+![1493216207773](README.assets/1493216207773.png)
+
+因为用户还未登录，所以HttpSession中查询不到这个客户端的用户密码信息，所以显示登录界面。
+
+② 假设输入用户名，但是不输入密码：
+
+![1493216221908](README.assets/1493216221908.png)
+
+服务器后台输出：
+
+![1493216238461](README.assets/1493216238461.png)
+
+后台判断出提交的内容为空，所以重新跳转到登录界面。
+
+③ 输入用户名和密码：
+
+![1493216252335](README.assets/1493216252335.png)
+
+点击登录按钮提交2，后台输出：
+
+![1493216294052](README.assets/1493216294052.png)
+
+前端跳转到主页：
+
+![1493216280557](README.assets/1493216280557.png)
+
+说明此时服务器端获取到了提交的用户名和密码。
+
+④ 当我们再次请求/Session 或着 /Session/login 时候，还是一直显示上面的欢迎界面，因为服务器端在我们这个客户端对应的HttpSession中找到了之前提交的用户名和密码，知道登录过了，所以就不用登录了，因此显示这个界面。
+
+⑤ 当我们清除浏览器缓存或者关闭浏览器重新请求这个应用时，又回到了登录界面，因为之前的浏览器端缓存已经失效或者丢失了，服务器端新生成了HttpSession，而新的HttpSession中并没有用户名和密码信息，所以认为客户端没有登录过，因此需要重新登录。
