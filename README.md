@@ -3055,3 +3055,162 @@ a) url **? key-1=value-1&key-2=value-2**...
 ④ 当我们再次请求/Session 或着 /Session/login 时候，还是一直显示上面的欢迎界面，因为服务器端在我们这个客户端对应的HttpSession中找到了之前提交的用户名和密码，知道登录过了，所以就不用登录了，因此显示这个界面。
 
 ⑤ 当我们清除浏览器缓存或者关闭浏览器重新请求这个应用时，又回到了登录界面，因为之前的浏览器端缓存已经失效或者丢失了，服务器端新生成了HttpSession，而新的HttpSession中并没有用户名和密码信息，所以认为客户端没有登录过，因此需要重新登录。
+
+### 14.EL表达式
+
+#### 14.1. 定义
+
+EL 全名为Expression Language
+
+#### 14.2. EL主要作用：
+
+1) 获取数据：
+
+EL表达式主要用于替换JSP页面中的脚本表达式，以从各种类型的web域 中检索java对象、获取数据。(某个web域 中的对象，访问javabean的属性、访问list集合、访问map集合、访问数组)
+
+2) 执行运算：
+
+利用EL表达式可以在JSP页面中执行一些基本的关系运算、逻辑运算和算术运算，以在JSP页面中完成一些简单的逻辑运算。${user==null}
+
+3) 获取web开发常用对象
+
+EL 表达式定义了一些隐式对象，利用这些隐式对象，web开发人员可以很轻松获得对web常用对象的引用，从而获得这些对象中的数据。
+
+4) 调用Java方法
+
+EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表达式调用Java类的方法。
+
+#### 14.3. 实例
+
+1) EL获取数据
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<%@ page import="com.example.test.Person" %>  
+3.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+4.<html>  
+5.  <head>  
+6.  
+7.  </head>  
+8.    
+9.  <body>  
+10.    <h3>获取常量数据</h3><hr>  
+11.    ${"一弦一柱思华年" } ${999} ${true}  
+12.      
+13.    <h3>获取域中的变量数据</h3><hr>  
+14.    <%  
+15.        String name = "梅超风";  
+16.        pageContext.setAttribute("name", name);  
+17.     %>  
+18.     ${name }  
+19.       
+20.     <h3>获取数组数据</h3><hr>  
+21.     <%  
+22.        String[]  dayDream = {"一手托起喜马拉雅山","飞上云霄","一秒到火星"};  
+23.        pageContext.setAttribute("dream", dayDream);  
+24.      %>  
+25.     ${dream[1] }  
+26.       
+27.     <h3>获取集合中的数据</h3><hr>  
+28.     <%  
+29.        List<String>  list = new ArrayList<String>();  
+30.        list.add("小红");  
+31.        list.add("红花狼");  
+32.        list.add("小太郎");  
+33.        pageContext.setAttribute("list", list);  
+34.          
+35.      %>  
+36.      ${list[1] }  
+37.       
+38.      
+39.     <h3>获取Map中的数据</h3><hr>  
+40.    <%  
+41.        Map<String,String> map = new HashMap();  
+42.        map.put("name","奥巴马");  
+43.        map.put("age","17");  
+44.        map.put("gender","男");  
+45.        map.put("addr","白宫");  
+46.        map.put("name.xiao","小黑黑");  
+47.        pageContext.setAttribute("map",map);  
+48.        pageContext.setAttribute("name","age");  
+49.     %>  
+50.     ${map["name"] }            ${map["addr"] }  
+51.     ${map.gender }             ${map.age }  
+52.     ${map["name.xiao"] }       ${name }  
+53.       
+54.     <h3>获取javabean的属性</h3><hr>  
+55.     <%  
+56.        Person p = new Person();  
+57.        p.setName("西门吹雪");  
+58.        p.setAge("99");  
+59.        pageContext.setAttribute("p", p);  
+60.      %>  
+61.      ${p.age }  ${p.name }  
+62.  </body>  
+63.</html>  
+```
+
+![1493532434225](README.assets/1493532434225.png)
+
+2) EL执行运算
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+3.<html>  
+4.  <head>  
+5.  </head>      
+6.  <body>  
+7.    <h3>算术运算：非数字参与运算会被转为数字参与运算</h3><hr>  
+8.    ${1+1 }  
+9.    ${1+"4" }  
+10.    <%--${1+"a" } 错误 --%>  
+11.      
+12.    <h3>比较运算</h3><hr>  
+13.    ${1>3 }  
+14.    ${3 le 6 }  
+15.      
+16.    <h3>逻辑运算</h3><hr>  
+17.      
+18.    <h3>三元运算</h3><hr>  
+19.    ${5>8?"是的":"不是" }  
+20.      
+21.    <h3>empty 运算符 : 判断一个对象是否为null或字符串是否为空字符串或集合内容是否为空或域中是否没有任何属性</h3><hr>  
+22.    <%  
+23.        String str = "aaaa";  
+24.        pageContext.setAttribute("str",str);  
+25.        List<String> list = new ArrayList<String>();  
+26.        list.add("");  
+27.        pageContext.setAttribute("list",list);  
+28.     %>  
+29.     ${empty str }  
+30.     ${empty list}  
+31.     ${empty pageScope }  
+32.      
+33.      
+34.  </body>  
+35.</html>  
+```
+
+![1493532466894](README.assets/1493532466894.png)
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.  
+3.<%--导入标签库 --%>  
+4.<%@ taglib  uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>  
+5.  
+6.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+7.<html>  
+8.  <head>  
+9.  
+10.  </head>  
+11.    
+12.  <body>  
+13.        <%--利用标签库中提供的方法将字符以大写形式输出 --%>  
+14.        ${fn:toUpperCase("asdasdDASasd") }  
+15.  </body>  
+</html>  
+```
+
+![1493532489847](README.assets/1493532489847.png)
