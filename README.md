@@ -3214,3 +3214,111 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 ```
 
 ![1493532489847](README.assets/1493532489847.png)
+
+### 15. 自定义标签
+
+#### 15.1. 传统标签:
+
+例：显示ip地址
+
+1) 写一个类实现Tag接口
+
+```java
+1. public class ShowIpTag implements javax.servlet.jsp.tagext.Tag{  
+2.    private PageContext pc = null;  
+3.      
+4.    @Override  
+5.    public int doEndTag() throws JspException {  
+6.        return 0;  
+7.    }  
+8.  
+9.    @Override  
+10.    public int doStartTag() throws JspException {  
+11.        try {  
+12.            //获取ip  
+13.            String ip = pc.getRequest().getRemoteAddr();  
+14.            //输出  
+15.            pc.getOut().write(ip);  
+16.        } catch (IOException e) {  
+17.            e.printStackTrace();  
+18.        }  
+19.        return 0;  
+20.    }  
+21.  
+22.    @Override  
+23.    public javax.servlet.jsp.tagext.Tag getParent() {  
+24.        return null;  
+25.    }  
+26.  
+27.    @Override  
+28.    public void release() {  
+29.    }  
+30.  
+31.    @Override  
+32.    public void setPageContext(PageContext pc) {  
+33.        this.pc = pc;  
+34.    }  
+35.  
+36.    @Override  
+37.    public void setParent(javax.servlet.jsp.tagext.Tag arg0) {  
+38.    }  
+39.  
+40.}  
+```
+
+2) 写一个tld文件,描述写好的类
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<taglib version="2.0" xmlns="http://java.sun.com/xml/ns/j2ee"  
+3. xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee  http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd">  
+4. <tlib-version>1.0</tlib-version>  
+5. <short-name>MyTag</short-name>  
+6. <uri>http://www.example.com/MyTag</uri>  
+7.   
+8. <tag>  
+9.      <name>showip</name>  
+10.      <tag-class>com.example.tag.ShowIpTag</tag-class>  <%--所指向的类路径--%>  
+11.      <body-content>empty</body-content>  
+12. </tag>  
+13.   
+14.</taglib>  
+```
+
+注意新建tld文件时候版本要选择2.0
+
+新建完成后将 xsi:schemaLocation= 后的属性复制到 *web-jsptaglibrary_2_0.xsd*  前面，这样
+
+在文件中才有提示
+
+3) 在jsp页面中引入tld文件,就可以在jsp页面中使用自定义标签了
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<%@ taglib uri="http://www.example.com/MyTag"  prefix="MyTag"%>  
+3.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+4.<html>  
+5.  <head>  
+6.  
+7.  </head>  
+8.    
+9.  <body>  
+10.        <h3>java输出ip为：</h3>  
+11.        <%=request.getRemoteAddr() %>  
+12.          
+13.        <h3>自定义标签输出ip为:</h3>  
+14.        <MyTag:showip></MyTag:showip>  
+15.          
+16.        <h3>简单标签输出的ip：</h3>  
+17.        <MyTag:showip2></MyTag:showip2>  
+18.  </body>  
+19.</html>  
+```
+
+输出结果：
+
+![1493545072269](README.assets/1493545072269.png)
+
+分为doStartTag 和 doEndTag方法来分别处理发现开始标签和发现结束标签时的代码,在doStartTag可以通过返回值来控制标签体是否允许执行,在doEndTag方法里可以通过返回值控制标签之后的剩余页面是否允许执行；
+
+传统标签的这种开发方式,需要我们分析发现开始标签和发现结束标签时都需要执行什么代码,还需要分析到底要返回什么样的标签体控制程序执行,相对来说相当的繁琐。
