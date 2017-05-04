@@ -3322,3 +3322,92 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 分为doStartTag 和 doEndTag方法来分别处理发现开始标签和发现结束标签时的代码,在doStartTag可以通过返回值来控制标签体是否允许执行,在doEndTag方法里可以通过返回值控制标签之后的剩余页面是否允许执行；
 
 传统标签的这种开发方式,需要我们分析发现开始标签和发现结束标签时都需要执行什么代码,还需要分析到底要返回什么样的标签体控制程序执行,相对来说相当的繁琐。
+
+#### 15.2. 简单标签
+
+(1) 写一个类实现SimpleTag接口(继承SimpleTag接口的默认实现类SimpleTagSupport)
+
+```java
+1.public class SimpleTagDemo  implements SimpleTag{  
+2.    private JspContext jc = null;  
+3.  
+4.    @Override  
+5.    public void doTag() throws JspException, IOException {  
+6.        //转型获取PageContext对象  
+7.        PageContext pContext = (PageContext)jc;  
+8.        //获取ip  
+9.        String pc = pContext.getRequest().getRemoteAddr();  
+10.        //输出  
+11.        pContext.getOut().write(pc);  
+12.    }  
+13.  
+14.    @Override  
+15.    public JspTag getParent() {  
+16.        // TODO Auto-generated method stub  
+17.        return null;  
+18.    }  
+19.  
+20.    @Override  
+21.    public void setJspBody(JspFragment arg0) {  
+22.        // TODO Auto-generated method stub  
+23.          
+24.    }  
+25.  
+26.    @Override  
+27.    public void setJspContext(JspContext jc) {  
+28.        this.jc = jc ;  
+29.    }  
+30.  
+31.    @Override  
+32.    public void setParent(JspTag arg0) {  
+33.        // TODO Auto-generated method stub  
+34.          
+35.    }  
+36.  
+37.}  
+```
+
+(2) 写一个tld文件,描述写好的类
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<taglib version="2.0" xmlns="http://java.sun.com/xml/ns/j2ee"  
+3. xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee  http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd">  
+4. <tlib-version>1.0</tlib-version>  
+5. <short-name>MyTag</short-name>  
+6. <uri>http://www.example.com/MyTag</uri>  
+7.   
+8. <tag>  
+9.      <name>showip2</name>  
+10.      <tag-class>com.example.simpletag.SimpleTagDemo</tag-class>  
+11.      <body-content>empty</body-content>  
+12. </tag>  
+13.   
+14.   
+15.</taglib>  
+```
+
+(3) 在jsp页面中引入tld文件,就可以在jsp页面中使用自定义标签了
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<%@ taglib uri="http://www.example.com/MyTag"  prefix="MyTag"%>  
+3.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+4.<html>  
+5.  <head>  
+6.  
+7.  </head>  
+8.    
+9.  <body>  
+10.        <h3>java输出ip为：</h3>  
+11.        <%=request.getRemoteAddr() %>  
+12.          
+13.        <h3>自定义标签输出ip为:</h3>  
+14.        <MyTag:showip></MyTag:showip>  
+15.          
+16.        <h3>简单标签输出的ip：</h3>  
+17.        <MyTag:showip2></MyTag:showip2>  
+18.  </body>  
+19.</html>  
+```
+
