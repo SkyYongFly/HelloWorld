@@ -3411,3 +3411,66 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 19.</html>  
 ```
 
+#### 15.3. 控制简单自定义标签的执行
+
+##### 15.3.1. 控制标签体是否执行 
+
+```java
+1.public class SimpleTagControl extends SimpleTagSupport{  
+2.    private int times ;  
+3.     public void setTimes(int times) {  
+4.        this.times = times;  
+5.    }  
+6.  
+7.    @Override  
+8.    public void doTag() throws JspException, IOException {  
+9.        //控制标签体是否执行  
+10.        //----标签体不执行：什么都不做标签体就不执行  
+11.        //----标签体执行：只要调用封装标签体的JSPFragment的invoke 方法就可以  
+12.        JspFragment  jFragment = getJspBody();  
+13.        //jFragment.invoke(getJspContext().getOut());  
+14.        //invoke()方法里面直接传入null默认也会将内容写入out  
+15.        jFragment.invoke(null);  
+16.          
+17.    }  
+18.  
+19.}  
+```
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<taglib version="2.0" xmlns="http://java.sun.com/xml/ns/j2ee"  
+3. xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee  http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd">  
+4. <tlib-version>1.0</tlib-version>  
+5. <short-name>MyTag</short-name>  
+6. <uri>http://www.example.com/MyTag</uri>  
+7.   
+8.   
+9. <tag>  
+10.      <name>ControlTag</name>  
+11.      <tag-class>com.example.simpletag.SimpleTagControl</tag-class>  
+12.      <body-content>scriptless</body-content>  
+13. </tag>  
+14.   
+15.</taglib>  
+```
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<%@ taglib uri="http://www.example.com/MyTag"  prefix="MyTag"%>  
+3.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+4.<html>  
+5.  <head>  
+6.  
+7.  </head>  
+8.      
+9.  <body>  
+10.            标签之前  
+11.            <MyTag:ControlTag >标签体</MyTag:ControlTag>  
+12.            标签之后  
+13.  </body>  
+14.</html>  
+```
+
+![1493902353184](README.assets/1493902353184.png)
+
