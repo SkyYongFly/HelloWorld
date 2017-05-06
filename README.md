@@ -3531,3 +3531,118 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 
 ![1493987111742](README.assets/1493987111742.png)
 
+##### 15.3.3. 控制标签体重复执行
+
+```java
+1.public class SimpleTagControl extends SimpleTagSupport{  
+2.    private int times ;  
+3.     public void setTimes(int times) {  
+4.        this.times = times;  
+5.    }  
+6.  
+7.    @Override  
+8.    public void doTag() throws JspException, IOException {  
+9.          
+10.        //控制标签体重复执行  
+11.        for(int i=0;i<5;i++)  
+12.            getJspBody().invoke(null);  
+13.          
+14.    }  
+15.  
+16.}  
+```
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<taglib version="2.0" xmlns="http://java.sun.com/xml/ns/j2ee"  
+3. xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee  http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd">  
+4. <tlib-version>1.0</tlib-version>  
+5. <short-name>MyTag</short-name>  
+6. <uri>http://www.example.com/MyTag</uri>  
+7.   
+8.   
+9. <tag>  
+10.      <name>ControlTag</name>  
+11.      <tag-class>com.example.simpletag.SimpleTagControl</tag-class>  
+12.      <body-content>scriptless</body-content>  
+13. </tag>  
+14.   
+</taglib>  
+```
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<%@ taglib uri="http://www.example.com/MyTag"  prefix="MyTag"%>  
+3.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+4.<html>  
+5.  <head>  
+6.  
+7.  </head>  
+8.      
+9.  <body>  
+10.            标签之前  
+11.            <MyTag:ControlTag >标签体</MyTag:ControlTag>  
+12.            标签之后  
+13.  </body>  
+14.</html>  
+```
+
+![1493991277523](README.assets/1493991277523.png)
+
+##### 15.3.4. 修改标签体后输出
+
+```java
+1.public class SimpleTagControl extends SimpleTagSupport{  
+2.    private int times ;  
+3.     public void setTimes(int times) {  
+4.        this.times = times;  
+5.    }  
+6.  
+7.    @Override  
+8.    public void doTag() throws JspException, IOException {  
+9.        //修改标签体后输出  
+10.        StringWriter writer = new StringWriter();  
+11.        JspFragment jspFragment = getJspBody();  
+12.        jspFragment.invoke(writer);  
+13.        String string = writer.toString();  
+14.        string = string.toUpperCase();  
+15.        getJspContext().getOut().write(string);  
+16.          
+17.    }  
+18.}  
+```
+
+```html
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<taglib version="2.0" xmlns="http://java.sun.com/xml/ns/j2ee"  
+3. xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee  http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd">  
+4. <tlib-version>1.0</tlib-version>  
+5. <short-name>MyTag</short-name>  
+6. <uri>http://www.example.com/MyTag</uri>  
+7.   
+8.   
+9. <tag>  
+10.      <name>ControlTag</name>  
+11.      <tag-class>com.example.simpletag.SimpleTagControl</tag-class>  
+12.      <body-content>scriptless</body-content>  
+13. </tag>  
+14.   
+15.</taglib>  
+
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<%@ taglib uri="http://www.example.com/MyTag"  prefix="MyTag"%>  
+3.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+4.<html>  
+5.  <head>  
+6.  
+7.  </head>  
+8.      
+9.  <body>  
+10.            标签之前  
+11.            <MyTag:ControlTag ><br>标签体zcxzxc<br></MyTag:ControlTag>  
+12.            标签之后  
+13.  </body>  
+14.</html>  
+```
+
+![1493991323719](README.assets/1493991323719.png)
