@@ -3646,3 +3646,51 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 ```
 
 ![1493991323719](README.assets/1493991323719.png)
+
+#### 15.4. 自定义标签来增加一个属性:
+
+1) 在标签处理类中增加一个javabean属性,这个属性就是要增加的标签的属性,并对外提供setXXX方法
+
+```java
+1.public class SimpleTagControl extends SimpleTagSupport{  
+2.    private int times ;  
+3.     public void setTimes(int times) {  
+4.        this.times = times;  
+5.    }  
+6.  
+7.    @Override  
+8.    public void doTag() throws JspException, IOException {  
+9.        //控制标签体重复执行  
+10.        for(int i=0;i<times;i++)  
+11.            getJspBody().invoke(null);  
+12.    }  
+13.  
+14.}  
+```
+
+2) 在tld文件中这个标签的描述中描述一下该属性 
+
+```xml
+1.<tag>  
+2.      <name>ControlTag</name>  
+3.      <tag-class>com.example.simpletag.SimpleTagControl</tag-class>  
+4.      <body-content>scriptless</body-content>  
+5.      <attribute>  
+6.        <name>times</name>  
+7.        <required>true</required>  
+8.        <type>int</type>  
+9.        <rtexprvalue>false</rtexprvalue>  
+10.      </attribute>  
+ </tag>  
+```
+
+则在jsp文件中引用该标签时自动加上属性 (此处功能相当于标签体执行5次)
+
+```html
+1.<body>  
+2.            标签之前  
+3.            <MyTag:ControlTag times="5"><br>标签体zcxzxc<br></MyTag:ControlTag>  
+4.            标签之后  
+5.  </body>  
+```
+
