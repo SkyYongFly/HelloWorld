@@ -3694,3 +3694,56 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 5.  </body>  
 ```
 
+### 16.JDBC
+
+#### 16.1. JDBC快速入门
+
+* 导入JDBC  jar包到当前工程lib目录，添加到编译路径
+
+  操作数据库，新建数据库 day10 , 在其中新建表user ，
+
+![1494059972885](README.assets/1494059972885.png)
+
+![1494418590345](README.assets/1494418590345.png)
+
+利用JDBC操作数据库
+
+```java
+1.package com.example.jdbc;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.DriverManager;  
+5.import java.sql.ResultSet;  
+6.import java.sql.SQLException;  
+7.import java.sql.Statement;  
+8.  
+9.import com.mysql.jdbc.Driver;  
+10.  
+11.public class JDBCDemo1 {  
+12.  
+13.    public static void main(String[] args) throws SQLException{  
+14.        //1、注册数据库驱动  
+15.        DriverManager.registerDriver(new Driver());  
+16.        //2、获取数据库连接  
+17.        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/day10","root","root");  
+18.        //3、获取传输器对象  
+19.        Statement statement = connection.createStatement();  
+20.        //4、利用传输器传输sql语句到数据库中执行，获取结果集对象  
+21.        ResultSet rs = statement.executeQuery("select * from user");  
+22.        //5、遍历结果集查询结果  
+23.        while (rs.next()) {  
+24.            String name = rs.getString("name");  
+25.            System.out.println(name);  
+26.              
+27.        }  
+28.        //6、关闭资源  
+29.        rs.close();  
+30.        statement.close();  
+31.        connection.close();  
+32.          
+33.    }  
+34.}  
+```
+
+结果显示数据库中 name 对应的值
+
