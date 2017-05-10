@@ -3747,3 +3747,207 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 
 结果显示数据库中 name 对应的值
 
+#### 16.2. 对数据库进行增删改查操作
+
+* 先将操作中的共性方法封装成类
+
+```java
+1.package com.example.util;  
+2.  
+3.import java.io.FileReader;  
+4.import java.sql.Connection;  
+5.import java.sql.DriverManager;  
+6.import java.sql.ResultSet;  
+7.import java.sql.SQLException;  
+8.import java.sql.Statement;  
+9.import java.util.Properties;  
+10.  
+11.  
+12.public class JDBCUtil {  
+13.    private  static Properties properties;  
+14.    static{  
+15.        try {  
+16.            properties = new Properties();  
+17.            properties.load(new FileReader(JDBCUtil.class.getClassLoader().getResource("config.properties").getPath()));  
+18.        } catch (Exception e) {  
+19.            e.printStackTrace();  
+20.            throw new RuntimeException();  
+21.        }  
+22.          
+23.    }  
+24.  
+25.    /* 
+26.     * 注册数据库驱动并且获取数据库连接 
+27.     * @param null 
+28.     * @return 数据库连接 
+29.     */  
+30.    public static Connection getConnection() throws ClassNotFoundException, SQLException{  
+31.        //1、注册数据库驱动  
+32.        //DriverManager.registerDriver(new Driver());  
+33.        Class.forName(properties.getProperty("driver"));  
+34.        //2、获取数据库连接  
+35.        return  DriverManager.getConnection(properties.getProperty("uri"),properties.getProperty("user"),properties.getProperty("password"));  
+36.          
+37.    }  
+38.      
+39.      
+40.    /* 
+41.     * 关闭资源 
+42.     * @param ResultSet 
+43.     * @param Statement 
+44.     * @param Connection 
+45.     */  
+46.    public static void close(ResultSet rs,Statement st,Connection ct){  
+47.        if(rs != null){  
+48.            try {  
+49.                rs.close();  
+50.            } catch (SQLException e) {  
+51.                e.printStackTrace();  
+52.            }finally{  
+53.                rs = null;  
+54.            }  
+55.        }  
+56.          
+57.        if(st != null){  
+58.            try {  
+59.                st.close();  
+60.            } catch (SQLException e) {  
+61.                e.printStackTrace();  
+62.            }finally{  
+63.                st = null;  
+64.            }  
+65.        }  
+66.          
+67.        if(ct != null){  
+68.            try {  
+69.                ct.close();  
+70.            } catch (SQLException e) {  
+71.                e.printStackTrace();  
+72.            }finally{  
+73.                ct = null;  
+74.            }  
+75.        }  
+76.    }  
+77.}  
+```
+
+相关properties 文件
+
+```
+driver=com.mysql.jdbc.Driver
+uri=jdbc:mysql://localhost:3306/day10
+user=root
+password=root
+```
+
+测试文件
+
+```java
+1.package com.example.jdbc;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.ResultSet;  
+5.import java.sql.Statement;  
+6.  
+7.import org.junit.Test;  
+8.  
+9.import com.example.util.JDBCUtil;  
+10.  
+11./* 
+12. * 利用JDBC对数据库进行增删改查 
+13. */  
+14.public class JDBCDemo2 {  
+15.      
+16.    /* 
+17.     * 对数据库进行更新数据 
+18.     */  
+19.    @Test  
+20.    public void update() {  
+21.        Connection ct = null;  
+22.        Statement st = null;  
+23.        ResultSet rs = null;  
+24.          
+25.        try {  
+26.            ct = JDBCUtil.getConnection();  
+27.            st = ct.createStatement();  
+28.            st.executeUpdate("update user set password=2345 where name='lisi'");  
+29.              
+30.        } catch (Exception e) {  
+31.            e.printStackTrace();  
+32.        }finally{  
+33.            JDBCUtil.close(rs, st, ct);  
+34.        }  
+35.    }  
+36.      
+37.    /* 
+38.     * 删除数据 
+39.     */  
+40.    @Test  
+41.    public void delete(){  
+42.        Connection ct = null;  
+43.        Statement st = null;  
+44.        ResultSet rs = null;  
+45.          
+46.        try {  
+47.            ct = JDBCUtil.getConnection();  
+48.            st = ct.createStatement();  
+49.            st.executeUpdate("delete from user where name='lisi'");  
+50.        } catch (Exception e) {  
+51.            e.printStackTrace();  
+52.        }finally{  
+53.            JDBCUtil.close(rs, st, ct);  
+54.        }  
+55.    }  
+56.      
+57.    /* 
+58.     * 查询数据 
+59.     */  
+60.    @Test  
+61.    public void find(){  
+62.        Connection ct = null;  
+63.        Statement st = null;  
+64.        ResultSet rs = null;  
+65.          
+66.        try {  
+67.            ct = JDBCUtil.getConnection();  
+68.            st = ct.createStatement();  
+69.            rs =st.executeQuery("select * from user where name='zs'");  
+70.            while(rs.next()){  
+71.                String name = rs.getString("name");  
+72.                String password = rs.getString("password");  
+73.                System.out.println(name+" : "+password);  
+74.            }  
+75.        } catch (Exception e) {  
+76.            e.printStackTrace();  
+77.        }finally{  
+78.            JDBCUtil.close(rs, st, ct);  
+79.        }  
+80.    }  
+81.      
+82.    /* 
+83.     *增加数据 
+84.     */  
+85.    @Test  
+86.    public void add(){  
+87.        Connection ct = null;  
+88.        Statement st = null;  
+89.        ResultSet rs = null;  
+90.        try {  
+91.            ct = JDBCUtil.getConnection();  
+92.            st = ct.createStatement();  
+93.            int count = st.executeUpdate("insert into user values (null,'zhaoliu','123456','zhaoliu@qq.com','1999-09-09')");  
+94.            if(count > 0){  
+95.                System.out.println("执行成功，并且影响的行数为"+count);  
+96.            }else{  
+97.                System.out.println("执行失败");  
+98.            }  
+99.                  
+100.        } catch (Exception e) {  
+101.            e.printStackTrace();  
+102.        }finally{  
+103.            JDBCUtil.close(rs, st, ct);  
+104.        }  
+105.    }  
+106.}  
+```
+
