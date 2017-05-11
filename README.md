@@ -3951,3 +3951,46 @@ password=root
 106.}  
 ```
 
+### 17. 利用PreparedStatement防止SQL注入
+
+```java
+1.package com.example.jdbc;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.DriverManager;  
+5.import java.sql.ResultSet;  
+6.import java.sql.SQLException;  
+7.  
+8.import org.junit.Test;  
+9.  
+10.import com.mysql.jdbc.Driver;  
+11.import com.mysql.jdbc.PreparedStatement;  
+12.  
+13.public class JDBCDemo3 {  
+14.    @Test  
+15.    public void test() throws SQLException{  
+16.        //1、注册数据库驱动  
+17.        DriverManager.registerDriver(new Driver());  
+18.        //2、获取数据库连接  
+19.        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/day10","root","root");  
+20.        //3、利用 PreparedStatement 将操作语句传入，参数用 ? 代替  
+21.        PreparedStatement ps = (PreparedStatement) connection.prepareStatement("select * from  user where name=?");  
+22.        //4、传入参数  
+23.        ps.setString(1, "wangwu");  
+24.        //5、获取结果集对象  
+25.        ResultSet rs = ps.executeQuery();  
+26.        //6、遍历结果集查询结果  
+27.        while (rs.next()) {  
+28.            String name = rs.getString("name");  
+29.            String password = rs.getString("password");  
+30.            System.out.println(name+" : "+password);  
+31.              
+32.        }  
+33.        //6、关闭资源  
+34.        rs.close();  
+35.        connection.close();  
+36.          
+37.    }  
+38.}  
+```
+
