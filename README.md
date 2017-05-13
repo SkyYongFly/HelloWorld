@@ -4063,3 +4063,51 @@ password=root
 58.}  
 ```
 
+#### 18.2. preparedStatement 批处理机制
+
+优点：有预编译机制，效率较高，执行多条结构相同，参数不同的sql语句时，不需要重复写sql的主干语句
+
+缺点：只能执行结构相同参数不同的人sql语句，不能执行多条结构不同的语句
+
+```java
+1.package com.example.batch;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.DriverManager;  
+5.import java.sql.Statement;  
+6.  
+7.import org.junit.Test;  
+8.  
+9.import com.mysql.jdbc.PreparedStatement;  
+10.  
+11.public class PSBanch {  
+12.  
+13.    @Test  
+14.    public void PSDemo(){  
+15.        Connection connection = null;  
+16.        PreparedStatement ps = null;  
+17.        try {  
+18.            Class.forName("com.mysql.jdbc.Driver");  
+19.            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/day10banch","root","root");  
+20.            ps = (PreparedStatement) connection.prepareStatement("insert into demo values (null,?)");  
+21.              
+22.            for(int i=1;i<10000;i++){  
+23.                ps.setString(1, "ha"+i);  
+24.                ps.addBatch();  
+25.                  
+26.                if(i%1000 == 0){  
+27.                    ps.executeBatch();  
+28.                    ps.clearBatch();  
+29.                }  
+30.            }  
+31.            ps.executeBatch();  
+32.              
+33.              
+34.        } catch (Exception e) {  
+35.            e.printStackTrace();  
+36.        }  
+37.    }  
+38.          
+39.}  
+```
+
