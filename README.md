@@ -3994,3 +3994,72 @@ password=root
 38.}  
 ```
 
+### 18.JDBC批处理
+
+#### 18.1. Statement批处理
+
+优点：可以执行多条不同结构的sql语句
+
+缺点：没有使用预编译机制，效率低下，如果执行多条结构相同只是参数不同的sql语句，仍然需要些多条sql语句的主干，相对麻烦
+
+```java
+1.package com.example.batch;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.DriverManager;  
+5.import java.sql.SQLException;  
+6.import java.sql.Statement;  
+7.import org.junit.Test;  
+8.public class StatementBatch {  
+9.    /* 
+10.     * 实现statement方式批处理 
+11.     */  
+12.    @Test  
+13.    public void BatchDemo(){  
+14.        Connection connection = null;  
+15.        Statement statement = null;  
+16.        try {  
+17.            Class.forName("com.mysql.jdbc.Driver");  
+18.             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/day10","root","root");  
+19.             statement = connection.createStatement();  
+20.            statement.addBatch("create database day10banch");  
+21.            statement.addBatch("use day10banch");  
+22.            statement.addBatch("create table banch("  
+23.                            + "id int primary key auto_increment,"  
+24.                            +"name varchar(60)"  
+25.                            +");");  
+26.            statement.addBatch("insert into banch value (null,'xiao')");  
+27.            statement.addBatch("insert into banch value (null,'hong')");  
+28.            statement.addBatch("insert into banch value (null,'fang')");  
+29.            statement.addBatch("insert into banch value (null,'yan')");  
+30.            statement.addBatch("insert into banch value (null,'fei')");  
+31.      
+32.            statement.executeBatch();  
+33.        } catch (Exception e) {  
+34.            e.printStackTrace();  
+35.        }finally{  
+36.            if(statement != null){  
+37.                try {  
+38.                    statement.close();  
+39.                } catch (SQLException e) {  
+40.                    e.printStackTrace();  
+41.                }finally{  
+42.                    statement = null;  
+43.                }  
+44.            }  
+45.              
+46.            if(connection != null){  
+47.                try {  
+48.                    connection.close();  
+49.                } catch (SQLException e) {  
+50.                    e.printStackTrace();  
+51.                }finally{  
+52.                    connection = null;  
+53.                }  
+54.            }  
+55.        }  
+56.          
+57.    }  
+58.}  
+```
+
