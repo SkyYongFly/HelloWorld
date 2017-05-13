@@ -4111,3 +4111,167 @@ password=root
 39.}  
 ```
 
+### 19. 事务
+
+#### **19.1.** **基础概念**
+
+#### **19.2.** **事务使用**
+
+```java
+1.package com.example.tran;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.DriverManager;  
+5.import java.sql.SQLException;  
+6.  
+7.import javax.persistence.PreUpdate;  
+8.  
+9.import org.junit.Test;  
+10.  
+11.import com.mysql.jdbc.PreparedStatement;  
+12.  
+13.public class JDBCTranDemo1 {  
+14.    @Test  
+15.    public void Demo(){  
+16.        Connection connection = null;  
+17.        PreparedStatement ps  = null;  
+18.        try{  
+19.            Class.forName("com.mysql.jdbc.Driver");  
+20.            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/day11","root","root");  
+21.            //回滚事务  
+22.            connection.setAutoCommit(false);  
+23.              
+24.            ps = (PreparedStatement) connection.prepareStatement("update account set money=money-100 where name=?");  
+25.            ps.setString(1, "xiao");  
+26.            ps.executeUpdate();  
+27.              
+28.            int i = 1/0;//此处发生错误，导致下面账户更改不能执行  
+29.              
+30.            ps =(PreparedStatement)connection.prepareStatement("update account set money=money+100 where name=?");  
+31.            ps.setString(1, "hong");  
+32.            ps.executeUpdate();  
+33.              
+34.            //提交事务  
+35.            connection.commit();  
+36.        }catch(Exception e){  
+37.            try {  
+38.                //事务回滚  
+39.                connection.rollback();  
+40.            } catch (SQLException e1) {  
+41.                e1.printStackTrace();  
+42.            }  
+43.            e.printStackTrace();  
+44.        }finally{  
+45.            if(ps != null){  
+46.                try {  
+47.                    ps.close();  
+48.                } catch (SQLException e) {  
+49.                    e.printStackTrace();  
+50.                }finally{  
+51.                    ps = null;  
+52.                }  
+53.            }  
+54.            if(connection != null){  
+55.                try {  
+56.                    connection.close();  
+57.                } catch (SQLException e) {  
+58.                    e.printStackTrace();  
+59.                }finally{  
+60.                    connection = null;  
+61.                }  
+62.            }  
+63.        }  
+64.    }  
+65.      
+}  
+```
+
+#### 19.3. 设置事务回滚点
+
+```java
+1.package com.example.tran;  
+2./* 
+3. * 事务中设置回滚点 
+4. */  
+5.import java.sql.Connection;  
+6.import java.sql.DriverManager;  
+7.import java.sql.SQLException;  
+8.import java.sql.Savepoint;  
+9.  
+10.import org.junit.Test;  
+11.  
+12.import com.mysql.jdbc.PreparedStatement;  
+13.  
+14.public class JDBCTranDemo2 {  
+15.    @Test  
+16.    public void Demo2(){  
+17.        Connection connection = null;  
+18.        PreparedStatement ps  = null;  
+19.        Savepoint  sp = null;  
+20.        try{  
+21.            Class.forName("com.mysql.jdbc.Driver");  
+22.            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/day11","root","root");  
+23.            //回滚事务  
+24.            connection.setAutoCommit(false);  
+25.              
+26.            ps = (PreparedStatement) connection.prepareStatement("update account set money=money-100 where name=?");  
+27.            ps.setString(1, "xiao");  
+28.            ps.executeUpdate();  
+29.              
+30.            ps =(PreparedStatement)connection.prepareStatement("update account set money=money+100 where name=?");  
+31.            ps.setString(1, "hong");  
+32.            ps.executeUpdate();  
+33.              
+34.            //设置回滚点  
+35.            sp = connection.setSavepoint();  
+36.              
+37.            int i = 1/0;//错误发生处  
+38.              
+39.            ps = (PreparedStatement) connection.prepareStatement("update account set money=money-100 where name=?");  
+40.            ps.setString(1, "xiao");  
+41.            ps.executeUpdate();  
+42.              
+43.            ps =(PreparedStatement)connection.prepareStatement("update account set money=money+100 where name=?");  
+44.            ps.setString(1, "hong");  
+45.            ps.executeUpdate();  
+46.              
+47.              
+48.            //提交事务  
+49.            connection.commit();  
+50.        }catch(Exception e){  
+51.            try {  
+52.                if(sp == null){//如果sp为空，说明语句还没有执行回滚点处就已经发生异常，要对所有语句进行回滚  
+53.                    connection.rollback();  
+54.                }else{//sp不为空，可以回到回滚点，继续执行其它操作，但如果希望之前的代码有效，依然需要提交  
+55.                    connection.rollback(sp);  
+56.                    connection.commit();  
+57.                }  
+58.                  
+59.            } catch (SQLException e1) {  
+60.                e1.printStackTrace();  
+61.            }  
+62.            e.printStackTrace();  
+63.        }finally{  
+64.            if(ps != null){  
+65.                try {  
+66.                    ps.close();  
+67.                } catch (SQLException e) {  
+68.                    e.printStackTrace();  
+69.                }finally{  
+70.                    ps = null;  
+71.                }  
+72.            }  
+73.            if(connection != null){  
+74.                try {  
+75.                    connection.close();  
+76.                } catch (SQLException e) {  
+77.                    e.printStackTrace();  
+78.                }finally{  
+79.                    connection = null;  
+80.                }  
+81.            }  
+82.        }  
+83.    }  
+84.}  
+```
+
