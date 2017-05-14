@@ -4546,3 +4546,82 @@ uri=jdbc\:mysql\://localhost\:3306/day11
 35.}  
 ```
 
+### 21. **开源数据库连接池**
+
+#### **21.1.** **JDBC**
+
+1) 在系统中增加如下两个 jar 文件：
+
+Commons-dbcp.jar：连接池的实现
+
+Commons-pool.jar：连接池实现的依赖库
+
+2) jdbc.properties
+
+```
+driverClassName=com.mysql.jdbc.Driver
+url=jdbc:mysql:///day11
+username=root
+password=root
+```
+
+3)
+
+```java
+1.package com.example.dbcp;  
+2.  
+3.import java.io.FileReader;  
+4.import java.sql.Connection;  
+5.import java.sql.PreparedStatement;  
+6.import java.sql.ResultSet;  
+7.import java.util.Properties;  
+8.  
+9.  
+10.  
+11.import javax.sql.DataSource;  
+12.  
+13.import org.apache.commons.dbcp.BasicDataSource;  
+14.import org.apache.commons.dbcp.BasicDataSourceFactory;  
+15.import org.junit.Test;  
+16.  
+17.import com.example.jdbcpool.PoolDemo;  
+18.import com.example.jdbcutil.JDBCUtils;  
+19.  
+20.public class DBCPDemo {  
+21.    @Test  
+22.    public void Demo(){  
+23.        Connection cn = null;  
+24.        PreparedStatement pt = null;  
+25.        ResultSet rs = null;  
+26.        try{      
+27.        //利用DBCP方式实现数据源  
+28.        //方式1  
+29.//      BasicDataSource source = new BasicDataSource();  
+30.//      source.setDriverClassName("com.mysql.jdbc.Driver");  
+31.//      source.setUrl("jdbc:mysql://localhost:3306/day11");  
+32.//      source.setUsername("root");  
+33.//      source.setPassword("root");  
+34.          
+35.        //方式2  
+36.        Properties prop = new Properties();  
+37.        prop.load(new FileReader("jdbc.properties"));  
+38.        BasicDataSourceFactory factory = new BasicDataSourceFactory();  
+39.        DataSource source = factory.createDataSource(prop);  
+40.          
+41.        cn = source.getConnection();  
+42.        pt = cn.prepareStatement("select * from account");  
+43.        rs = pt.executeQuery();  
+44.        while(rs.next()){  
+45.            System.out.println(rs.getString("name"));  
+46.        }  
+47.        }catch(Exception e){  
+48.            e.printStackTrace();  
+49.        }finally{  
+50.            JDBCUtils.close(rs, null, cn);  
+51.        }  
+52.          
+53.          
+54.    }  
+55.}  
+```
+
