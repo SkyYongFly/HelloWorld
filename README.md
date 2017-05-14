@@ -4275,3 +4275,274 @@ password=root
 84.}  
 ```
 
+### 20.手动编写连接池
+
+#### **20.1.** 实际示例
+
+1) 编写JDBC公共方法
+
+```java
+1.package com.example.jdbcutil;  
+2.  
+3.import java.io.FileReader;  
+4.import java.sql.Connection;  
+5.import java.sql.DriverManager;  
+6.import java.sql.ResultSet;  
+7.import java.sql.SQLException;  
+8.import java.sql.Statement;  
+9.import java.util.Properties;  
+10.  
+11.public class JDBCUtils {  
+12.      
+13.    private static  Properties prop = null;  
+14.    private static Connection connection;  
+15.      
+16.    static{  
+17.        prop = new Properties();  
+18.        try {  
+19.            prop.load(new FileReader(JDBCUtils.class.getClassLoader().getResource("config.properties").getPath()));  
+20.        } catch (Exception e) {  
+21.            e.printStackTrace();  
+22.            throw new RuntimeException();  
+23.        }  
+24.    }  
+25.    public JDBCUtils(){  
+26.          
+27.    }  
+28.      
+29.    /* 
+30.     * 获取数据库连接 
+31.     */  
+32.    public static Connection getConnection() throws ClassNotFoundException, SQLException{  
+33.        //获取连接  
+34.            Class.forName(prop.getProperty("driver"));  
+35.            connection = DriverManager.getConnection(prop.getProperty("uri"),prop.getProperty("user"),prop.getProperty("password"));  
+36.            return connection;  
+37.          
+38.    }  
+39.      
+40.    /* 
+41.     * 关闭数据库连接 
+42.     */  
+43.    public static void close(ResultSet rs,Statement st,Connection ct){  
+44.        if(rs != null){  
+45.            try {  
+46.                rs.close();  
+47.            } catch (SQLException e) {  
+48.                e.printStackTrace();  
+49.            }finally{  
+50.                rs = null;  
+51.            }  
+52.        }  
+53.          
+54.        if(st != null){  
+55.            try {  
+56.                st.close();  
+57.            } catch (SQLException e) {  
+58.                e.printStackTrace();  
+59.            }finally{  
+60.                st = null;  
+61.            }  
+62.        }  
+63.          
+64.        if(ct != null){  
+65.            try {  
+66.                ct.close();  
+67.            } catch (SQLException e) {  
+68.                e.printStackTrace();  
+69.            }finally{  
+70.                ct = null;  
+71.            }  
+72.        }  
+73.    }  
+74.      
+75.}  
+```
+
+相关 properties 文件：
+
+```
+driver=com.mysql.jdbc.Driver
+user=root
+password=root
+uri=jdbc\:mysql\://localhost\:3306/day11
+```
+
+2) 手动编写连接池
+
+```java
+1.package com.example.jdbcpool;  
+2.  
+3.import java.io.PrintWriter;  
+4.import java.lang.reflect.InvocationHandler;  
+5.import java.lang.reflect.Method;  
+6.import java.lang.reflect.Proxy;  
+7.import java.sql.Connection;  
+8.import java.sql.SQLException;  
+9.import java.sql.SQLFeatureNotSupportedException;  
+10.import java.util.LinkedList;  
+11.import java.util.List;  
+12.import java.util.logging.Logger;  
+13.  
+14.import javax.sql.DataSource;  
+15.  
+16.import com.example.jdbcutil.JDBCUtils;  
+17.  
+18.public class PoolDemo implements DataSource {  
+19.    //对数据库操作涉及大量增删改操作，采用LinkedList 实现，便于增删改  
+20.    private static List<Connection> list = new LinkedList<Connection>();  
+21.      
+22.    static{  
+23.        try{  
+24.            for(int i=0;i<5;i++){  
+25.                Connection cn = JDBCUtils.getConnection();  
+26.                list.add(cn);  
+27.            }  
+28.        }catch(Exception e){  
+29.            e.printStackTrace();  
+30.        }  
+31.    }  
+32.      
+33.    @Override  
+34.    public Connection getConnection() throws SQLException {  
+35.        try{  
+36.        if(list.size() == 0){  
+37.            for(int i=0;i<3;i++){  
+38.                Connection cn = JDBCUtils.getConnection();  
+39.                list.add(cn);  
+40.            }  
+41.        }  
+42.        }catch(Exception e){  
+43.            e.printStackTrace();  
+44.        }  
+45.          
+46.        final Connection cn = list.remove(0);  
+47.          
+48.        //利用动态代理改造close()方法  
+49.        Connection proxy = (Connection) Proxy.newProxyInstance(cn.getClass().getClassLoader(),cn.getClass().getInterfaces(), new InvocationHandler() {  
+50.              
+51.            @Override  
+52.            public Object invoke(Object proxy, Method method, Object[] args)  
+53.                    throws Throwable {  
+54.                if("close".equals(method.getName())){  
+55.                    //对于close方法，自行修改  
+56.                    returnCon(cn);  
+57.                    return null;  
+58.                }else{  
+59.                    //对于不想调用的方法调用代理者身上相同的方法  
+60.                    return method.invoke(cn, args);  
+61.                }  
+62.            }  
+63.        });  
+64.          
+65.        System.out.println("获取了一个连接，连接池里还有"+list.size()+"个连接");  
+66.        return proxy;  
+67.          
+68.    }  
+69.      
+70.    private void returnCon(Connection ct){  
+71.        try{  
+72.            if(ct !=null && !ct.isClosed()){  
+73.                list.add(ct);  
+74.                System.out.println("还回了一个连接，连接池里还有"+list.size()+"个连接");  
+75.            }  
+76.        }catch(Exception e){  
+77.            e.printStackTrace();  
+78.        }  
+79.    }  
+80.      
+81.      
+82.    @Override  
+83.    public PrintWriter getLogWriter() throws SQLException {  
+84.        // TODO Auto-generated method stub  
+85.        return null;  
+86.    }  
+87.  
+88.    @Override  
+89.    public void setLogWriter(PrintWriter out) throws SQLException {  
+90.        // TODO Auto-generated method stub  
+91.  
+92.    }  
+93.  
+94.    @Override  
+95.    public void setLoginTimeout(int seconds) throws SQLException {  
+96.        // TODO Auto-generated method stub  
+97.  
+98.    }  
+99.  
+100.    @Override  
+101.    public int getLoginTimeout() throws SQLException {  
+102.        // TODO Auto-generated method stub  
+103.        return 0;  
+104.    }  
+105.  
+106.    @Override  
+107.    public Logger getParentLogger() throws SQLFeatureNotSupportedException {  
+108.        // TODO Auto-generated method stub  
+109.        return null;  
+110.    }  
+111.  
+112.    @Override  
+113.    public <T> T unwrap(Class<T> iface) throws SQLException {  
+114.        // TODO Auto-generated method stub  
+115.        return null;  
+116.    }  
+117.  
+118.    @Override  
+119.    public boolean isWrapperFor(Class<?> iface) throws SQLException {  
+120.        // TODO Auto-generated method stub  
+121.        return false;  
+122.    }  
+123.  
+124.      
+125.  
+126.    @Override  
+127.    public Connection getConnection(String username, String password)  
+128.            throws SQLException {  
+129.        // TODO Auto-generated method stub  
+130.        return null;  
+131.    }  
+132.  
+133.}  
+```
+
+3) 主程序：操作数据库
+
+```java
+1.package com.example.jdbc;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.PreparedStatement;  
+5.import java.sql.ResultSet;  
+6.  
+7.import org.junit.Test;  
+8.  
+9.import com.example.jdbcpool.PoolDemo;  
+10.import com.example.jdbcutil.JDBCUtils;  
+11.  
+12.public class JDBCDemo1 {  
+13.      
+14.    @Test  
+15.    public void Demo(){  
+16.        Connection cn = null;  
+17.        PreparedStatement pt = null;  
+18.        ResultSet rs = null;  
+19.        PoolDemo pDemo  = new PoolDemo();  
+20.        try{  
+21.            cn = pDemo.getConnection();  
+22.            pt = cn.prepareStatement("select * from account");  
+23.            rs = pt.executeQuery();  
+24.            while(rs.next()){  
+25.                System.out.println(rs.getString("name"));  
+26.            }  
+27.        }catch(Exception e){  
+28.            e.printStackTrace();  
+29.        }finally{  
+30.            JDBCUtils.close(rs, null, cn);  
+31.        }  
+32.          
+33.          
+34.    }  
+35.}  
+```
+
