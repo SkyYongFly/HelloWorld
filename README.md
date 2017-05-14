@@ -4705,3 +4705,87 @@ password=root
 50.}  
 ```
 
+#### 21.1.tomcat内置的数据源(DBCP)
+
+1) 为tomcat配置数据源
+
+在 WebRoot-META-INF 下：context.xml
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<Context>  
+3.    <Resource name="mySource"  
+4.             auth="Container"  
+5.             type="javax.sql.DataSource"  
+6.             username="root"  
+7.             password="root"  
+8.             driverClassName="com.mysql.jdbc.Driver"  
+9.             url="jdbc:mysql:///day11"  
+10.             maxActive="8"  
+11.             maxIdle="4"/>  
+12.</Context>  
+```
+
+2) 如果在程序中获取这个数据源
+
+​	想要访问jndi就必须在Servlet中才能执行下列代码:
+
+```java
+1.package com.example.TOM;  
+2.  
+3.import java.io.IOException;  
+4.import java.sql.Connection;  
+5.import java.sql.PreparedStatement;  
+6.import java.sql.ResultSet;  
+7.  
+8.import javax.naming.Context;  
+9.import javax.naming.InitialContext;  
+10.import javax.naming.NamingException;  
+11.import javax.servlet.ServletException;  
+12.import javax.servlet.http.HttpServlet;  
+13.import javax.servlet.http.HttpServletRequest;  
+14.import javax.servlet.http.HttpServletResponse;  
+15.import javax.sql.DataSource;  
+16.  
+17.public class TomDbcp extends HttpServlet{  
+18.  
+19.    @Override  
+20.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+21.            throws ServletException, IOException {  
+22.        super.doGet(req, resp);  
+23.    }  
+24.  
+25.    @Override  
+26.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+27.            throws ServletException, IOException {  
+28.        super.doPost(req, resp);  
+29.    }  
+30.  
+31.    @Override  
+32.    public void init() throws ServletException {  
+33.          
+34.        try {  
+35.            Context ct = new InitialContext();  
+36.            Context jndi= (Context) ct.lookup("java:com/env");  
+37.            DataSource source = (DataSource) jndi.lookup("mySource");  
+38.              
+39.            Connection cn = source.getConnection();  
+40.            PreparedStatement pt = cn.prepareStatement("select * from account");  
+41.            ResultSet rs = pt.executeQuery();  
+42.            while(rs.next()){  
+43.                System.out.println(rs.getString("name"));  
+44.            }  
+45.              
+46.            rs.close();  
+47.            pt.close();  
+48.            cn.close();  
+49.        } catch (Exception e) {  
+50.            e.printStackTrace();  
+51.            throw new RuntimeException(e);  
+52.        }  
+53.          
+54.    }  
+55.      
+56.}  
+```
+
