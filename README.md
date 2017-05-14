@@ -4625,3 +4625,83 @@ password=root
 55.}  
 ```
 
+#### 21.2. C3P0
+
+1) 导入jar包
+
+2) 如果采用方式2配置  c3p0-config.xml  文件
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<c3p0-config>  
+3.    <default-config>  
+4.        <property name="driverClass">com.mysql.jdbc.Driver</property>  
+5.        <property name="jdbcUrl">jdbc:mysql://localhost:3306/day11</property>  
+6.        <property name="user">root</property>  
+7.        <property name="password">root</property>  
+8.    </default-config>  
+9.      
+10.        <named-config name="aaa">  
+11.        <property name="driverClass">com.mysql.jdbc.Driver</property>  
+12.        <property name="jdbcUrl">jdbc:mysql://localhost:3306/day11</property>  
+13.        <property name="user">root</property>  
+14.        <property name="password">root</property>  
+15.    </named-config>  
+16.</c3p0-config>  
+```
+
+3)
+
+```java
+1.package com.example.c3p0;  
+2.  
+3.import java.io.FileReader;  
+4.import java.sql.Connection;  
+5.import java.sql.PreparedStatement;  
+6.import java.sql.ResultSet;  
+7.import java.util.Properties;  
+8.  
+9.import javax.sql.DataSource;  
+10.  
+11.import org.apache.commons.dbcp.BasicDataSourceFactory;  
+12.import org.junit.Test;  
+13.  
+14.import com.example.jdbcutil.JDBCUtils;  
+15.import com.mchange.v2.c3p0.ComboPooledDataSource;  
+16.  
+17.public class C3P0Demo {  
+18.    @Test  
+19.    public void Demo(){  
+20.        Connection cn = null;  
+21.        PreparedStatement pt = null;  
+22.        ResultSet rs = null;  
+23.        try{      
+24.            //利用c3p0数据源  
+25.            //方式1 手动配置  
+26.//          ComboPooledDataSource source = new ComboPooledDataSource();  
+27.//          source.setDriverClass("com.mysql.jdbc.Driver");  
+28.//          source.setJdbcUrl("jdbc:mysql://localhost:3306/day11");  
+29.//          source.setUser("root");  
+30.//          source.setPassword("root");  
+31.              
+32.            //方式2，利用配置文件 c3p0-config.xml 连接数据库  
+33.            //ComboPooledDataSource source = new ComboPooledDataSource();//不指定名称则寻找  默认标签  
+34.            ComboPooledDataSource source = new ComboPooledDataSource("aaa");//寻找名称为 aaa 的标签  
+35.              
+36.            cn = source.getConnection();  
+37.            pt = cn.prepareStatement("select * from account");  
+38.            rs = pt.executeQuery();  
+39.            while(rs.next()){  
+40.                System.out.println(rs.getString("name"));  
+41.        }  
+42.        }catch(Exception e){  
+43.            e.printStackTrace();  
+44.        }finally{  
+45.            JDBCUtils.close(rs, null, cn);  
+46.        }  
+47.          
+48.          
+49.    }  
+50.}  
+```
+
