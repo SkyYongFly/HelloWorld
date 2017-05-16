@@ -4789,3 +4789,250 @@ password=root
 56.}  
 ```
 
+### 22. JDBC元数据API
+
+#### 22.1. **基础概念**
+
+1) 元数据：数据库、表、列的定义信息
+
+2) 元数据类型：
+
+DataMetaData
+
+ParameterMetaData
+
+ResultSetMetaData
+
+#### 22.2. 测试实例
+
+1) 导入c3p0相关类库，配置c3p0-config.xml
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<c3p0-config>  
+3.    <default-config>  
+4.        <property name="driverClass">com.mysql.jdbc.Driver</property>  
+5.        <property name="jdbcUrl">jdbc:mysql://localhost:3306/day12</property>  
+6.        <property name="user">root</property>  
+7.        <property name="password">root</property>  
+8.    </default-config>  
+</c3p0-config>  
+```
+
+2) 测试DataMetaData
+
+```java
+1.package com.example.metadata;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.DatabaseMetaData;  
+5.import java.sql.PreparedStatement;  
+6.import java.sql.ResultSet;  
+7.import java.sql.SQLException;  
+8.  
+9.import com.mchange.v2.c3p0.ComboPooledDataSource;  
+10.  
+11.public class DataBaseMetaDataDemo {  
+12.    public static void main(String[] args) {  
+13.        Connection cn = null;  
+14.        ResultSet rs = null;  
+15.        ComboPooledDataSource source = new ComboPooledDataSource();  
+16.          
+17.        try{  
+18.            cn  = source.getConnection();  
+19.              
+20.            //获取当前数据库的元数据  
+21.            DatabaseMetaData metaData  = cn.getMetaData();  
+22.              
+23.            //获取数据库的 URL  
+24.            String url = metaData.getURL();  
+25.            System.out.println(url);  
+26.              
+27.            //获取数据库的用户名  
+28.            String userName = metaData.getUserName();  
+29.            System.out.println(userName);  
+30.              
+31.            //获取驱动名称  
+32.            String driverName = metaData.getDriverName();  
+33.            System.out.println(driverName);  
+34.              
+35.            //获取数据库中指定表的主键信息  
+36.            rs = metaData.getPrimaryKeys(null,null,"account");  
+37.            while(rs.next()){  
+38.                short  keySeq = rs.getShort("KEY_SEQ");  
+39.                String name = rs.getString("COLUMN_NAME");  
+40.                System.out.println(keySeq +" : "+name);  
+41.            }  
+42.              
+43.            //获取表  
+44.            rs = metaData.getTables(null, null,"%",null);  
+45.            while(rs.next()){  
+46.                String name = rs.getString("TABLE_NAME");  
+47.                System.out.println(name);  
+48.            }  
+49.        }catch(Exception e){  
+50.            e.printStackTrace();  
+51.        }finally{  
+52.            if(rs!=null){  
+53.                try {  
+54.                    rs.close();  
+55.                } catch (SQLException e) {  
+56.                    e.printStackTrace();  
+57.                }  
+58.            }  
+59.              
+60.            if(cn!=null){  
+61.                try {  
+62.                    cn.close();  
+63.                } catch (SQLException e) {  
+64.                    e.printStackTrace();  
+65.                }  
+66.            }  
+67.        }  
+68.          
+69.          
+70.          
+71.    }  
+72.}  
+```
+
+测试： ParameterMetaData
+
+```java
+1.package com.example.metadata;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.PreparedStatement;  
+5.import java.sql.ResultSet;  
+6.import java.sql.SQLException;  
+7.  
+8.import com.mchange.v2.c3p0.ComboPooledDataSource;  
+9.  
+10.public class ParameterMetaData {  
+11.    public static void main(String[] args) {  
+12.        Connection cn = null;  
+13.        PreparedStatement ps = null;  
+14.        ResultSet rs = null;  
+15.        ComboPooledDataSource source = new ComboPooledDataSource();  
+16.      
+17.        try{  
+18.            cn = source.getConnection();  
+19.            ps = cn.prepareStatement("select * from account where name=? and money=?");  
+20.              
+21.            //获取参数元数据  
+22.            java.sql.ParameterMetaData  pData = ps.getParameterMetaData();  
+23.              
+24.            //参数个数  
+25.            int count = pData.getParameterCount();  
+26.            System.out.println(count);  
+27.              
+28.            //获取参数的类型（mysql不支持，如果需要url后面拼接参数  
+29.            //?generateSimpleParameterMetadata=true）  
+30.//          String type = pData.getParameterTypeName(1);  
+31.//          System.out.println(type);  
+32.//          String type2 = pData.getParameterTypeName(2);  
+33.//          System.out.println(type2);  
+34.              
+35.        }catch(Exception e){  
+36.            e.printStackTrace();  
+37.        }finally{  
+38.            if(rs!=null){  
+39.                try {  
+40.                    rs.close();  
+41.                } catch (SQLException e) {  
+42.                    e.printStackTrace();  
+43.                }  
+44.            }  
+45.              
+46.            if(ps!=null){  
+47.                try {  
+48.                    ps.close();  
+49.                } catch (SQLException e) {  
+50.                    e.printStackTrace();  
+51.                }  
+52.            }  
+53.              
+54.            if(cn!=null){  
+55.                try {  
+56.                    cn.close();  
+57.                } catch (SQLException e) {  
+58.                    e.printStackTrace();  
+59.                }  
+60.            }  
+61.        }  
+62.    }  
+63.}  
+```
+
+测试：ResultSetMetaData
+
+```java
+1.package com.example.metadata;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.PreparedStatement;  
+5.import java.sql.ResultSet;  
+6.import java.sql.ResultSetMetaData;  
+7.import java.sql.SQLException;  
+8.  
+9.import com.mchange.v2.c3p0.ComboPooledDataSource;  
+10.  
+11.public class RSMetaData {  
+12.    public static void main(String[] args) {  
+13.        Connection cn = null;  
+14.        PreparedStatement ps = null;  
+15.        ResultSet rs = null;  
+16.        ComboPooledDataSource source = new ComboPooledDataSource();  
+17.      
+18.        try{  
+19.            cn = source.getConnection();  
+20.            ps = cn.prepareStatement("select * from account");  
+21.            rs = ps.executeQuery();  
+22.              
+23.            //获取结果集元数据  
+24.            ResultSetMetaData rSetMetaData = rs.getMetaData();  
+25.              
+26.            //获取结果集中的列数  
+27.            int count  = rSetMetaData.getColumnCount();  
+28.            System.out.println(count);  
+29.              
+30.            //获取结果集中的指定列的名称  
+31.            String name = rSetMetaData.getColumnName(2);  
+32.            System.out.println(name);  
+33.              
+34.            //获取结果集中指定列的类型名称  
+35.            String type = rSetMetaData.getColumnTypeName(2);  
+36.            System.out.println(type);  
+37.              
+38.        }catch(Exception e){  
+39.            e.printStackTrace();  
+40.        }finally{  
+41.            if(rs!=null){  
+42.                try {  
+43.                    rs.close();  
+44.                } catch (SQLException e) {  
+45.                    e.printStackTrace();  
+46.                }  
+47.            }  
+48.              
+49.            if(ps!=null){  
+50.                try {  
+51.                    ps.close();  
+52.                } catch (SQLException e) {  
+53.                    e.printStackTrace();  
+54.                }  
+55.            }  
+56.              
+57.            if(cn!=null){  
+58.                try {  
+59.                    cn.close();  
+60.                } catch (SQLException e) {  
+61.                    e.printStackTrace();  
+62.                }  
+63.            }  
+64.        }  
+65.          
+66.    }  
+67.}  
+```
+
