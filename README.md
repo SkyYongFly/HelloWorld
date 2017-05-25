@@ -5036,3 +5036,289 @@ ResultSetMetaData
 67.}  
 ```
 
+### 23. Apache—DBUtils框架
+
+#### **23.1.** **基础概念**
+
+1) commons-dbutils 是 Apache 组织提供的一个开源 JDBC工具类库，它是对JDBC的简单封装
+
+2) API介绍：
+
+org.apache.commons.dbutils.QueryRunner --- 核心
+
+org.apache.commons.dbutils.ResultSetHandler
+
+org.apache.commons.dbutils.DbUtils  工具类
+
+3) DbUtils 
+
+提供如关闭连接、装载JDBC驱动程序等常规工作的工具类，里面的所有方法都是静态的
+
+4) QueryRunner:可以简化对数据库的操作
+
+#### 23.2. 代码示例
+
+⑴ 导入相关DBUtils和c3p0类库，配置c3p0-config.xml
+
+⑵ 实现增删改：update方法
+
+```java
+1.public class DBUtilsDemo1 {  
+2.      
+3.    /* 
+4.     * 利用 DBUtils 实现数据库增删改 
+5.     */  
+6.    @Test  
+7.    public void update() throws SQLException{  
+8.        QueryRunner runner = new QueryRunner(new ComboPooledDataSource());  
+9.        runner.update("update account set money=? where name=?",8888,"hong");  
+10.    }  
+11.      
+12.    @Test  
+13.    public void add() throws SQLException{  
+14.        QueryRunner runner = new QueryRunner(new ComboPooledDataSource());  
+15.        runner.update("insert into account values (null,?,?)","wang",7777);  
+16.    }  
+17.      
+18.    @Test  
+19.    public void delete() throws SQLException{  
+20.        QueryRunner  runner = new QueryRunner(new ComboPooledDataSource());  
+21.        runner.update("delete from account where id=?",3);  
+22.    }  
+23.      
+24.    /* 
+25.     * 自定义实现DBUtils功能 
+26.     */  
+27.    @Test  
+28.    public void updateMyDBU() throws SQLException{  
+29.        MyDBUtils mDb = new MyDBUtils(new ComboPooledDataSource());  
+30.        mDb.update("insert into account values (null,?,?)","xue",9999);  
+31.    }  
+32.}  
+```
+
+其中为了理解其相关实现过程，自定义方法实现相同功能 updateMyDBU() 方法
+
+```java
+1.package com.example.dbutils;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.ParameterMetaData;  
+5.import java.sql.PreparedStatement;  
+6.import java.sql.SQLException;  
+7.  
+8.import javax.sql.DataSource;  
+9.  
+10.import org.apache.commons.dbutils.DbUtils;  
+11.  
+12.  
+13.public class MyDBUtils {  
+14.  
+15.    private DataSource source;  
+16.    public MyDBUtils(){  
+17.          
+18.    }  
+19.      
+20.    public MyDBUtils(DataSource source){  
+21.        this.source = source;  
+22.    }  
+23.      
+24.    /* 
+25.     * 自定义实现数据库增删改操作 
+26.     */  
+27.    public int update(String sql,Object... params) throws SQLException{  
+28.        Connection cnn = source.getConnection();  
+29.        PreparedStatement ps = cnn.prepareStatement(sql);  
+30.        //获取参数元数据，获取参数个数  
+31.        ParameterMetaData pMetaData = ps.getParameterMetaData();  
+32.        int count  = pMetaData.getParameterCount();  
+33.        //循环设置参数  
+34.        for(int i=1;i<=count;i++){  
+35.            ps.setObject(i,params[i-1]);  
+36.        }  
+37.        //执行操作  
+38.        int rs = ps.executeUpdate();  
+39.        DbUtils.closeQuietly(cnn,ps,null);  
+40.        return rs;  
+41.    }  
+42.  
+43.}  
+```
+
+实现查询： QuneryRunner.query 方法
+
+```java
+1.package com.example.dbutils;  
+2.  
+3.import java.sql.ResultSet;  
+4.import java.sql.SQLException;  
+5.import java.util.ArrayList;  
+6.import java.util.List;  
+7.  
+8.import org.apache.commons.dbutils.QueryRunner;  
+9.import org.apache.commons.dbutils.ResultSetHandler;  
+10.import org.junit.Test;  
+11.  
+12.import com.mchange.v2.c3p0.ComboPooledDataSource;  
+13.  
+14.public class DBUtilsQuery {  
+15.  
+16.    /* 
+17.     * 利用 DBUtils 方式实现数据库的查询 
+18.     */  
+19.    @Test  
+20.    public void Query() throws SQLException{  
+21.        QueryRunner runner = new QueryRunner(new ComboPooledDataSource());  
+22.        List<Account> list = runner.query("select * from account where  money>?",  
+23.        new ResultSetHandler<List<Account>>() {  
+24.  
+25.            @Override  
+26.            public List<Account> handle(ResultSet rs) throws SQLException {  
+27.                List<Account> list = new ArrayList<Account>();  
+28.                while(rs.next()){  
+29.                    Account account = new Account();  
+30.                    account.setId(rs.getInt("id"));  
+31.                    account.setName(rs.getString("name"));  
+32.                    account.setMoney(rs.getDouble("money"));  
+33.                    list.add(account);  
+34.                }  
+35.                  
+36.                return list;  
+37.            }  
+38.        },5000);  
+39.          
+40.        System.out.println(list);  
+41.    }  
+42.      
+43.    /* 
+44.     * 自定义方式实现 数据库查询 
+45.     */  
+46.    @Test  
+47.    public void MyQuery() throws SQLException{  
+48.        MyDBUtilsQuery mQuery = new MyDBUtilsQuery(new ComboPooledDataSource());  
+49.        List<Account> list = mQuery.Query("select * from account where  money>?",  
+50.                new MyResultSetHandler<List<Account>>() {  
+51.  
+52.                    @Override  
+53.                    public List<Account> handle(ResultSet rs) throws SQLException {  
+54.                        List<Account> list = new ArrayList<Account>();  
+55.                        while(rs.next()){  
+56.                            Account account = new Account();  
+57.                            account.setId(rs.getInt("id"));  
+58.                            account.setName(rs.getString("name"));  
+59.                            account.setMoney(rs.getDouble("money"));  
+60.                            list.add(account);  
+61.                        }  
+62.                          
+63.                        return list;  
+64.                    }  
+65.                },5000);  
+66.                  
+67.                System.out.println(list);  
+68.    }  
+69.}  
+```
+
+其中account 对象：
+
+```java
+1.package com.example.dbutils;  
+2.  
+3.public class Account {  
+4.    private int id ;  
+5.    private String name ;  
+6.    private double money;  
+7.    public int getId() {  
+8.        return id;  
+9.    }  
+10.    public void setId(int id) {  
+11.        this.id = id;  
+12.    }  
+13.    public String getName() {  
+14.        return name;  
+15.    }  
+16.    public void setName(String name) {  
+17.        this.name = name;  
+18.    }  
+19.    public double getMoney() {  
+20.        return money;  
+21.    }  
+22.    public void setMoney(double money) {  
+23.        this.money = money;  
+24.    }  
+25.    public Account(int id, String name, double money) {  
+26.        super();  
+27.        this.id = id;  
+28.        this.name = name;  
+29.        this.money = money;  
+30.    }  
+31.    public Account() {  
+32.    }  
+33.      
+34.}  
+```
+
+自定义方法MyQuery() 实现查询
+
+```java
+1.package com.example.dbutils;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.ParameterMetaData;  
+5.import java.sql.PreparedStatement;  
+6.import java.sql.ResultSet;  
+7.import java.sql.SQLException;  
+8.  
+9.import javax.sql.DataSource;  
+10.  
+11.import org.apache.commons.dbutils.DbUtils;  
+12.  
+13.  
+14.public class MyDBUtilsQuery {  
+15.  
+16.    DataSource source;  
+17.    public MyDBUtilsQuery(){  
+18.          
+19.    }  
+20.      
+21.    public MyDBUtilsQuery(DataSource source){  
+22.        this.source = source;  
+23.    }  
+24.      
+25.    /* 
+26.     * 自定义实现数据库查询 
+27.     */  
+28.    public <T> T Query(String sql,MyResultSetHandler<T>  mrs,Object... params) throws SQLException{  
+29.         Connection  cnn = source.getConnection();  
+30.         PreparedStatement ps = cnn.prepareStatement(sql);  
+31.         //获取参数元数据，获取参数个数  
+32.         ParameterMetaData pMetaData = ps.getParameterMetaData();  
+33.         int count = pMetaData.getParameterCount();  
+34.         //循环设置参数  
+35.         for(int i=1;i<=count;i++){  
+36.             ps.setObject(i, params[i-1]);  
+37.         }  
+38.           
+39.         //执行查询获取查询结果集  
+40.         ResultSet rs = ps.executeQuery();  
+41.         //回调处理结果集的逻辑  
+42.         T t = mrs.handle(rs);  
+43.         DbUtils.closeQuietly(cnn, ps, rs);  
+44.         return t;  
+45.    }  
+46.}  
+```
+
+MyResultSetHandler 接口：
+
+```java
+1.package com.example.dbutils;  
+2.  
+3.import java.sql.ResultSet;  
+4.import java.sql.SQLException;  
+5.  
+6.public interface MyResultSetHandler<T> {  
+7.        T handle(ResultSet rs) throws SQLException;  
+8.}  
+```
+
