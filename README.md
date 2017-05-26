@@ -5322,3 +5322,80 @@ MyResultSetHandler 接口：
 8.}  
 ```
 
+### 24.监听器（活化和钝化）
+
+#### 24.1. 监听器
+
+监听器就是一个java程序，功能是监听另一个java对象变化（方法调用、属性变更）
+
+#### 24.2. 监听器分类
+
+**1) 8个监听器**
+
+```
+ServletContextListener
+HttpSessionListener
+ServletRequestListener
+ServletContextAttributeListener
+HttpSessionAttributeListener 
+ServletRequestAttributeListener
+HttpSessionBindingListener 
+HttpSessionActivationListener 
+```
+
+2) 8个监听器主要分为3钟
+
+a) 用来监听三大作用域的创建和销毁的监听器
+
+* ServletContextListener 用来监听ServletContext对象创建和销毁的监听器
+
+​		创建:服务器启动,web应用加载后立即创建代表当前web应用的ServletContext对象
+
+​		销毁:服务器关闭或web应用被移除出容器时,随着web应用的销毁而销毁
+
+* HttpSessionListener 用来监听HttpSession对象创建和销毁的监听器
+
+​		创建:第一次调用request.getSession方法时创建代表当前会话的session对象
+
+​		销毁:超过30分钟没人用销毁/调用invalidate方法自杀/服务器非正常关闭时随着web应用的销毁而销毁,如果服		务器是正常关闭会被钝化起来.
+
+* 钝化
+
+  当服务器正常关闭时,还存活着的session会随着服务器的关闭被以文件的形式存储在tomcat的work目录下,这个过程叫做session的钝化
+
+* 活化
+
+  当服务器再次正常开启时,服务器会找到之前的SESSIONS.ser文件从中恢复之前保存起来的session对象这个过程叫做session的活化
+
+  **想要随着Session被钝化活化的对象它的类必须实现Serializable接口**
+
+* ServletRequestListener  用来监听ServletRequest对象创建和销毁的监听
+
+​          创建:请求开始创建代表请求的request对象
+
+​          销毁:请求结束时代表请求的request对象销毁
+
+b) 用来监听三大作用域中属性变化的监听器
+
+```
+ServletContextAttributeListener
+HttpSessionAttributeListener 
+ServletRequestAttributeListener
+```
+
+c) 使javabean自己感知自己在Session中状态变化的监听器,
+
+这两个监听器很特殊,**不需要自己去写类实现也不需要在web.xml中注册,只要使javabean实现	这个接口就能起作用**
+
+* **HttpSessionBindingListener** 
+
+​		javabean被绑定到session中：sessionDidActive(HttpSessionBindingEvent event)
+
+​		javabean被移除绑定从session中：valueUnbound(HttpSessionBindingEvent event)方法
+
+* **HttpSessionActivationListener**
+
+​	    javabean随着session被钝化：sessionWillPassivate(HttpSessionBindingEvent event) 
+
+​		javabean随着session被活化：sessionDidActive(HttpSessionBindingEvent event)
+
