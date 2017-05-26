@@ -5399,3 +5399,56 @@ c) 使javabean自己感知自己在Session中状态变化的监听器,
 
 ​		javabean随着session被活化：sessionDidActive(HttpSessionBindingEvent event)
 
+#### 24.3. **实例代码**
+
+##### 24.3.1**ServletContextListener**
+
+​	步骤：
+
+* 新建类实现ServletContextListener接口
+
+```
+1.package com.example.servletcontext;  
+2.  
+3.import javax.servlet.ServletContextEvent;  
+4.import javax.servlet.ServletContextListener;  
+5.  
+6.public class ServletContextListenerDemo1 implements ServletContextListener {  
+7.  
+8.    @Override  
+9.    public void contextDestroyed(ServletContextEvent arg0) {  
+10.        System.out.println("ServletContextListener被销毁了！");  
+11.    }  
+12.  
+13.    @Override  
+14.    public void contextInitialized(ServletContextEvent arg0) {  
+15.        System.out.println("ServletContextListener被触发了！");  
+16.    }  
+17.  
+18.}  
+```
+
+* 在web.xml 中注册监听器
+
+```
+1.<listener>  
+2.    <listener-class>  
+3.        com.example.servletcontext.ServletContextListenerDemo1  
+4.    </listener-class>  
+5.</listener>  
+```
+
+* 验证功能
+
+当启动tomcat 服务器后，在输出的信息中可以发现
+
+![1495799007974](README.assets/1495799007974.png)
+
+即当前web应用被加载后 ServletContext 对象创建 ，从而触动 ServletContextListener 
+
+当关闭服务器后
+
+![1495799022736](README.assets/1495799022736.png)
+
+web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的方法
+
