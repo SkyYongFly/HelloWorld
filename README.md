@@ -5574,3 +5574,38 @@ web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的
 ![1495869186766](README.assets/1495869186766.png)
 
 **注意，如果在HttpSession中想要是设置的Javabean 相关值能够钝化和活化,需要使Javabean实现   Serializable 接口**
+
+##### 24.3.3 ServletRequestListener
+
+* 新建类实现ServletRequestListener接口
+
+```java
+1.package com.example.srlistener;  
+2.  
+3.import javax.servlet.ServletRequestEvent;  
+4.import javax.servlet.ServletRequestListener;  
+5.  
+6.public class MyServletRequestListener implements ServletRequestListener {  
+7.  
+8.    @Override  
+9.    public void requestDestroyed(ServletRequestEvent arg0) {  
+10.        System.out.println("request对象被销毁了"+arg0.getServletRequest());  
+11.    }  
+12.  
+13.    @Override  
+14.    public void requestInitialized(ServletRequestEvent arg0) {  
+15.        System.out.println("request对象被创建出来了"+arg0.getServletRequest());  
+16.    }  
+17.  
+18.}  
+```
+
+* 在web.xml 中注册监听器
+
+* 验证功能
+
+  当访问上例中的 HSGetValue   时
+
+![1495869327734](README.assets/1495869327734.png)
+
+4) 其它监听器省略示例
