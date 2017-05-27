@@ -5332,7 +5332,7 @@ MyResultSetHandler 接口：
 
 **1) 8个监听器**
 
-```
+```java
 ServletContextListener
 HttpSessionListener
 ServletRequestListener
@@ -5401,13 +5401,13 @@ c) 使javabean自己感知自己在Session中状态变化的监听器,
 
 #### 24.3. **实例代码**
 
-##### 24.3.1**ServletContextListener**
+##### 24.3.1  ServletContextListener
 
 ​	步骤：
 
 * 新建类实现ServletContextListener接口
 
-```
+```java
 1.package com.example.servletcontext;  
 2.  
 3.import javax.servlet.ServletContextEvent;  
@@ -5430,7 +5430,7 @@ c) 使javabean自己感知自己在Session中状态变化的监听器,
 
 * 在web.xml 中注册监听器
 
-```
+```xml
 1.<listener>  
 2.    <listener-class>  
 3.        com.example.servletcontext.ServletContextListenerDemo1  
@@ -5452,3 +5452,125 @@ c) 使javabean自己感知自己在Session中状态变化的监听器,
 
 web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的方法
 
+##### 24.3.2  HttpSessionListener
+
+​	步骤：
+
+* 新建类实现**HttpSessionListener**接口
+
+```java
+1.public class MyHttpSessionListener implements HttpSessionListener {  
+2.  
+3.    @Override  
+4.    public void sessionCreated(HttpSessionEvent arg0) {  
+5.        System.out.println("HttpSession 创建了");  
+6.    }  
+7.  
+8.    @Override  
+9.    public void sessionDestroyed(HttpSessionEvent arg0) {  
+10.        System.out.println("HttpSession 销毁了");  
+11.    }  
+12.  
+13.} 
+```
+
+* 注册监听器
+
+```xml
+1.<listener>  
+2.    <listener-class>  
+3.       com.example.listener.MyHttpSessionListener  
+4.    </listener-class>  
+5. </listener>  
+```
+
+* 写代码测试
+
+新建类获取HttpSession 对象，并设置值
+
+```java
+1.public class HSListenerDemo1 extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.          
+7.        //获取 HttpSession 对象，并设置值  
+8.        HttpSession session = req.getSession();  
+9.        session.setAttribute("name","hong");  
+10.          
+11.    }  
+12.  
+13.    @Override  
+14.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+15.            throws ServletException, IOException {  
+16.        doGet(req, resp);  
+17.          
+18.    }  
+19.  
+20.}  
+```
+
+类 销毁HttpSession 对象
+
+```java
+1.public class HttpSessionInvalidate extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //销毁HttpSession 对象  
+7.        req.getSession().invalidate();  
+8.    }  
+9.  
+10.    @Override  
+11.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+12.            throws ServletException, IOException {  
+13.        doGet(req, resp);  
+14.          
+15.    }  
+16.  
+} 
+```
+
+获取 HttpSession 域中设置的值
+
+```java
+1.public class HSGetValue extends HttpServlet {  
+2.  
+3.    @Override  
+4.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+5.            throws ServletException, IOException {  
+6.        //获取 HttpSession 域中设置的值  
+7.        HttpSession  session = req.getSession();  
+8.        String name = (String) session.getAttribute("name");  
+9.        System.out.println(name);  
+10.    }  
+11.    @Override  
+12.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+13.            throws ServletException, IOException {  
+14.        doGet(req, resp);     
+15.    }  
+16.  
+17.}  
+```
+
+在 xml 中配置   HSListenerDemo1 、HttpSessionInvalidate  和   HSGetValue 
+
+使浏览器能够访问
+
+*  当第一次访问 HSListenerDemo1 时 
+
+  （当服务器正常关闭后再打开在访问不会出现，因为服务器将session中信息	保存起来了，下次会使用这些信息，当非正常关闭不会保存这些信息，就是**钝化**和**活化**）
+
+![1495869141862](README.assets/1495869141862.png)
+
+* 访问 HSGetValue  
+
+  ![1495869169382](README.assets/1495869169382.png)
+
+* 访问  HttpSessionInvalidate
+
+![1495869186766](README.assets/1495869186766.png)
+
+**注意，如果在HttpSession中想要是设置的Javabean 相关值能够钝化和活化,需要使Javabean实现   Serializable 接口**
