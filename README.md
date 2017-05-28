@@ -5609,3 +5609,44 @@ web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的
 ![1495869327734](README.assets/1495869327734.png)
 
 4) 其它监听器省略示例
+
+### 25. **过滤器**
+
+#### 25.1. **Filter**
+
+也称之为过滤器，它是Servlet技术中最实用的技术，WEB开发人员通过Filter技术，对web服务器管理的所有web资源：例如Jsp, Servlet, 静态图片文件或静态 html 文件等进行拦截，从而实现一些特殊的功能。例如实现URL级别的权限访问控制、过滤敏感词汇、压缩响应信息等一些高级功能。
+
+#### 25.2. **Filter的生命周期**
+
+* init(FilterConfig filterConfig)throws ServletException：
+
+  和我们编写的Servlet程序一样，Filter的创建和销毁由WEB服务器负责。 web 应用程序启动时，web 服务器将创建Filter 的实例对象，并调用其init方法进行初始化
+
+  开发人员通过init方法的参数，可获得代表当前filter配置信息的FilterConfig对象。
+
+* doFilter(ServletRequest,ServletResponse,FilterChain)
+
+  每次filter进行拦截都会执行;
+
+  在实际开发中方法中参数request和response通常转换为HttpServletRequest和HttpServletResponse类型进行操作;
+
+* destroy()：
+
+​      在Web容器卸载 Filter 对象之前被调用。
+
+#### 25.3. **开发实例**
+
+1) Filter开发分为二个步骤：
+
+> 编写java类**实现Filter接口**，并实现(三个方法)其doFilter方法。
+
+> 在 **web.xml** 文件中使用**<filter>和<filter-mapping>元素对编写的filter类进行注册**，并设置它所能拦截的资源。
+
+2) 利用过滤器实现全站请求乱码处理
+
+​	实现思想：
+
+​     浏览器请求服务器资源，中间经过过滤器，如果浏览器的数据是中文，那么由于浏览器和服务器的数据编码可能不一样，会导致服务器收到的是乱码，那么可以在过滤器中对数据进行处理，将数据进行转码成 “UTF-8”的编码给服务器，从而服务器收到正确的中文数据。其中对于 POST 方式提交的数据直接设置字符编码便可以解决，但是对于  GET 方式提交的数据则需要手动将其转码，可以通过request 域获取参数集合，遍历集合将数据转码。
+
+​     对于浏览器返回的数据只需要指定编码即可。
+
