@@ -5772,3 +5772,245 @@ web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的
     </filter-mapping>  
 ```
 
+### 26. **文件的上传**
+
+#### 26.1. 文件的上传步骤
+
+1) 在web页面中添加上传输入项
+
+​	<input type="file">标签用于在web页面中添加文件上传输入项，设置文件上传输入项时须注意：
+
+* 必须要设置**input输入项的name属性**，否则浏览器将不会发送上传文件的数据。
+
+* 必须把form的**enctype属值设为multipart/form-data.**设置该值后，浏览器在上传文件时，将把文件数据附带在http请求消息体中，并使用**ＭＩＭＥ**协议对上传的文件进行描述，以方便接收方对上传数据进行解析和处理。
+
+* 表单的提交方式要是**post**
+
+2) 在servlet中读取上传文件的数据，并保存到服务器硬盘中
+
+Request对象提供了一个**getInputStream**方法，通过这个方法可以读取到客户端提交过来的数据。但由于用户可能会同时上传多个文件，在servlet端编程直接读取上传数据，并分别解析出相应的文件数据是一项非常麻烦的工作
+
+为方便用户处理文件上传数据，Apache 开源组织提供了一个用来处理表单文件上传的一个开源组件（ **Commons-fileupload** ），该组件性能优异，并且其API使用极其简单，可以让开发人员轻松实现web文件上传功能，因此在web开发中实现文件上传功能，通常使用Commons-fileupload组件实现。
+
+使用Commons-fileupload组件实现文件上传，需要导入该组件相应的支撑jar包：**Commons-fileupload**和**commons-io**。commons-io 不属于文件上传组件的开发jar文件，但Commons-fileupload 组件从1.1 版本开始，它工作时需要commons-io包的支持
+
+#### 26.2. **实例**
+
+* 导入所需要的jar包
+
+* 在jsp页面中写出文件上传输入项
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+3.<html>  
+4.  <head>  
+5.  </head>  
+6.    
+7.  <body style="text-align: center;">  
+8.    <h1>文件上传</h1><hr>  
+9.      
+10.    <form action="${pageContext.request.contextPath }/getFile" method="POST" enctype="multipart/form-data">  
+11.        字段1:<input type="text" name="des1"/>  
+12.        字段2:<input type="text" name="des2">  
+13.        <input type="file" name="fileUp" /><br><br>  
+14.        <input type="submit" value="上传文件"/>  
+15.    </form>  
+16.      
+17.  </body>  
+18.</html>  
+```
+
+* 在servlet中对上传请求进行处理
+
+```java
+1.package com.example.web;  
+2.  
+3.import java.io.File;  
+4.import java.io.FileOutputStream;  
+5.import java.io.IOException;  
+6.import java.io.InputStream;  
+7.import java.io.OutputStream;  
+8.import java.math.BigDecimal;  
+9.import java.util.List;  
+10.import java.util.UUID;  
+11.  
+12.import javax.servlet.ServletException;  
+13.import javax.servlet.http.HttpServlet;  
+14.import javax.servlet.http.HttpServletRequest;  
+15.import javax.servlet.http.HttpServletResponse;  
+16.  
+17.import org.apache.commons.fileupload.FileItem;  
+18.import org.apache.commons.fileupload.ProgressListener;  
+19.import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededException;  
+20.import org.apache.commons.fileupload.FileUploadException;  
+21.import org.apache.commons.fileupload.disk.DiskFileItemFactory;  
+22.import org.apache.commons.fileupload.servlet.ServletFileUpload;  
+23.  
+24.import com.example.utils.IOUtil;  
+25.  
+26.public class GetFile  extends HttpServlet{  
+27.  
+28.    /** 
+29.     * 实现对上传文件的处理，对于提交的内容分析，如果是字段则打印出名称和值，如果是文件则将其保存至磁盘中 
+30.     */  
+31.    @Override  
+32.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+33.            throws ServletException, IOException {  
+34.        resp.setContentType("text/html;charset=utf-8");  
+35.        try{  
+36.            //1、创建工厂  
+37.            DiskFileItemFactory factory = new DiskFileItemFactory();  
+38.                //--设置内存缓冲区大小，当上传的文件大小超出设定大小，将使用临时文件  
+39.                factory.setSizeThreshold(10*1024);  
+40.                //--设置临时文件（不设置将使用默认）  
+41.                factory.setRepository(new File(this.getServletContext().getRealPath("WEB-INF//temp")));  
+42.                  
+43.            //2、生产文件上传核心类  
+44.            ServletFileUpload fileUpload = new ServletFileUpload(factory);  
+45.                //--判断上传表单是否为multipart/form-data类型  
+46.                if(!fileUpload.isMultipartContent(req)){  
+47.                    throw new RuntimeException("请使用正确的表单方式上传");  
+48.                }  
+49.                //--设置单个文件上传的最大值  
+50.                fileUpload.setFileSizeMax(1024*1024);  
+51.                //--设置整个表单上传文件总量的最大值  
+52.                fileUpload.setSizeMax(10*1024*1024);  
+53.                //--设置编码方式，解决上传文件名乱码问题  
+54.                fileUpload.setHeaderEncoding("utf-8");  
+55.                  
+56.                //--对文件上传进行监听  
+57.                fileUpload.setProgressListener(new ProgressListener() {  
+58.                      
+59.                    Long startTime = System.currentTimeMillis();  
+60.                      
+61.                    //三个参数分别表示已经上传量，总上传量，上传的提交的第几项  
+62.                    @Override  
+63.                    public void update(long bytesRead, long contentLength, int items) {  
+64.                          
+65.                        try {  
+66.                            Thread.sleep(100);  
+67.                        } catch (InterruptedException e) {  
+68.                            e.printStackTrace();  
+69.                        }  
+70.                          
+71.                        //显示上传第几项，总上传量，已经上传量  
+72.                        BigDecimal br = new BigDecimal(bytesRead).divide(new BigDecimal(1024),2,BigDecimal.ROUND_HALF_UP);  
+73.                        BigDecimal cl = new BigDecimal(contentLength).divide(new BigDecimal(1024),2,BigDecimal.ROUND_HALF_UP);  
+74.                        System.out.print("上传第"+items+"项   ; 总上传量"+cl.toString()+"kb ; 已经上传量"+br.toString()+"kb");  
+75.                          
+76.                        //剩余字节数  
+77.                        BigDecimal leftLength = cl.subtract(br);  
+78.                        System.out.print(" ; 剩余字节"+leftLength+"kb");  
+79.                                  
+80.                        //上传百分比  
+81.                        if(contentLength!=0){  
+82.                            BigDecimal percent = new BigDecimal(bytesRead).multiply(new BigDecimal(100)).divide(new BigDecimal(contentLength),2,BigDecimal.ROUND_HALF_UP);  
+83.                            System.out.print(" ; 已上传"+percent+"%");  
+84.                        }  
+85.                        //上传用时  
+86.                        Long currentTime = System.currentTimeMillis();  
+87.                        Long spendTime = (currentTime-startTime)/1000;  
+88.                        System.out.print(" ; 已用时"+spendTime+"s");  
+89.                        //上传速度  
+90.                        BigDecimal speed = new BigDecimal(0)  ;  
+91.                        if(spendTime != 0){  
+92.                            speed = br.divide(new BigDecimal(spendTime),2,BigDecimal.ROUND_HALF_UP);  
+93.                        }  
+94.                        System.out.print(" ; 上传速度"+speed.toString()+"kb/s");  
+95.                        //大致剩余时间  
+96.                        BigDecimal leftTime =new BigDecimal(0);  
+97.                        if(!speed.equals(new BigDecimal(0))){  
+98.                             leftTime = leftLength.divide(speed,2,BigDecimal.ROUND_HALF_UP);  
+99.                        }  
+100.                        System.out.print(" ; 估计剩余时间"+leftTime.toString()+"s");  
+101.                          
+102.                        System.out.println("");  
+103.                    }  
+104.                });  
+105.              
+106.            //3、解析上传的内容  
+107.            List<FileItem> list = fileUpload.parseRequest(req);  
+108.            //4、遍历文档获取对象  
+109.            for(FileItem item : list){  
+110.                if(item.isFormField()){  
+111.                    //上传的是普通表单文件  
+112.                    String name = item.getFieldName();//获取表单名称  
+113.                    String value = item.getString();//获取表单值  
+114.                    //System.out.println(name+"　: "+value);  
+115.                }else{  
+116.                    //上传的是文件  
+117.                    InputStream in = item.getInputStream();  
+118.                    String fileName = item.getName();  
+119.                      
+120.                    //--有些浏览器上传上来的文件是文件的整个路径，需要处理，只保留文件名  
+121.                    fileName = fileName.substring(fileName.lastIndexOf("\\")+1);  
+122.                    //--为了使相同名称的文件保存到服务器中不会覆盖，需要对每个文件名处理得到一个独一无二的名称  
+123.                    fileName = UUID.randomUUID().toString()+"_"+fileName;  
+124.                      
+125.                    String path = this.getServletContext().getRealPath("WEB-INF//upFile");  
+126.                    //--为了保证不将所有的问件保存到一个目录中，可以按照哈希算法创建多个文件目录，保存文件  
+127.                    int hash = fileName.hashCode();  
+128.                    String hashStr = Integer.toHexString(hash);  
+129.                    char[]  hashStrings = hashStr.toCharArray();  
+130.                    for(char c : hashStrings){  
+131.                        path = path+"//"+c;  
+132.                    }  
+133.                      
+134.                    //判断保存文件的目录是否存在，如果不存在则创建  
+135.                    File pathFile = new File(path);  
+136.                    if(!pathFile.exists() && !pathFile.isDirectory()){  
+137.                        pathFile.mkdirs();  
+138.                    }  
+139.                      
+140.                    //创建文件  
+141.                    File saveFile= new File(path+"\\"+fileName);  
+142.                    saveFile.createNewFile();  
+143.                      
+144.                    //将上传的文件保存至指定目录  
+145.                    OutputStream out = new FileOutputStream(saveFile);  
+146.                    IOUtil.inToOut(in, out);  
+147.                    IOUtil.close(in, out);  
+148.                      
+149.                    //删除临时文件  
+150.                    item.delete();  
+151.                      
+152.                }  
+153.            }  
+154.        }catch(FileSizeLimitExceededException e){  
+155.            resp.getWriter().write("单个文件上传大小不超过1M，文件上传总量不超过10M!");  
+156.            return;  
+157.        }catch (FileUploadException e) {  
+158.            e.printStackTrace();  
+159.        }  
+160.    }  
+161.  
+162.    @Override  
+163.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+164.            throws ServletException, IOException {  
+165.        doGet(req, resp);  
+166.          
+167.    }  
+168.      
+169.}  
+```
+
+* 注册servlet
+
+* 结果
+
+  浏览器访问应用
+
+![1495965417721](README.assets/1495965417721.png)
+
+选择上传文件，如果选择的文件过大，将抛出异常（程序中可以给出友好提示）
+
+选择合适大小的文件上传，将会显示上传过程
+
+![1495965432237](README.assets/1495965432237.png)
+
+上传完成，可以在Tomcat的应用目录下找到该文件
+
+.........\webapps\FileUpLoad\WEB-INF\upFile\d\1\3\f\5\4\e\文件名
+
+（上面在在字段中输入数据的话将会将数据传送出去，打印出来）
