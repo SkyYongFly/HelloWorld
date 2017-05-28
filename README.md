@@ -5650,3 +5650,125 @@ web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的
 
 ​     对于浏览器返回的数据只需要指定编码即可。
 
+​	 具体实现：
+
+```java
+1.package com.example.filter;  
+2.  
+3.import java.io.IOException;  
+4.import java.util.Map;  
+5.  
+6.import javax.servlet.Filter;  
+7.import javax.servlet.FilterChain;  
+8.import javax.servlet.FilterConfig;  
+9.import javax.servlet.ServletException;  
+10.import javax.servlet.ServletRequest;  
+11.import javax.servlet.ServletResponse;  
+12.import javax.servlet.http.HttpServletRequest;  
+13.import javax.servlet.http.HttpServletRequestWrapper;  
+14.  
+15.public class EncodeFilter implements Filter {  
+16.  
+17.    private String encodingString = null;  
+18.  
+19.    @Override  
+20.    public void destroy() {  
+21.  
+22.    }  
+23.  
+24.    @Override  
+25.    public void doFilter(ServletRequest request, ServletResponse response,  
+26.            FilterChain chain) throws IOException, ServletException {  
+27.        //请求恢复编码设置  
+28.        response.setContentType("text/html;charset=" + encodingString);  
+29.        //request.setCharacterEncoding("utf-8");//可以解决POST提交的数据乱码，但是不能解决GET方式的乱码  
+30.          
+31.        //调用自定义的类对request进行处理  
+32.        chain.doFilter(new MyServletRequest((HttpServletRequest)request),response);  
+33.          
+34.    }  
+35.  
+36.    @Override  
+37.    public void init(FilterConfig filterConfig) throws ServletException {  
+38.        // 获取初始化编码方式  
+39.        encodingString = filterConfig.getInitParameter("encoding") == null ?"utf-8"  
+40.                : filterConfig.getInitParameter("encoding");  
+41.    }  
+42.  
+43.    // 采用装饰模式编写编码过滤器，一定要注意此处继承的类，不是ServletRequestWrapper  
+44.    class MyServletRequest extends HttpServletRequestWrapper {  
+45.        private HttpServletRequest request = null;  
+46.        private boolean isFilter = true;// 设置标志位，当相同的请求再次发生时从缓存中取出字符不会再次转码  
+47.  
+48.        public MyServletRequest(HttpServletRequest request) {  
+49.            super(request);  
+50.            this.request =  request;  
+51.        }  
+52.  
+53.        @Override  
+54.        public Map<String, String[]> getParameterMap() {  
+55.            try {  
+56.                // 如果提交方式是 POST 提交  
+57.                if (request.getMethod().equalsIgnoreCase("POST")) {  
+58.                    request.setCharacterEncoding(encodingString);  
+59.                    return request.getParameterMap();  
+60.                } else if (request.getMethod().equalsIgnoreCase("GET")) {  
+61.  
+62.                    // 如果是 GET 方式提交，则需要手动将每个字符转码  
+63.                    Map<String, String[]> map = request.getParameterMap();  
+64.                    if (isFilter) {  
+65.                        for (Map.Entry<String, String[]> a : map.entrySet()) {  
+66.                            String[] valueStrings = a.getValue();  
+67.                            for (int i = 0; i < valueStrings.length; i++) {  
+68.                                valueStrings[i] = new String(  
+69.                                        valueStrings[i].getBytes("iso8859-1"),  
+70.                                        encodingString);  
+71.                            }  
+72.                        }  
+73.                        isFilter = false;  
+74.                    }  
+75.                    return map;  
+76.                } else {  
+77.                    return request.getParameterMap();  
+78.                }  
+79.                  
+80.            } catch (Exception e) {  
+81.                e.printStackTrace();  
+82.                throw new RuntimeException(e);  
+83.            }  
+84.        }  
+85.  
+86.        @Override  
+87.        public String[] getParameterValues(String name) {  
+88.            return this.getParameterMap().get(name);  
+89.        }  
+90.  
+91.        @Override  
+92.        public String getParameter(String name) {  
+93.            return getParameterValues(name) == null ? null  
+94.                    : getParameterValues(name)[0];  
+95.        }  
+96.    }  
+}  
+```
+
+在web.xml 注册过滤器
+
+```xml
+1.<filter>  
+2.        <filter-name>encodeFilter</filter-name>  
+3.        <filter-class>com.example.filter.EncodeFilter</filter-class>  
+4.  
+5.        <!-- 配置一下请求编码 -->  
+6.        <init-param>  
+7.            <param-name>encoding</param-name>  
+8.            <param-value>utf-8</param-value>  
+9.        </init-param>  
+10.    </filter>  
+11.  
+12.    <filter-mapping>  
+13.        <filter-name>encodeFilter</filter-name>  
+14.        <url-pattern>/*</url-pattern>  
+    </filter-mapping>  
+```
+
