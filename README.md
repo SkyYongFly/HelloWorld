@@ -6014,3 +6014,104 @@ Request对象提供了一个**getInputStream**方法，通过这个方法可以�
 .........\webapps\FileUpLoad\WEB-INF\upFile\d\1\3\f\5\4\e\文件名
 
 （上面在在字段中输入数据的话将会将数据传送出去，打印出来）
+
+### 27.**文件的下载**
+
+#### 27.1.**实现方式**
+
+Web应用中实现文件下载的两种方式：
+
+1) 超链接直接指向下载资源
+
+2) 程序实现下载需设置两个响应头
+
+   设置**Content-Type** 的值为：下载文件对应**MIME** 类型、
+
+Web 服务器希望浏览器不直接处理相应的实体内容，而是由用户选择将相应的实体内容
+
+保存到一个文件中，这需要设置 **Content-Disposition** 报头。
+
+在设置 Content-Dispostion 之前一定要指定 Content-Type.
+
+#### 27.2.**实例**
+
+* 例如在如下目录保存两个图片
+
+![1496319463017](README.assets/1496319463017.png)
+
+* 设置jsp页面
+
+```html
+1.<%@ page language="java" contentType="text/html; charset=UTF-8"  
+2.    pageEncoding="UTF-8"%>  
+3.<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">  
+4.<html>  
+5.<head>  
+6.</head>  
+7.  
+8.<body style="text-align: center;">  
+9.    <h1>下载页面</h1><hr>  
+10.        <a href="${pageContext.request.contextPath }/down?name=1.jpg">图片1</a><pre></pre>  
+11.        <a href="${pageContext.request.contextPath }/down?name=2.jpg">图片2</a>  
+12.  
+13.</body>  
+</html> 
+```
+
+* 实现servlet
+
+```java
+1.package com.example.web;  
+2.  
+3.import java.io.FileInputStream;  
+4.import java.io.IOException;  
+5.import java.io.OutputStream;  
+6.import java.net.URLEncoder;  
+7.  
+8.import javax.servlet.ServletException;  
+9.import javax.servlet.http.HttpServlet;  
+10.import javax.servlet.http.HttpServletRequest;  
+11.import javax.servlet.http.HttpServletResponse;  
+12.  
+13.import com.example.utils.IOUtil;  
+14.  
+15.public class DownloadFile extends HttpServlet {  
+16.  
+17.    @Override  
+18.    protected void doGet(HttpServletRequest req, HttpServletResponse resp)  
+19.            throws ServletException, IOException {  
+20.        //获取待下载文件的名称  
+21.        String fileName = req.getParameter("name");  
+22.          
+23.        //通知浏览器以下载方式保存文件，同时设定编码防止乱码  
+24.        resp.setHeader("Content-Disposition", "attachment;filename="+URLEncoder.encode(fileName,"UTF-8"));  
+25.        //通知浏览器将要下载文件的类型  
+26.        resp.setContentType(this.getServletContext().getMimeType(fileName));  
+27.          
+28.        FileInputStream inputStream = new FileInputStream(this.getServletContext().getRealPath(fileName));  
+29.        OutputStream outputStream = resp.getOutputStream();  
+30.          
+31.        IOUtil.inToOut(inputStream, outputStream);  
+32.        IOUtil.close(inputStream, outputStream);  
+33.          
+34.    }  
+35.  
+36.    @Override  
+37.    protected void doPost(HttpServletRequest req, HttpServletResponse resp)  
+38.            throws ServletException, IOException {  
+39.        doGet(req, resp);  
+40.          
+41.    }  
+42.  
+43.}  
+```
+
+* 注册servlet
+
+* 结果
+
+  浏览器访问，点击图片1
+
+![1496319514053](README.assets/1496319514053.png)
+
+选择保存或打开，得到图片1
