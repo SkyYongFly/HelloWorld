@@ -6218,3 +6218,145 @@ Web 服务器希望浏览器不直接处理相应的实体内容，而是由用�
 可以看到发件人，正文内容等信息；
 
 至此本地邮件收发就完成了。
+
+### 29. **Jsp页面中嵌入Javascript程序**
+
+#### 29.1. **代码示例**
+
+1) 注册界面处理，Javascript完成对输入内容是否为空及合法性的判断
+
+```html
+1.<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>  
+2.<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">  
+3.<html>  
+4.  <head>  
+5.        <script type="text/javascript">  
+6.        function changeImg(img){  
+7.            imgimg.src = img.src+"?time="+new Date().getTime();  
+8.        }  
+9.        function checkForm(){  
+10.            var canSubmit = true;  
+11.            //非空校验  
+12.            canSubmit1 =checkNull("username","用户名不能为空");  
+13.            canSubmit2 =checkNull("nickname","昵称不能为空") ;  
+14.            canSubmit3 =checkNull("password","密码不能为空");  
+15.            canSubmit4 =checkNull("password2","确认密码不能为空") ;  
+16.            canSubmit5 =checkNull("email","邮箱不能为空") ;  
+17.            canSubmit6 =checkNull("valistr","验证码不能为空");  
+18.              
+19.            if(canSubmit1 == false || canSubmit2 == false || canSubmit3 == false || canSubmit4 == false || canSubmit5 == false ||canSubmit6 == false){  
+20.                canSubmit = false;  
+21.            }  
+22.              
+23.            //判断两次密码是否一致  
+24.            var pwd1 = document.getElementsByName("password")[0].value;  
+25.            var pwd2 = document.getElementsByName("password2")[0].value;  
+26.            if(pwd1 != pwd2){  
+27.                document.getElementById("password2_message").innerHTML="<font color='red'>"+"两次密码不一致"+"</font>";  
+28.                canSubmit =false;  
+29.            }  
+30.              
+31.            //判断邮箱格式  
+32.            //--邮箱格式  xx@xx.xx.xx  
+33.            var email = document.getElementsByName("email")[0].value;  
+34.            if(email!=null && email!="" && !/^\w+@\w+(\.\w+)+$/.test(email)){  
+35.                document.getElementById("email_message").innerHTML="<font color='red'>"+"邮箱格式不正确"+"</font>";  
+36.                canSubmit=false;  
+37.                      
+38.            }  
+39.              
+40.            //判断验证码是否正确  
+41.            //后台校验  
+42.              
+43.            return canSubmit;  
+44.        }  
+45.        function checkNull(name,message){  
+46.            document.getElementById(name+"_message").innerHTML="";  
+47.            var value = document.getElementsByName(name)[0].value;  
+48.              
+49.            if(value == null || value == ""){  
+50.                document.getElementById(name+"_message").innerHTML="<font color='red'>"+message+"</font>";  
+51.                return false;  
+52.            }  
+53.            return true;  
+54.      
+55.              
+56.        }  
+57.          
+58.        </script>  
+59.  </head>  
+60.    
+61.  <body style="text-align: center;">  
+62.    <div align="center">  
+63.    <h1>我要注册</h1><hr>  
+64.    <form action="${pageContext.request.contextPath }/regist" method="POST" onsubmit="return checkForm();">  
+65.        <table  style="text-align: center;" border="1" >  
+66.            <tr>  
+67.                <td>用户名</td>  
+68.                <td><input type="text" name="username" value="${param.username }"></td>  
+69.                <td id="username_message"></td>  
+70.            </tr>  
+71.            <tr>  
+72.                <td>昵称</td>  
+73.                <td><input type="text" name="nickname" value="${param.nickname }"></td>  
+74.                <td id="nickname_message"></td>  
+75.            </tr>  
+76.            <tr>  
+77.                <td>密码</td>  
+78.                <td><input type="password" name="password"></td>  
+79.                <td id="password_message"></td>  
+80.            </tr>  
+81.            <tr>  
+82.                <td>确认密码</td>  
+83.                <td><input type="password" name="password2"></td>  
+84.                <td id="password2_message"></td>  
+85.            </tr>  
+86.            <tr>  
+87.                <td>邮箱</td>  
+88.                <td><input type="text" name="email" value="${param.email }"></td>  
+89.                <td id="email_message"></td>  
+90.            </tr>  
+91.            <tr>  
+92.                <td>验证码</td>  
+93.                <td><input type="text" name="valistr"></td>  
+94.                <td id="valistr_message">${msg }</td>  
+95.            </tr>  
+96.            <tr>  
+97.                <td>验证码图片</td>  
+98.                <td><img src="${pageContext.request.contextPath }/ValiImg" onclick="changeImg(this)" style="cursor: pointer;"></td>  
+99.            </tr>  
+100.        </table>  
+101.        <br><br><input type="submit" value="立即注册">  
+102.    </form>  
+103.    </div>  
+104.  </body>  
+105.</html>  
+```
+
+#### 29.2. **注意事项**
+
+1) Javascript和java程序是不一样的,有些在java中的语法在javascript中是没有用的
+
+例如不能使用equals()方法，判断相等直接使用 ==
+
+2) 在jsp中使用<c:if >等c标签，一定要声明，否则会出错
+
+3) 要注意警告标志，一般很有可能是标签没有闭合，这样有些虽然表面上没有大问题，但是还是有着不妥的，例如在写一个 超链接的标签时如果没有闭合，那么在界面中在不该有超链接的地方点击依然会触发超链接
+
+4) 上面jsp页面的效果，这属于前台校验
+
+![1496543508616](README.assets/1496543508616.png)
+
+验证码的正确性使用后台校验：
+
+```java
+1.//校验验证码是否正确  
+2. String valistr = (String) req.getSession().getAttribute("valistr");  
+3. String valistrString = req.getParameter("valistr");  
+4. if(valistr ==null || valistrString==null || !valistr.equals(valistrString)){  
+5.       req.setAttribute("msg","<font color='red'>"+"验证码不正确"+"</font>");  
+6.       req.getRequestDispatcher("/regist.jsp").forward(req, resp);  
+7.        return;  
+8.  }  
+```
+
