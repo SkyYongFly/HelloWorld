@@ -6360,3 +6360,73 @@ Web 服务器希望浏览器不直接处理相应的实体内容，而是由用�
 8.  }  
 ```
 
+### 30.**注解+本地线程+动态代理实现事务管理**
+
+#### 30.1. **概述**
+
+在项目开发中由于某些问题使得程序出错，通常出错了我们要么抛出异常，要么对其进行处理。但是在某些场合程序的前后逻辑存在一定的耦合关系，要么一起完成，要么一起不完成，比如A 和B两件事，但是有可能A完成了，但是在执行B或之前除了问题，导致B没有执行，这就可能出现打错。常用的一个例子就是银行转账问题，A给B转账，A已经将钱汇出，银行将A账户钱减少，但是在往B账户添加钱款时发生了断电或网络故障导致B的账户并没有收到钱款，这就造成了A用户的损失。所以我们使用事务对其进行控制。
+
+#### 30.2.**示例**
+
+对数据库进行操作的时候，用service向数据库中的订单表和订单项表中存入数据，由于两张表存在外键联系，所以要进行事务控制，
+
+![1496543639069](README.assets/1496543639069.png)
+
+同时我们需要向dao层中的方法传入connection参数，这样做的结果是我们每次都要开启提交事务，很是麻烦，尤其service向dao层传入参数增加了层与层直接的耦合性，那么有什么好方法可以不用这样做呢？
+
+那是当然，我们使用动态代理技术，何为动态代理啊？说的简单一点就是它将你的方法拿过去改造一番，改造出来的方法变得更加强大，可以在执行本来的方法前或后执行一些操作。
+
+![1496543654304](README.assets/1496543654304.png)
+
+那这样我们就可以对service进行改造啦，我们可以将service进行代理，在它之前开启事务，之后关闭事务。
+
+在工厂类中：
+
+```java
+1.public  <T> T getInstance(Class<T> clazz){  
+2.        try {  
+3.            String name = clazz.getSimpleName();  
+4.            String clasName = prop.getProperty(name);  
+5.            final T service = (T) Class.forName(clasName).newInstance();  
+6.              
+7.            return (T) Proxy.newProxyInstance(service.getClass().getClassLoader(),service.getClass().getInterfaces(),   
+8.                new InvocationHandler() {  
+9.                      
+10.                    @Override  
+11.                    public Object invoke(Object proxy, Method method, Object[] args)  
+12.                            throws Throwable {  
+13.                            try{  
+14.                                //开启事务  
+15.                                TransationManager.startTran();  
+16.                                Object object = method.invoke(service, args);  
+17.                                //提交事务  
+18.                                TransationManager.commit();  
+19.                                return object;  
+20.                            }catch(InvocationTargetException e){  
+21.                                //事务回滚  
+22.                                TransationManager.rollBack();  
+23.                                //如果是底层的异常需要获取底层异常将异常抛出去传递到上层  
+24.                                e.printStackTrace();  
+25.                                throw new RuntimeException(e.getTargetException());  
+26.                            }catch(Exception e){  
+27.                                //事务回滚  
+28.                                TransationManager.rollBack();  
+29.                                e.printStackTrace();  
+30.                                throw new RuntimeException(e);  
+31.                            }finally{  
+32.                                TransationManager.release();  
+33.                            }  
+34.                        }  
+35.                    }  
+36.                });  
+37.              
+38.        } catch (Exception e) {  
+39.            e.printStackTrace();  
+40.            throw new RuntimeException(e);  
+41.        }   
+42.    }  
+```
+
+其中TransationManager类可以获取对数据库的连接，开启事务，提交事务等，稍后提到，这样我们原来不住地写开关事务就不用了，因为调用service类会自动开关事务
+
+但这样依然有问题，我们的service和dao都是通过工厂类来获取的，但是我们的dao需要实现事务吗？service层调用了dao层，dao层当然就不需要了，可是工厂类中获取实例就只有这一个方法，怎么办呢？哎，我来一个getServiceInstance()和getDaoInstance()两个方法，只要在service实例方法中实现代理就可以了。但是如果我们在程序中应该调用getDaoInstance()方法的地方结果调用getServiceInstance()方法了，程序会识别出来吗？不会！那又怎么办啊？！
