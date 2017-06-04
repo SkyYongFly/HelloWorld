@@ -6430,3 +6430,197 @@ Web 服务器希望浏览器不直接处理相应的实体内容，而是由用�
 其中TransationManager类可以获取对数据库的连接，开启事务，提交事务等，稍后提到，这样我们原来不住地写开关事务就不用了，因为调用service类会自动开关事务
 
 但这样依然有问题，我们的service和dao都是通过工厂类来获取的，但是我们的dao需要实现事务吗？service层调用了dao层，dao层当然就不需要了，可是工厂类中获取实例就只有这一个方法，怎么办呢？哎，我来一个getServiceInstance()和getDaoInstance()两个方法，只要在service实例方法中实现代理就可以了。但是如果我们在程序中应该调用getDaoInstance()方法的地方结果调用getServiceInstance()方法了，程序会识别出来吗？不会！那又怎么办啊？！
+
+##### 30.2.1. 泛型
+
+这里我们就要使用另一杀手锏了-----泛型！我们使service的类接口实现一个新定义的Service接口，dao类的接口实现新建的Dao接口，在工厂方法中限定获取方法的类型，不就可以了吗
+
+```java
+1.package com.example.dao;  
+2.  
+3.public interface Dao {  
+4.  
+5.}  
+```
+
+```java
+public interface  OrderDao  extends Dao{......}  
+```
+
+```java
+1.package com.example.service;  
+2.  
+3.public interface Service {  
+4.  
+}  
+```
+
+```java
+public interface OrderService extends Service{.....} 
+```
+
+在工厂类中
+
+```java
+public  <T extends Service> T getServiceInstance(Class<T> clazz){....}  
+```
+
+```java
+1.public  <T extends Dao> T getDaoInstance(Class<T> clazz){...}  
+```
+
+这样便完成对service和dao的获取不同实例对象的控制
+
+但这样就好了吗？我们的service默认是使用事务的，但是如果我们的service不需要事务呢？那又怎么办啊？！
+
+##### 30.2.2. 注解
+
+我们要使用另一秘密武器--------注解！注意，注解和注释是不同的，注释是给我们人看的，而注解是给程序看的，我们平时使用的 @Override 就是注解，它可表明该方法覆盖父类方法。注解可以实现程序的标识，那么好了，我们可以使用一个注解表明那些需要事务的方法啊，如果不需要事务的我们不给它通行证（注解）就行了呗！
+
+好，那我们来新建一个注解 @interface 
+
+```java
+1.package com.example.annotation;  
+2.  
+3.import java.lang.annotation.ElementType;  
+4.import java.lang.annotation.Retention;  
+5.import java.lang.annotation.RetentionPolicy;  
+6.import java.lang.annotation.Target;  
+7.  
+8.  
+9./** 
+10. * 自定义注解，该注解含义，只有被改注解注解的方法才能开启事务，从而达到只对需要的方法开启事务的控制 
+11. * @author YONGZHU 
+12. * 
+13. */  
+14.@Retention(RetentionPolicy.RUNTIME)  
+15.@Target(ElementType.METHOD)  
+16.public @interface Tran {  
+17.  
+18.}  
+```
+
+我们该需要开启事务的添加注解，
+
+```java
+  @Tran  
+  public void addOrderToSQL(Order order);  
+```
+
+添加注解是添加了，那我们的代理如何识别啊？我们可以通过
+
+```
+method.isAnnotationPresent(Tran.class）
+```
+
+来判定一个方法是否有注解（此处程序中的注解名是Tran）
+
+那么工厂类我们就可以写成这样
+
+```java
+1.package com.example.factory;  
+2.  
+3.import java.io.FileReader;  
+4.import java.lang.reflect.InvocationHandler;  
+5.import java.lang.reflect.InvocationTargetException;  
+6.import java.lang.reflect.Method;  
+7.import java.lang.reflect.Proxy;  
+8.import java.util.Properties;  
+9.  
+10.import com.example.annotation.Tran;  
+11.import com.example.dao.Dao;  
+12.import com.example.service.Service;  
+13.import com.example.utils.TransationManager;  
+14.  
+15.public class BasicFactory {  
+16.      
+17.    private static BasicFactory factory = new BasicFactory();  
+18.    private static Properties prop = null;  
+19.      
+20.    static{  
+21.        try {  
+22.            prop = new Properties();  
+23.            prop.load(new FileReader(BasicFactory.class.getClassLoader().getResource("config.properties").getPath()));  
+24.        } catch (Exception e) {  
+25.            e.printStackTrace();  
+26.            throw new RuntimeException(e);  
+27.        }  
+28.    }  
+29.      
+30.      
+31.    public BasicFactory(){  
+32.          
+33.    }  
+34.      
+35.    public static BasicFactory getFactory(){  
+36.        return factory;   
+37.    }  
+38.      
+39.    //获取Dao的实例对象  
+40.    @SuppressWarnings("unchecked")  
+41.    public  <T extends Dao> T getDaoInstance(Class<T> clazz){  
+42.        try {  
+43.            String name = clazz.getSimpleName();  
+44.            String clasName = prop.getProperty(name);  
+45.            return (T) Class.forName(clasName).newInstance();  
+46.        } catch (Exception e) {  
+47.            e.printStackTrace();  
+48.            throw new RuntimeException(e);  
+49.        }   
+50.    }  
+51.      
+52.    //获取Service的实例对象  
+53.    @SuppressWarnings("unchecked")  
+54.    public  <T extends Service> T getServiceInstance(Class<T> clazz){  
+55.        try {  
+56.            String name = clazz.getSimpleName();  
+57.            String clasName = prop.getProperty(name);  
+58.            final T service = (T) Class.forName(clasName).newInstance();  
+59.              
+60.            return (T) Proxy.newProxyInstance(service.getClass().getClassLoader(),service.getClass().getInterfaces(),   
+61.                new InvocationHandler() {  
+62.                      
+63.                    @Override  
+64.                    public Object invoke(Object proxy, Method method, Object[] args)  
+65.                            throws Throwable {  
+66.                        if(method.isAnnotationPresent(Tran.class)){  
+67.                            //实现了Tran注解的方法才开启事务  
+68.                            try{  
+69.                                //开启事务  
+70.                                TransationManager.startTran();  
+71.                                Object object = method.invoke(service, args);  
+72.                                //提交事务  
+73.                                TransationManager.commit();  
+74.                                return object;  
+75.                            }catch(InvocationTargetException e){  
+76.                                //事务回滚  
+77.                                TransationManager.rollBack();  
+78.                                //如果是底层的异常需要获取底层异常将异常抛出去传递到上层  
+79.                                e.printStackTrace();  
+80.                                throw new RuntimeException(e.getTargetException());  
+81.                            }catch(Exception e){  
+82.                                //事务回滚  
+83.                                TransationManager.rollBack();  
+84.                                e.printStackTrace();  
+85.                                throw new RuntimeException(e);  
+86.                            }finally{  
+87.                                TransationManager.release();  
+88.                            }  
+89.                        }else{  
+90.                            return method.invoke(service, args);  
+91.                        }  
+92.                    }  
+93.                });  
+94.              
+95.        } catch (Exception e) {  
+96.            e.printStackTrace();  
+97.            throw new RuntimeException(e);  
+98.        }   
+99.    }  
+100.      
+101.}  
+```
+
+这样就可以了吗？
+
+我们思考一下，在web的使用中，我们的服务器端可能同时收到很多请求，这样就可能引发多线程安全问题，如果对数据库的连接只有一个connection，可能一个线程开启了事务，但是出现问题了需要回滚事务，但是此时另一个线程开挂抢了cpu资源提交了事务，那这就大事不好了。哎呀，那又应该怎么办呀？
