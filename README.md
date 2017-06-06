@@ -6624,3 +6624,368 @@ method.isAnnotationPresent(Tran.class）
 这样就可以了吗？
 
 我们思考一下，在web的使用中，我们的服务器端可能同时收到很多请求，这样就可能引发多线程安全问题，如果对数据库的连接只有一个connection，可能一个线程开启了事务，但是出现问题了需要回滚事务，但是此时另一个线程开挂抢了cpu资源提交了事务，那这就大事不好了。哎呀，那又应该怎么办呀？
+
+##### 30.2.3. ThreadLocal
+
+好吧，你知道的，我又要使出一个杀手锏了，那就是ThreadLocal，这是个什么东西啊，乍看好像和线程有关，哎，我们要研究的不就是多线程么，看来靠谱，不过谁知道这怎么用啊，我们不妨先来看一下API文档。
+
+类 ThreadLocal<T>
+
+![1496751116987](README.assets/1496751116987.png)
+
+直接已知子类： 
+
+![1496751125869](README.assets/1496751125869.png)
+
+该类提供了线程局部 (thread-local) 变量。这些变量不同于它们的普通对应物，因为访问某个变量（通过其 get 或 set 方法）的每个线程都有自己的局部变量，它独立于变量的初始化副本。ThreadLocal 实例通常是类中的 private static 字段，它们希望将状态与某一个线程（例如，用户 ID 或事务 ID）相关联。 
+
+读了一遍，呵呵，这文字真是令人费解，算了，我们不妨先来看一下它的方法，一看，还真简单，就四个方法：
+
+![1496751145945](README.assets/1496751145945.png)
+
+一个设置初始化值，不过它操作的是当前线程的局部变量，这个我们往其中设置一些值，其它三个也好理解获取值，移除。
+
+其实这个对象能干什么呢，它能够保存线程对象，那么我们可以针对不同的线程创建不同的ThreadLocal实例，让它带着值去操作，这样就不会受到其他线程的影响
+
+我们原来的TransationManager只是简单的获取连接，用连接去开启事务，回滚事务，回滚事务，将这些功能通过方法提供出来，现在我们需要对其进行改进
+
+```java
+1.package com.example.utils;  
+2.  
+3.import java.lang.reflect.InvocationHandler;  
+4.import java.lang.reflect.Method;  
+5.import java.lang.reflect.Proxy;  
+6.import java.sql.Connection;  
+7.import java.sql.SQLException;  
+8.  
+9.import javax.sql.DataSource;  
+10.  
+11.import org.apache.commons.dbutils.DbUtils;  
+12.  
+13.import com.mchange.v2.c3p0.ComboPooledDataSource;  
+14.  
+15./** 
+16. * 事务管理 
+17. * @author YONGZHU 
+18. * 
+19. */  
+20.public class TransationManager {  
+21.  
+22.    public TransationManager(){  
+23.          
+24.    }  
+25.    //数据源  
+26.    private static DataSource source = new ComboPooledDataSource();  
+27.    //保存当前线程  
+28.    private static ThreadLocal<Connection> proxyCon = new ThreadLocal<Connection>(){};  
+29.      
+30.      
+31.    //开启事务  
+32.    public static void startTran() throws SQLException{  
+33.            final Connection connection = source.getConnection();//获取连接  
+34.            connection.setAutoCommit(false);//开启事务  
+35.            proxyCon.set(proxyConnection);  
+36.              
+37.    }  
+38.      
+39.    //提交事务并关闭资源  
+40.    public static void commit(){  
+41.        DbUtils.commitAndCloseQuietly(proxyCon.get());  
+42.    }  
+43.      
+44.    //回滚事务  
+45.    public static void rollBack(){  
+46.        DbUtils.rollbackAndCloseQuietly(proxyCon.get());  
+47.    }  
+48.      
+49.    //  
+50.    public static Connection getConnection(){  
+51.        return proxyCon.get();  
+52.    }  
+53.      
+54.    /** 
+55.     * @return 
+56.     */  
+57.    public static DataSource getSource(){  
+58.return source;  
+59.          
+60.    }  
+61.  
+62.    //释放资源  
+63.    public static void release() {  
+64.        DbUtils.closeQuietly(proxyCon.get());  
+65.        proxyCon.remove();  
+66.    }  
+}  
+```
+
+那么....你已经知道我要说什么了，什么还有问题？哪里有？不着急，我们来看一下DaoImpl中的程序
+
+```java
+1.@Override  
+2.    public void addOrderToSQL(Order order) throws Exception {  
+3.            QueryRunner runner = new QueryRunner();  
+4.            runner.update(TransationManager.getConnection(),"insert into orders values (?,?,?,?,?,?,?,?,?)",  
+5.            ......  );  
+6.    }  
+7.  
+8.@Override  
+9.    public Product getPnumByUUID(String productUUID) throws UnsupportedEncodingException, SQLException {  
+10.          
+11.        QueryRunner runner = new QueryRunner(TransationManager.getSource());  
+12.        return runner.query("select * from products where uuid=?",......);  
+13.    }  
+```
+
+发现什么？对于是否需要事务的方法我们采用了不同的处理方法，一个getSource()，一个getConnection()，这是不是有点显得麻烦啊，有没有一种好的方法，我们不需要去判定到底需要那种方法呢，可以一劳永逸呢？不就是getSource()和getConnection()两个方法嘛，那我们就对这进行处理，这里我们还是使用上述的代理方法
+
+```java
+1.package com.example.utils;  
+2.  
+3.import java.lang.reflect.InvocationHandler;  
+4.import java.lang.reflect.Method;  
+5.import java.lang.reflect.Proxy;  
+6.import java.sql.Connection;  
+7.import java.sql.SQLException;  
+8.  
+9.import javax.sql.DataSource;  
+10.  
+11.import org.apache.commons.dbutils.DbUtils;  
+12.  
+13.import com.mchange.v2.c3p0.ComboPooledDataSource;  
+14.  
+15./** 
+16. * 事务管理 
+17. * @author YONGZHU 
+18. * 
+19. */  
+20.public class TransationManager {  
+21.  
+22.    public TransationManager(){  
+23.          
+24.    }  
+25.    //数据源  
+26.    private static DataSource source = new ComboPooledDataSource();  
+27.    //保存当前线程  
+28.    private static ThreadLocal<Connection> proxyCon = new ThreadLocal<Connection>(){};  
+29.      
+30.    //判断当前线程是否开启事务标记  
+31.    private  static ThreadLocal<Boolean> isOpenTran = new ThreadLocal<Boolean>(){  
+32.        @Override  
+33.        protected Boolean initialValue() {  
+34.            return false;//默认不开启事务  
+35.        }  
+36.          
+37.    };  
+38.      
+39.    //开启事务  
+40.    public static void startTran() throws SQLException{  
+41.            isOpenTran.set(true);//设置事务标记为true  
+42.            final Connection connection = source.getConnection();//获取连接  
+43.            connection.setAutoCommit(false);//开启事务  
+44.              
+45.            //保存connection  
+46.            proxyCon.set(connection);  
+47.              
+48.    }  
+49.      
+50.    //提交事务并关闭资源  
+51.    public static void commit(){  
+52.        DbUtils.commitAndCloseQuietly(proxyCon.get());  
+53.    }  
+54.      
+55.    //回滚事务  
+56.    public static void rollBack(){  
+57.        DbUtils.rollbackAndCloseQuietly(proxyCon.get());  
+58.    }  
+59.      
+60.    //  
+61.    public static Connection getConnection(){  
+62.        return proxyCon.get();  
+63.    }  
+64.      
+65.    /** 
+66.     * 此方法实现当开启了事务，则返回改造过的getConnection() 
+67.     *              如果没有开启事务，则返回原数据源source 
+68.     * 因为在数据库连接中我们需要根据操作是否开启了事务调用不同的方法，如果开启了事务要用QuneryRunner.update(...getConnection,sql语句,....) 
+69.     * 而没有开启事务则直接获取source传入 new QueryRunner(...getSource()) 
+70.     * 较为麻烦，所以在获取source是就判断选哟哪种方法，这样在应用中直接调用这个方法就行 
+71.     * @return 
+72.     */  
+73.    public static DataSource getSource(){  
+74.          
+75.        if(isOpenTran.get()){//如果开启了事务  
+76.            return (DataSource) Proxy.newProxyInstance(source.getClass().getClassLoader(),source.getClass().getInterfaces(),  
+77.                    new InvocationHandler() {  
+78.                          
+79.                        @Override  
+80.                        public Object invoke(Object proxy, Method method, Object[] args)  
+81.                                throws Throwable {  
+82.                            if("getConnection".equals(method.getName())){  
+83.                                //如果想要获取去connection则返回connection  
+84.                                return proxyCon.get();  
+85.                            }else{  
+86.                                //否则返回原资源  
+87.                                return method.invoke(source, args);  
+88.                            }  
+89.                        }  
+90.                    }     
+91.                );  
+92.        }else{  
+93.            //没有开启事务则返回source  
+94.            return source;  
+95.        }      
+98.    }  
+99.  
+100.    //释放资源  
+101.    public static void release() {  
+102.        DbUtils.closeQuietly(proxyCon.getConnection());  
+103.        proxyCon.remove();  
+104.        isOpenTran.remove();  
+105.    }      
+106.}  
+```
+
+这里我们使用代理使其针对需不需要事务采用不同的参数方式，以后连接数据库，我们就可以直接
+
+```java
+QueryRunner runner = new QueryRunner(TransationManager.getSource()); 
+```
+
+爽吧？不要考虑其他的事情，尽管使用！
+
+   哈哈，终于完成了，赶快打开浏览器连接服务器，操作，提交，duang，报错了！我去，报错了！这么辛辛苦苦，结果......不活了，跳楼去!不要激动嘛，我们看一下问题嘛，一翻译，什么“不能使用已经关闭的连接”，定位一下，在我们插入订单项的时候错误，也就是说插入订单后连接就断了，我去，这个为什么出现这个问题呢？仔细分析一下，ThreadLocal在使用完连接后会自动清除连接，这个可不是我们想要的，我下面还要使用呐，那怎么办啊？好办，我们只需要在他需要关闭的地方不让它关闭，最后一起关闭
+
+```java
+1.package com.example.utils;  
+2.  
+3.import java.lang.reflect.InvocationHandler;  
+4.import java.lang.reflect.Method;  
+5.import java.lang.reflect.Proxy;  
+6.import java.sql.Connection;  
+7.import java.sql.SQLException;  
+8.  
+9.import javax.sql.DataSource;  
+10.  
+11.import org.apache.commons.dbutils.DbUtils;  
+12.  
+13.import com.mchange.v2.c3p0.ComboPooledDataSource;  
+14.  
+15./** 
+16. * 事务管理 
+17. * @author YONGZHU 
+18. * 
+19. */  
+20.public class TransationManager {  
+21.  
+22.    public TransationManager(){  
+23.          
+24.    }  
+25.    //数据源  
+26.    private static DataSource source = new ComboPooledDataSource();  
+27.    //保存当前线程  
+28.    private static ThreadLocal<Connection> proxyCon = new ThreadLocal<Connection>(){};  
+29.    //当前线程与数据库的连接备份，便于后面关闭  
+30.    private static ThreadLocal<Connection> saveCon = new ThreadLocal<Connection>(){};  
+31.      
+32.    //判断当前线程是否开启事务标记  
+33.    private  static ThreadLocal<Boolean> isOpenTran = new ThreadLocal<Boolean>(){  
+34.        @Override  
+35.        protected Boolean initialValue() {  
+36.            return false;//默认不开启事务  
+37.        }  
+38.          
+39.    };  
+40.      
+41.    //开启事务  
+42.    public static void startTran() throws SQLException{  
+43.            isOpenTran.set(true);//设置事务标记为true  
+44.            final Connection connection = source.getConnection();//获取连接  
+45.            connection.setAutoCommit(false);//开启事务  
+46.            saveCon.set(connection);//将当前线程保存起来，便于后续关闭连接  
+47.              
+48.            //改造连接关闭方法，设置连接先不关闭，为了后续操作使用该连接吗，在整个service完成后关闭连接，释放资源  
+49.            Connection proxyConnection = (Connection) Proxy.newProxyInstance(connection.getClass().getClassLoader(),connection.getClass().getInterfaces(),   
+50.                    new InvocationHandler() {  
+51.                          
+52.                        @Override  
+53.                        public Object invoke(Object proxy, Method method, Object[] args)  
+54.                                throws Throwable {  
+55.                            if("close".equals(method.getName())){  
+56.                                //如果是关闭连接的方法，则不关闭  
+57.                                return null;  
+58.                            }else {  
+59.                                return method.invoke(connection, args);  
+60.                            }  
+61.                        }  
+62.                    });  
+63.                      
+64.              
+65.            //保存改造过的connection  
+66.            proxyCon.set(proxyConnection);  
+67.              
+68.    }  
+69.      
+70.    //提交事务并关闭资源  
+71.    public static void commit(){  
+72.        DbUtils.commitAndCloseQuietly(proxyCon.get());  
+73.    }  
+74.      
+75.    //回滚事务  
+76.    public static void rollBack(){  
+77.        DbUtils.rollbackAndCloseQuietly(proxyCon.get());  
+78.    }  
+79.      
+80.    //  
+81.    public static Connection getConnection(){  
+82.        return proxyCon.get();  
+83.    }  
+84.      
+85.    /** 
+86.     * 此方法实现当开启了事务，则返回改造过的getConnection() 
+87.     *              如果没有开启事务，则返回原数据源source 
+88.     * 因为在数据库连接中我们需要根据操作是否开启了事务调用不同的方法，如果开启了事务要用QuneryRunner.update(...getConnection,sql语句,....) 
+89.     * 而没有开启事务则直接获取source传入 new QueryRunner(...getSource()) 
+90.     * 较为麻烦，所以在获取source是就判断选哟哪种方法，这样在应用中直接调用这个方法就行 
+91.     * @return 
+92.     */  
+93.    public static DataSource getSource(){  
+94.          
+95.        if(isOpenTran.get()){//如果开启了事务  
+96.            return (DataSource) Proxy.newProxyInstance(source.getClass().getClassLoader(),source.getClass().getInterfaces(),  
+97.                    new InvocationHandler() {  
+98.                          
+99.                        @Override  
+100.                        public Object invoke(Object proxy, Method method, Object[] args)  
+101.                                throws Throwable {  
+102.                            if("getConnection".equals(method.getName())){  
+103.                                //如果想要获取去connection则返回connection  
+104.                                return proxyCon.get();  
+105.                            }else{  
+106.                                //否则返回原资源  
+107.                                return method.invoke(source, args);  
+108.                            }  
+109.                        }  
+110.                    }     
+111.                );  
+112.        }else{  
+113.            //没有开启事务则返回source  
+114.            return source;  
+115.        }         
+116.    }  
+117.  
+118.    //释放资源  
+119.    public static void release() {  
+120.        DbUtils.closeQuietly(saveCon.get());  
+121.        saveCon.remove();  
+122.        proxyCon.remove();  
+123.        isOpenTran.remove();  
+124.    }       
+}  
+```
+
+然后在工厂类中service代理处finally()释放一下资源
+
+哎呀，这下应该没问题了吧？试一试。。。。。数据库一看，成功了，哈哈哈哈！
+
+但是这里要注意一个问题，因为我们的事务处理是根据异常来的，出现异常才回滚，所以dao层的异常一定要往上抛，否则service层一尾没有异常，明明有错误，就是不进行回滚，那就呵呵了......
