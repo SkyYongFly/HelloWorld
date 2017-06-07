@@ -6989,3 +6989,124 @@ QueryRunner runner = new QueryRunner(TransationManager.getSource()); 
 哎呀，这下应该没问题了吧？试一试。。。。。数据库一看，成功了，哈哈哈哈！
 
 但是这里要注意一个问题，因为我们的事务处理是根据异常来的，出现异常才回滚，所以dao层的异常一定要往上抛，否则service层一尾没有异常，明明有错误，就是不进行回滚，那就呵呵了......
+
+### 31. Spring
+
+#### 31.1. **Spring初探**
+
+##### 31.1.1. Spring是什么
+
+* Spring是一个开源框架，为了解决企业应用开发复杂性而创建的，但是现在已经不止应用于企业应用。
+
+* 是一个轻量级的控制反转(IoC)和面向切面（AOP）的容器框架。
+
+![1496837556239](README.assets/1496837556239.png)
+
+##### 31.1.2. Spring框架
+
+Spring基本框架如下图：
+
+![1496837576273](README.assets/1496837576273.png)
+
+可以看到Spring基本由几大模块组成，最下面的是测试框架（对Java测试框架做了增强）、核心容器（包括Beans容器、上下文、SpEL表达式）、对于AOP、Aspects、消息的支持、持久层框架的结合、Web开发支持（例如Spring MVC）。
+
+##### 31.1.3. Spring的作用
+
+* 作为一个容器，将Java对象当做Bean来处理，使Java对象之间松耦合，即IoC(或者DI)
+
+* AOP支持，例如事务管理、日志管理
+
+* 提供了对多种技术的支持
+
+  ——JMS
+
+  ——MQ支持
+
+  ——UnitTest
+
+* 提供了众多方便的应用的辅助类（JDBC Template等）
+
+* 对主流应用框架（如Hibernate）的良好支持
+
+#### 31.2. 小试牛刀
+
+上面初步介绍了Spring的概念、框架组成及作用，那么Spring具体如何使用呢？这一小节我们先写一个小Demo,以方便后续章节的讲解。
+
+##### 31.2.1. 代码结构
+
+传统的创建类的方法是通过new 的方式，但是在spring中，我们将这个工作交给spring容器来完成，我们无需显式的new即可创建对象，那如何创建呢？我们在Eclipse中新建一个工程。
+
+先看一下工程结构目录：
+
+![1496837756997](README.assets/1496837756997.png)
+
+我们看到我们的工程里面内容也很简单，包括一个java类、一个测试文件、一个xml文件，这个xml文件是什么作用呢？等会介绍。
+
+我们需要注意的是，使用spring框架需要引入对应的jar包，这里我只引入了基本的依赖jar包：spring.jar，另外一个commons-logging.jar，为日志依赖包。
+
+##### 31.2.2. 文件说明
+
+* application.xml文件
+
+  从工程目录中我们可以很清楚的看到一个文件：applicationContext.xml文件。这个文件的作用是啥呢？该文件为spring的配置文件，我们看一下它的内容。
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+4.    xsi:schemaLocation="http://www.springframework.org/schema/beans  
+5.       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">  
+6.    <!--   
+7.        id:唯一标识 ，指代一个类  
+8.         class: 类的全路径名  
+9.     -->  
+10.    <bean id="helloWorld" class="com.example.daomain.HelloWorld"></bean>  
+11.</beans>    
+```
+
+​	application.xml文件的作用在于声明Bean,就是我们把哪些类当做bean来处理。
+
+​	配置文件以<beans>为根节点，首先在<beans>中引入了一些命名空间，这个我们先不管，在<beans>中包含	了<bean>节点，这个<bean>就对应了一个类，每个bean有一个id,还有一个class。Id是bean唯一标识，需要	注意的是我们配置的bean的id不要重复！因为后期后期程序中需要引用，如果出现相同名称的bean，那么到底	该引用谁呢？class里面标注的是bean对应的类的全限定路径名称。
+
+* TestSpring.java文件
+
+  我们到底应该如何使用声明的bean呢？这里写了一个测试类。
+
+```java
+1. package com.example.test;  
+2.  
+3.import org.junit.Test;  
+4.import org.springframework.context.ApplicationContext;  
+5.import org.springframework.context.support.ClassPathXmlApplicationContext;  
+6.  
+7.import com.example.daomain.HelloWorld;  
+8.  
+9.public class TestSpring {  
+10.    @Test  
+11.    public void testCreateClass(){  
+12.        //启动spring容器  
+13.        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");  
+14.        //根据id将spring容器中的bean取出来  
+15.        HelloWorld helloWorld = (HelloWorld)context.getBean("helloWorld");  
+16.        helloWorld.hello();  
+17.    }  
+18.}  
+```
+
+分析：
+
+1) 第一步：
+
+**获取spring配置文件**，从类的名称 classPathXmlApplicationContext可以看出来这个是通过类路径的方式来寻找到applicationContext.xml文件的。
+
+2) 第二步：
+
+**提取bean即类对象**，这个过程是通过在配置文件的中<bean>中的id 来匹配的，因为写类名很长，用id指代类就相对方便一点。那spring容器中是在调用该方法的时候创建对象的吗？下面会有说到。
+
+3) 第三步：
+
+**操作类方法。**
+
+测试方法中的第一句是关键，我们加载配置文件，获取了应用上下文，然后利用bean的id获取到bean对象，最后调用bean方法。
+
+从上面的过程中可以看到，创建对象的步骤就是：创建一个类、在spring配置文件中声明<bean>、利用框架创建对象。
