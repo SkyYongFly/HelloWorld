@@ -7110,3 +7110,159 @@ Spring基本框架如下图：
 测试方法中的第一句是关键，我们加载配置文件，获取了应用上下文，然后利用bean的id获取到bean对象，最后调用bean方法。
 
 从上面的过程中可以看到，创建对象的步骤就是：创建一个类、在spring配置文件中声明<bean>、利用框架创建对象。
+
+#### 31.2. IoC容器
+
+##### 31.2.1. 什么是IoC
+
+*  基本概念
+
+  IoC(控制反转：Inverse of Control)。感觉很玄乎，嘛意思?其实从字面理解我们可以将其拆分为两部分：控制、反转。
+
+  我们从上面的示例程序看出什么东西出来没？或者说和我们平常写代码的方式有什么不一样么？最明显的差别就是我们平常创建要调用一个类的方法会怎么做呢，先获取一个类对象实例，然后通过这个对象实例来调用其中的方法，但是使用了Spring框架呢，我们好像并没有去new一个对象实例，而是利用容器去获取一个对象，而这个对象是被我们定义出的一个Spring对象——bean。那么这个过程中什么发生了变化呢？控制权——就是之前我们目标类需要自己去创建需要的对象实例，现在呢，不需要自己去new一个了，直接从容器中获取（上面的例子好像并不是非常好的体现出这个优点），从主动到被动，这就是所谓的控制反转。
+
+  直接用大白话解释就是将对对象的管理交由框架。显而易见，我们使用spring来创建容器就是体现了这个概念。
+
+* 示意图
+
+![1496837988973](README.assets/1496837988973.png)
+
+##### 31.2.2. DI
+
+这里我们还需要提出一个概念：DI（**依赖注入**），其实阐述的本质内容和IoC是一致的，就是将对象的使用通过容器注入的方式来获取，比如，对象A依赖B，A方法参数传入B的实例，这种就是注入的方式。
+
+DI和IoC只不过是统一问题的两个角度不同的描述。
+
+IoC是Spring赖以存在的两大基础支撑概念之一。
+
+##### 21.2.3. 注入方式
+
+Spring  bean之间的调用还是类之间的声明一个引用实例，然后调用目标方法，另外有些成员变量需要初始化设置为某些常量值，那么这些就需要涉及到Spring的注入方式。
+
+Spring的注入是指在启动Spring容器加载的bean配置的时候，完成对变量的赋值的行为。
+
+常用的两种注入方式有：
+
+——设值注入
+
+——构造注入
+
+下面分别看下两种注入方式的实际示例。
+
+* 设值注入
+
+Bean类：
+
+```java
+1.package com.example.bean;  
+2.  
+3./** 
+4. * @author  :zhuyong 
+5. */  
+6.public class Phone {  
+7.    private String name;  
+8.      
+9.    /** 
+10.     * @param name the name to set 
+11.     */  
+12.    public void setName(String name) {  
+13.        this.name = name;  java
+14.    }  
+15.      
+16.    /** 
+17.     * @return the name 
+18.     */  
+19.    public String getName() {  
+20.        return name;  
+21.    }  
+22.      
+23.    public void sendMessage(){  
+24.        System.out.println("用" + name +  "手机发送短信");  
+25.    }  
+26.}  
+```
+
+Sping配置文件：
+
+```xml
+1. <!-- 定义一个手机bean，并且设置名称 -->  
+2.    <bean id="phone" class="com.example.bean.Phone">  
+3.        <property name="name" value="魅族"/>  
+4.    </bean>  
+```
+
+测试类：
+
+```java
+1. @Test  
+2.    public void testSetBeanProperty(){  
+3.        ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");  
+4.        Phone phone = context.getBean("phone",Phone.class);  
+5.        phone.sendMessage();  
+    }  
+```
+
+输出：
+
+![1496838080952](README.assets/1496838080952.png)
+
+我们在配置文件中的<bean>标签内直接使用一个<property>来设置了Phone类中name属性的值，这就是设置注入。当spring容器加载的时候，创建bean时，自动将配置的值设置到bean实例对应的属性上。<property>的name标识哪个成员变量，value标识具体要设置的值。 
+
+* 构造注入
+
+增加一个类，以引用Phone对象。
+
+```java
+1.package com.example.bean;  
+2.  
+3./** 
+4. * @author  :zhuyong 
+5. */  
+6.public class Person {  
+7.    private Phone phone;  
+8.  
+9.    public Person() {  
+10.    }  
+11.  
+12.    public Person(Phone phone) {  
+13.        this.phone = phone;  
+14.    }  
+15.      
+16.    public void sendMessage(){  
+17.        if(phone == null){  
+18.            System.out.println("没有手机，发不了短信");  
+19.        }else{  
+20.            phone.sendMessage();  
+21.        }  
+22.    }  
+23.}  
+```
+
+配置文件：
+
+```xml
+1.<!-- 定义一个人bean,设置成员变量 -->  
+2.<bean id="person" class="com.example.bean.Person">  
+3.    <constructor-arg  ref="phone"/>  
+</bean>  
+```
+
+测试文件：
+
+```java
+1.@Test  
+2.    public void testPerson(){  
+3.    ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");
+4.      
+5.     Person person = context.getBean("person",Person.class);  
+6.     person.sendMessage();  
+    }  
+```
+
+结果：
+
+![1496838158260](README.assets/1496838158260.png)
+
+Person bean发送短信时通过phone来完成的，而phone这个对象引用正是在配置文件中利用构造注入的方式设置的。
+
+<constructor-arg>表示的是构造注入，就是给类构造器中的变量设置具体值，这里利用  ref 引用另一个 bean ，这个bean就是上面定义的Phone。
