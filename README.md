@@ -7400,3 +7400,119 @@ Bean是在加载配置文件的时候创建的，那可不可以在使用类的�
 这样在执行context.getBean()的时候才创建bean 对应的类对象。Spring默认不是懒加载。另外懒加载创建的对象是单实例的，即不管调用多少次 context.getBean() 其实返回的是同一个对象。
 
 这个就涉及一个概念，单实例和多实例。
+
+#### 32.4. **生命周期**
+
+既然Bean有创建时机，那肯定也应该有销毁的时候。初始化方法和销毁方法的调用有两种方式，一种是我们自定义初始化、销毁方法，然后在XML配置文件中声明；另一种是实现相应的接口，spring容器就知道bean有了初始化、销毁方法声明，在实际运行时会在合适的实际调用这两个方法。
+
+##### 32.4.1. 自定义
+
+HelloWorld.java :
+
+```java
+1.package com.example.daomain;  
+2.  
+3.public class HelloWorld {  
+4.      
+5.    public HelloWorld() {  
+6.        System.out.println("The class has created");  
+7.    }  
+8.    public void hello(){  
+9.        System.out.println("Hello Spring");  
+10.    }  
+11.    public void init(){  
+12.        System.out.println("init");  
+13.    }  
+14.    public void destroy(){  
+15.        System.out.println("destroy");  
+16.    }  
+17.}  
+```
+
+在配置文件中声明初始化和销毁方法:
+
+```xml
+1.<bean   
+2.        id="helloWorld"   
+3.        class="com.example.daomain.HelloWorld"  
+4.        init-method="init"  
+5.        destroy-method="destroy">  
+6.</bean>  
+```
+
+测试：
+
+```java
+1.@Test  
+2.    public void testScope(){  
+3.        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");  
+4.        HelloWorld helloWorld = (HelloWorld) context.getBean("helloWorld");  
+5.        helloWorld.hello();  
+6.          
+7.        ClassPathXmlApplicationContext context2 = (ClassPathXmlApplicationContext) context;  
+8.        //spring容器关闭  
+9.        context2.close();  
+10.    }  
+```
+
+输出：
+
+![1497077114988](README.assets/1497077114988.png)
+
+![1497077121111](README.assets/1497077121111.png)
+
+在构造函数之后，立刻执行init方法
+
+\* 如果spring容器没有执行close方法，则不执行销毁方法
+
+\* 如果spring容器执行了close方法，在执行该方法之前要执行销毁方法
+
+##### 32.4.2. 实现接口
+
+ExampleBean.java
+
+```java
+1.package com.example.bean;  
+2.  
+3.import org.springframework.beans.factory.DisposableBean;  
+4.import org.springframework.beans.factory.InitializingBean;  
+5.  
+6.public class ExampleBean  implements InitializingBean,DisposableBean{  
+7.  
+8.    /** 
+9.     * 初始化方法 
+10.     */  
+11.    @Override  
+12.    public void afterPropertiesSet() throws Exception {  
+13.        System.out.println("我是初始化方法!");  
+14.    }  
+15.  
+16.    /** 
+17.     * 销毁时方法 
+18.     */  
+19.    @Override  
+20.    public void destroy() throws Exception {  
+21.        System.out.println("我是销毁方法！");  
+22.    }  
+23.  
+24.}  
+```
+
+Test:
+
+```java
+1.@Test  
+2.    public void testInitAndDestory(){  
+3.        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("application.xml");  
+4.  
+5.        ExampleBean exampleBean = context.getBean("exampleBean",ExampleBean.class);  
+6.          
+7.        context.close();  
+8.    }  
+```
+
+结果：
+
+![1497077174757](README.assets/1497077174757.png)
+
+![1497077180610](README.assets/1497077180610.png)
