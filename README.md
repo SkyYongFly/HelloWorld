@@ -7321,3 +7321,82 @@ Spring中类的创建时间是在加载配置文件时创建的。
 
 实际上spring加载配置文件时，会依次解析其中的<bean>，来创建相应的对象。
 
+#### 32.3. **配置项**
+
+##### 32.3.1. 作用域
+
+- 五种类型
+
+![1497058187905](README.assets/1497058187905.png)
+
+比较常用的是singleton 和 prototype 两种作用域，对于singleton作用域，每次请求该Bean都将获得相同的实例，Spring容器负责跟踪监视Bean实例的状态，负责维护Bean实例的生命周期行为，如果一个Bean被设置成prototype作用域，程序每次请求该id的Bean，Spring都会创建一个新的Bean实例，然后返回给程序，在这种情况下，Spring容器仅仅使用new 关键字创建Bean实例，一旦创建成功，容器Spring不再对Bean的生命周期负责，也不会维护Bean实例的状态。
+
+如果不指定Bean的作用域，Spring默认使用singleton作用域。Java在常见Java实例时，需要进行内存申请，销毁实例是，需要完成垃圾回收，这些工作都会导致系统开销的增加。因此prototype作用域Bean 的创建销毁代价比较大。而singleton作用域的Bean 实例一旦创建成功，可以重复使用，因此，除非必要，否则避免将Bean作用域设置成prototype。
+
+如果要使用 request,session,global session作用域的Bean，在配置Bean之前，还需要做少量的初始配置(将HTTP 请求banding到该提供服务的线程上，这使得具有request 和 session作用域的Bean实例能够在后面的调用链中被访问到)，如果只是配置常规的作用域（singleton,prototype），则无须设置。如果Web 应用直接使用Spring MVC 作为MVC框架，即使用SpringDispatcherServlet 或DispatcherPorlet 来拦截所有用户请求，则无须设置，因为DispatcherServlet 和DispatcherPorlet已经处理了所有和请求有关的额状态处理。
+
+* 代码示例
+
+单实例和多实例就是指创建的类是否是同一个对象，如何创建多实例对象呢？
+
+```xml
+1.<!-- 多实例 -->  
+2.    <bean   
+3.            id="scopeHelloWorld"   
+4.            class="com.example.daomain.HelloWorld"   
+5.            scope="prototype">  
+6.</bean>  
+```
+
+测试：
+
+```java
+1.package com.example.test;  
+2.  
+3.import org.junit.Test;  
+4.import org.springframework.context.ApplicationContext;  
+5.import org.springframework.context.support.ClassPathXmlApplicationContext;  
+6.  
+7.import com.example.daomain.HelloWorld;  
+8.  
+9.public class TestSpring {  
+10.    @Test  
+11.    public void testScope(){  
+12.        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");  
+13.        HelloWorld helloWorld = (HelloWorld) context.getBean("scopeHelloWorld");  
+14.        HelloWorld helloWorld2 = (HelloWorld) context.getBean("scopeHelloWorld");  
+15.        System.out.println(helloWorld);  
+16.        System.out.println(helloWorld2);  
+17.    }  
+18.}  
+```
+
+输出：
+
+![1497058271483](README.assets/1497058271483.png)
+
+可以看到输出的两个对象不一样，同时”The class has created”输出了两次，说明对象被创建了两次，这个说明类的创建时间不是在加载配置文件的时候，而是在 context.getBean() 的时候，其实想一想也应该是这样，要创建多实例对象，我们能在加载配置文件的时候吗？不能，那样就是引用同一个对象了。
+
+另外，<bean>配置为多实例的时候，无论 lazy-init 为何值，都是在context.getBean() 的时候创建对象。
+
+但是单实例和多实例有啥实际用途啊？单实例是同一个对象，如果我们需要配置一个全局的属性或者方法我们可以使用单实例，这样每次使用时都是一个对象，不用重复创建。而多实例可以应用在在不同时候具有不同状态的类中。
+
+**“根据经验，对所有有状态的bean应该使用prototype作用域，而对无状态的bean则应该使用singleton作用域。“**
+
+##### 32.3.2. 懒加载
+
+Bean是在加载配置文件的时候创建的，那可不可以在使用类的时候创建这个类对象呢？这个是可以得，可以利用懒加载。
+
+懒加载只需要在<bean>中加上一个属性：
+
+```xml
+1.<!-- 懒加载 -->  
+2.<bean id="lazyHelloWorld"  
+3.      class="com.example.daomain.HelloWorld"   
+4.      lazy-init="true">  
+5.</bean>  
+```
+
+这样在执行context.getBean()的时候才创建bean 对应的类对象。Spring默认不是懒加载。另外懒加载创建的对象是单实例的，即不管调用多少次 context.getBean() 其实返回的是同一个对象。
+
+这个就涉及一个概念，单实例和多实例。
