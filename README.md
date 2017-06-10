@@ -7266,3 +7266,58 @@ Sping配置文件：
 Person bean发送短信时通过phone来完成的，而phone这个对象引用正是在配置文件中利用构造注入的方式设置的。
 
 <constructor-arg>表示的是构造注入，就是给类构造器中的变量设置具体值，这里利用  ref 引用另一个 bean ，这个bean就是上面定义的Phone。
+
+### 32. Spring Bean
+
+#### 32.1.  **基础概念**
+
+* Bean
+
+  Bean简单点说就是Spring对于类对象的自己定义，所有的对象在spring中都当作bean来处理，Spring容器正是一个大的Bean容器。可以把Spring容器理解成一个大型工厂，Bean就是该工厂的产品。
+
+* Spring 的 Bean 和 JavaBean比较
+
+  规范：Spring容器对Bean 没有特殊要求，不像JavaBean 一样遵循一些规范（为每个属性提供相应的setter 和 getter 方法），不过对于设值注入的Bean,一定要提供setter 方法。
+
+  作用：Spring 中的Bean 是 java 实例，java组件，它的作用几乎无所不包，任何应用组件都被称为Bean，而传统的Java应用中的JavaBean通常作为DTO（数据传输对象），来封装值对象，在各层之间传递数据。
+
+  生命周期：传统的JavaBean作为值对象传递，不接受任何容器管理其生命周期，Spring中的Bean有Spring管理其生命周期行为。
+
+#### 32.2. 初始化
+
+创建对象是在加载applicationContext.xml的时候还是在具体的调用bean的时候呢？
+
+我们可以测试一下。
+
+在工程SpringCreate 中我们在HelloWorld.java类中加上默认构造方法：
+
+```
+1.package com.example.daomain;  
+2.  
+3.public class HelloWorld {  
+4.      
+5.    public HelloWorld() {  
+6.        System.out.println("The class has created");  
+7.    }  
+8.    public void hello(){  
+9.        System.out.println("Hello Spring");  
+10.    }  
+11.}  
+```
+
+我们在测试方法中加断点，在调试时，当单步运行完
+
+ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+
+控制台打印输出：
+
+![1497058128318](README.assets/1497058128318.png)
+
+这个说明构造方法执行了，类已经被创建。
+
+由上，可以得出：
+
+Spring中类的创建时间是在加载配置文件时创建的。
+
+实际上spring加载配置文件时，会依次解析其中的<bean>，来创建相应的对象。
+
