@@ -7516,3 +7516,126 @@ Test:
 ![1497077174757](README.assets/1497077174757.png)
 
 ![1497077180610](README.assets/1497077180610.png)
+
+#### 32.5. **创建对象的方式**
+
+大多数情况下，BeanFactory 直接通过new 关键字调用构造器来创建Bean 实例，而class属性指定了Bean实例的实现类。但这并不是实例化Bean的唯一方法。
+
+创建Bean通常有以下三种方式：
+
+——调用构造器创建Bean 实例；
+
+——调用静态工厂方法创建Bean；
+
+——调用实例工厂方法创建Bean。
+
+##### 32.5.1. 构造器
+
+上面我们创建对象的方式，其实底层就是通过构造器来创建类实例的。
+
+##### 32.5.2. 静态工厂
+
+![1497082794553](README.assets/1497082794553.png)
+
+HelloStaticFactory.java 文件:
+
+```java
+1.package com.example.factory;  
+2.import com.example.daomain.HelloWorld;  
+3./** 
+4. * 静态工厂 
+5. * @author ZY 
+6. */  
+7.public class HelloStaticFactory {  
+8.    public static HelloWorld getClassInstance(){  
+9.        return new HelloWorld();  
+10.    }  
+11.}  
+```
+
+ApplicationContext.xml 文件：
+
+```xml
+1.  <?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+4.    xsi:schemaLocation="http://www.springframework.org/schema/beans  
+5.           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">  
+6.      
+7.    <!--   
+8.        id:唯一标识 ，指代一个类  
+9.        class: 类的全路径名  
+10.     -->  
+11.    <bean id="helloWorld" class="com.example.daomain.HelloWorld"></bean>  
+12.      
+13.    <!--   
+14.        声明工厂类  
+15.        创建对象的时候会根据factory-method配置属性执行其中的方法getClassInstance  
+16.     -->  
+17.    <bean id="helloStaticFactory"   
+18.          class="com.example.factory.HelloStaticFactory"   
+19.          factory-method="getClassInstance">  
+20.    </bean>  
+21.</beans>  
+```
+
+TestSring.java 文件：
+
+```java
+1. package com.example.test;  
+2.import org.junit.Test;  
+3.import org.springframework.context.ApplicationContext;  
+4.import org.springframework.context.support.ClassPathXmlApplicationContext;  
+5.  
+6.import com.example.daomain.HelloWorld;  
+7.  
+8.public class TestSpring {  
+9.    @Test  
+10.    public void testFactory(){  
+11.        //启动spring容器  
+12.        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");  
+13.        //根据id取出工厂类  
+14.        HelloWorld helloWorld = (HelloWorld)context.getBean("helloStaticFactory");  
+15.        helloWorld.hello();  
+16.    }  
+17.}  
+```
+
+这里面比较核心的就是 工厂bean中的 factory-method 了，它的作用就是告诉spring容器在创建工厂类的时候需要执行这个方法，而这个方法里面是什么东西呢？就是创建一个具体的类。所以我们在TestSpring中 context.getBean("helloStaticFactory")返回的对象不是工厂类对象，而是工厂类创建的实例对象。
+
+##### 32.5.3. 实例工厂
+
+同静态工厂不同，实例工厂在配置中的<bean>里面不直接声明factory-method 方法，
+
+实例工厂类 ：
+
+```java
+1.package com.example.factory;  
+2.import com.example.daomain.HelloWorld;  
+3./** 
+4. * 实例工厂 
+5. * @author ZY 
+6. */  
+7.public class HelloStaticFactory2 {  
+8.    public  HelloWorld getClassInstance(){  
+9.        return new HelloWorld();  
+10.    }  
+11.}  
+```
+
+配置：
+
+```xml
+1.<!-- 实例工厂类 -->  
+2.    <bean id="helloStaticFactory2"   
+3.          class="com.example.factory.HelloStaticFactory2" >  
+4.    </bean>  
+5.      
+6.    <!-- 使用实例工厂类 -->  
+7.    <bean id="helloWorld2"  
+8.          factory-bean="helloStaticFactory2"  
+9.          factory-method="getClassInstance">  
+10.    </bean>  
+```
+
+这样在具体的创建类时，直接调用 id 为 helloWorld2 的<bean> 。
