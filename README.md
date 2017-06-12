@@ -7789,3 +7789,207 @@ applicationContext.xml:
 有时某些Bean在配置时需要依赖其他Bean，也就是被依赖的Bean必须先存在，那么如何让被依赖的Bean在目标Bean之前创建呢？我们可以使用 @Required 注解。
 
 ![1497271254871](README.assets/1497271254871.png)
+
+#### 31.2. **自动装配**
+
+##### 31.2.1. 基本概念
+
+在XML配置方式中，某个Bean中有另一个Bean的引用，我们会利用IoC容器注入功能对其初始化，可以set方法注入，也可以构造器注入，但是在实际项目中会有很多的Bean，假设Bean之间的依赖都需要我们手动设置，那将是一个巨大的工作量，如何减少这种工作量、快速准确的进行装配呢？这就用到了自动装配。
+
+何为自动装配？自动装配是满足Bean之间依赖的一种方法，Spring框架会根据变量类型自动寻找相匹配的Bean并进行赋值引用。自动装配是利用 @Autowired 注解来完成的。
+
+##### 31.2.2. 注解自动装配使用
+
+```java
+1.package com.baobaotao;       
+2.import org.springframework.beans.factory.annotation.Autowired;       
+3.@Bean      
+4.public class Boss {       
+5.      
+6.    @Autowired      
+7.    private Car car;       
+8.      
+9.    @Autowired      
+10.    private Office office;       
+11.      
+12.    …       
+13.}    
+```
+
+在这个例子中，我们对成员变量 car 、office 使用了@Autowired注解，那么在Boss 初始化的时候，Spring容器就回去寻找类型为Car、Office的bean，并自动给这两个成员变量赋值。
+
+##### 31.2.3 自动装配对象
+
+我们不仅可以对成员变量进行自动装配，还可以对构造器和方法进行自动装配。
+
+**1)** **构造器自动装配**
+
+```java
+1.package com.baobaotao;       
+2.      
+3.@Bean  
+4.public class Boss {       
+5.    private Car car;       
+6.    private Office office;       
+7.        
+8.    @Autowired      
+9.    public Boss(Car car ,Office office){       
+10.        this.car = car;       
+11.        this.office = office ;       
+12.    }       
+13.        
+14.    …       
+}    
+```
+
+由于 Boss() 构造函数有两个入参，分别是 car 和 office，@Autowired 将分别寻找和它们类型匹配的 Bean，将它们作为 Boss(Car car ,Office office) 的入参来创建 Boss Bean。
+
+**2)方法自动装配**
+
+```java
+1.package com.baobaotao;       
+2.  
+3.@Bean   
+4.public class Boss {       
+5.    private Car car;       
+6.    private Office office;       
+7.      
+8.     @Autowired      
+9.    public void setCar(Car car) {       
+10.        this.car = car;       
+11.    }       
+12.        
+13.    @Autowired      
+14.    public void setOffice(Office office) {       
+15.        this.office = office;       
+16.    }       
+17.    …       
+}    
+```
+
+这时，@Autowired 将查找被标注的方法的入参类型的 Bean，并调用方法自动注入这些 Bean。
+
+**3)成员变量自动装配**
+
+（上面的小例子就是这种装配）
+
+**4)成员变量——集合自动装配**
+
+如果成员变量是集合的话，那么自动装配的时候会将所有符合条件的Bean装配进来。
+
+ApplePhone.java
+
+```java
+1.package com.example.multibeans;  
+2.  
+3.import org.springframework.core.Ordered;  
+4.import org.springframework.stereotype.Component;  
+5.  
+6.//通过实现接口定义bean被装配到集合中的顺序  
+7.@Component  
+8.public class ApplePhone implements Phone,Ordered{  
+9.  
+10.    @Override  
+11.    public void printName() {  
+12.        System.out.println("苹果手机");  
+13.    }  
+14.  
+15.    @Override  
+16.    public int getOrder() {  
+17.        return 2;  
+18.    }  
+19.  
+20.}  
+```
+
+MeizuPhone.java
+
+```java
+1.package com.example.multibeans;  
+2.  
+3.import org.springframework.core.annotation.Order;  
+4.import org.springframework.stereotype.Component;  
+5.  
+6.//通过注解定义bean被装配到集合中的顺序  
+7.@Order(1)  
+8.@Component  
+9.public class MeizuPhone implements Phone{  
+10.  
+11.    @Override  
+12.    public void printName() {  
+13.        System.out.println("魅族手机");  
+14.    }  
+15.   
+} 
+```
+
+Person.java
+
+```java
+1.package com.example.multibeans;  
+2.    
+3.import java.util.List;  
+4.import java.util.Map;  
+5.  
+6.import org.springframework.beans.factory.annotation.Autowired;  
+7.import org.springframework.beans.factory.annotation.Qualifier;  
+8.import org.springframework.stereotype.Component;  
+9.  
+10.@Component  
+11.public class Person {  
+12.    //集合自动装配  
+13.    @Autowired  
+14.    private List<Phone> phoneList;      
+15.      
+16.    //map自动装配  
+17.    @Autowired  
+18.    private Map<String, Phone> phoneMap;  
+19.      
+20.    public void printPhoneName(){  
+21.        System.out.println("list...........");  
+22.          
+23.        if(null != phoneList && phoneList.size() > 0){  
+24.            for(Phone phone : phoneList){  
+25.                phone.printName();  
+26.            }  
+27.        }else{  
+28.            System.out.println("没有手机。。。");  
+29.        }  
+30.    }  
+31.      
+32.    public void printPhoneName2(){  
+33.        System.out.println("\nmap...........");  
+34.          
+35.        if(null == phoneMap || phoneMap.size() == 0){  
+36.            System.out.println("没有手机。。。");  
+37.        }else{  
+38.            for(Map.Entry<String, Phone> phone : phoneMap.entrySet()){  
+39.                System.out.println("map名称：" + phone.getKey());  
+40.                phone.getValue().printName();  
+41.            }  
+42.        }  
+43.    }  
+44.}  
+```
+
+在Person中定义了一个List、一个Map，并设置了自动装配，会有什么效果呢？我们测试下：
+
+```java
+1./** 
+2.     * 测试list、map自动装配 
+3.     */  
+4.    @Test  
+5.    public void test_ListOrMap_Autowired(){  
+6.        Person person = super.getBean("person");  
+7.        person.printPhoneName();  
+8.        person.printPhoneName2();  
+9.    }  
+```
+
+![1497278015588](README.assets/1497278015588.png)
+
+![1497278039604](README.assets/1497278039604.png)
+
+根据输出的信息可以知道不管List还是Map都将符合条件的Bean给设置进去了，其中Map利用bean的id作为键值对的键名称，值为对应的Bean。
+
+注意一个细节，我们的两个Phone的实现类，一个标注了@Order注解，一个实现了Ordered，这个什么作用呢？其实用用来设置在集合装配时在集合中的顺序的，根据上述结果可以看出顺序的设置对List有效，对Map无效。
