@@ -7639,3 +7639,153 @@ TestSring.java 文件：
 ```
 
 这样在具体的创建类时，直接调用 id 为 helloWorld2 的<bean> 。
+
+### 33. Spring注解
+
+上一章讲解了Bean相关的基础知识以及相关的配置使用方式，我们都是用XML配置的方式进行配置的，因为我们测试程序里面的bean是很少的，我们试想一下，在实际的项目中，有成千上万个bean，不谈bean之间引用装配的配置，单单声明一遍bean，我们的配置文件也是臃肿不堪的。那么有没有好的方式解决这一问题呢？那肯定是有的，就是我们要说的注解。
+
+注解的使用我们可能在其他应用功能中用过，比如说REST的配置声明，使用很是便捷，其实Spring注解也是，其实注解简单的理解就是我们给类、方法标识一下，告诉容器、框架我是谁谁谁，使用的时候可以找到我啥的。
+
+#### 33.1. **定义Bean**
+
+##### 33.1.1. 基本配置
+
+我们先来看下如何用注解的方式声明一个bean。
+
+```java
+1.package com.example.bean;  
+2.  
+3.import org.springframework.context.annotation.Scope;  
+4.import org.springframework.stereotype.Component;  
+5.  
+6./** 
+7. * 使用注解方式定义Bean 
+8. *  
+9. * @author zhu 
+10. */    
+11.@Component("COMPUTER")  
+12.public class Computer {    
+13.    public void getName(String name){  
+14.        System.out.println("名称：" + name);  
+15.    }  
+}  
+```
+
+可以看到我们在我们定义的类上面加了一个注解：@Component,这个就是我们用来声明一个类是Spring Bean的方式！有木有超级简单，再也不用在XML文件中写那么长的一串东西了。
+
+我们注意到@Component中貌似还有个东西——“COMPUTER”，这个是用来干啥的呢？其实就是用来给我们的Bean起一个别名的，也就是Bean ID，如果我们没有声明呢？没有显示设置的话，就用类名首字母小写的格式来当作bean的ID,这里如果没有声明的话，那么bean 的ID 就是 computer。
+
+好了，既然已经定义了Bean，那么就可以使用咯，写个测试方法走起！
+
+```java
+1.@Test  
+2.public void testAnnotationBean(){  
+3.    Computer computer = super.getBean("COMPUTER");  
+4.    computer.getName("惠普");  
+5.}  
+```
+
+额，先说明一下，我这里测试类继承了一个父类，在父类中封装了获取Bean的一些方法，方便每次测试使用。这个父类代码如下：
+
+```java
+1.package com.example.test;  
+2.  
+3.import org.junit.After;  
+4.import org.junit.Before;  
+5.import org.springframework.context.support.ClassPathXmlApplicationContext;    
+6.import com.example.utils.StringUtil;  
+7.  
+8./** 
+9. * 测试基础类 ，用于获取Spring配置XML文件及获取bean 
+10. *  
+11. * @author zhu 
+12. */  
+13.public class UnitTestBase {  
+14.    private ClassPathXmlApplicationContext context;  
+15.    private String classPathXml;  
+16.      
+17.    public UnitTestBase(String classPathXml) {  
+18.        this.classPathXml = classPathXml;  
+19.    }  
+20.      
+21.    /** 
+22.     * JUNIT初始化之前初始化并启动Spring容器 
+23.     */  
+24.    @Before  
+25.    public void initAndStartContext(){  
+26.        if(StringUtil.isNullOrEmpty(classPathXml)){  
+27.            classPathXml = "classpath*:spring-*.xml";  
+28.        }  
+29.          
+30.        try{  
+31.            this.context = new ClassPathXmlApplicationContext(classPathXml.split("[,\\s]+"));  
+32.            context.start();  
+33.        }catch (Exception e) {  
+34.            e.printStackTrace();  
+35.        }  
+36.    }  
+37.      
+38.    /** 
+39.     * 关闭Spring容器 
+40.     */  
+41.    @After  
+42.    public void destoryContext(){  
+43.        context.destroy();  
+44.    }  
+45.        
+46.    @SuppressWarnings("unchecked")  
+47.    public <T extends Object> T getBean(String beanName){  
+48.        if(StringUtil.isNullOrEmpty(beanName) || null == context){  
+49.            return null;  
+50.        }  
+51.          
+52.        return (T) context.getBean(beanName);  
+53.    }  
+54.}  
+```
+
+言归正传，我们赶快跑起我们的测试代码。。哎?!怎么回事，怎么报错了，没有这个bean声明？我们不是声明了吗？
+
+哈哈，其实还有一个东西没说呢，不要打我。。。我们是使用了注解声明了一个Bean，其实这个时候Spring容器并不会发现这个Bean，我们还需要显示的告诉Spring容器我们在哪声明了Bean，然后容器可以去指定的路径下寻找到这个bean。其实这个道理和我们在电脑上安装JAVA一样，安装完成后，操作系统并不知道有这个东西，所以在命令行里不好直接运行相关命令，我们需要把安装路径配置到系统环境变量中，然后我们就可以在命令行窗口执行相关的命令选项了，这个配置到环境变量的过程就是我们要做的告诉容器我们的Bean在哪里。那么如何告诉容器我们的Bean在哪里呢？这个时候我们不得不又使用上我们的XML配置文件啦（后面讲到Java配置方式的时候也可以不用XML配置方式了）。
+
+applicationContext.xml:
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+4.    xmlns:context="http://www.springframework.org/schema/context"  
+5.    xsi:schemaLocation="http://www.springframework.org/schema/beans  
+6.       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+7.       http://www.springframework.org/schema/context  
+8.       http://www.springframework.org/schema/context/spring-context.xsd">  
+9.          
+10.  <!-- 设置注解bean扫描范围 -->  
+11.  <context:component-scan base-package="com.example.bean"></context:component-scan>  
+12.</beans>   
+```
+
+这时我们再去执行，发现测试代码可以愉快正常的运行了。我们看下我们的XML配置文件，里面只有一个配置项：<context:component-scan  >,这个作用就是告诉容器去扫描注册bean，那么扫描哪里呢，就是通过里面的  base-package 属性来配置的，一般我们指定bean 所在包名路径。注意，这里使用到了 context 命名空间，需要先注册，也就是上面 <beans>里面引入的context相关的内容。
+
+##### 31.1.2. 作用域
+
+在XML配置方式中我们使用scope 属性设置Bean的作用域，那么在注解方式中如何设置Bean的作用域呢？方式就是我们使用 @Scope 注解来设置。
+
+```java
+1.@Scope("prototype")  
+2.@Component("COMPUTER")  
+3.public class Computer {  
+4.      
+5.    public void getName(String name){  
+6.        System.out.println("名称：" + name);  
+7.    }  
+}  
+```
+
+注解中我们可以定义参数来设置作用域，其实用法和XML配置方式是一样的
+
+##### 31.1.3. Required
+
+有时某些Bean在配置时需要依赖其他Bean，也就是被依赖的Bean必须先存在，那么如何让被依赖的Bean在目标Bean之前创建呢？我们可以使用 @Required 注解。
+
+![1497271254871](README.assets/1497271254871.png)
