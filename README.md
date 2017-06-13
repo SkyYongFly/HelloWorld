@@ -7993,3 +7993,55 @@ Person.java
 根据输出的信息可以知道不管List还是Map都将符合条件的Bean给设置进去了，其中Map利用bean的id作为键值对的键名称，值为对应的Bean。
 
 注意一个细节，我们的两个Phone的实现类，一个标注了@Order注解，一个实现了Ordered，这个什么作用呢？其实用用来设置在集合装配时在集合中的顺序的，根据上述结果可以看出顺序的设置对List有效，对Map无效。
+
+##### 31.2.4. 自动装配冲突
+
+假设现在要给某个成员变量设置自动装配，但是这个成员变量类型对应的Bean有多个，那么将会如何装配呢？也就是该成员变量引用哪个Bean，其实这个时候会报错的，因为框架不知道到底给引用哪个，妥妥的选择困难症啊。。。
+
+那么如何解决呢？其实和实际生活中的场景是一样的，当面对多个选择时并且只能选择一个呢，怎么办呢？就告诉他选择这个不就行了嘛，就不要纠结了。 
+
+* 标示首选的bean
+
+我们可以给要被引用的bean设置一个注解 @Primary，表明当多个选择发生时，这个bean将被优先选择。
+
+```java
+1.package com.example.multibeans;  
+2.  
+3.import org.springframework.context.annotation.Primary;  
+4.import org.springframework.core.Ordered;  
+5.import org.springframework.stereotype.Component;  
+6.  
+7.//通过实现接口定义bean被装配到集合中的顺序  
+8.@Component  
+9.@Primary  
+10.public class ApplePhone implements Phone,Ordered{  
+11.  
+12.    @Override  
+13.    public void printName() {  
+14.        System.out.println("苹果手机");  
+15.    }  
+16.  
+17.    @Override  
+18.    public int getOrder() {  
+19.        return 2;  
+20.    }  
+21.  
+22.}  
+```
+
+* 限定自动装配的bean
+
+既然有多个bean可以选择而产生分歧，那为何不直接指定装配哪个bean呢？是可以的，我们可以利用 @Qualifier注解来限定自动装配的bean范围。
+
+```java
+1.//Qualifier的使用，缩小bean装配范围（有多个匹配会错误）  
+2.    @Autowired  
+3.    @Qualifier("applePhone")  
+4.    private Phone phone;  
+5.      
+6.    public void printPhoneName3(){  
+7.        phone.printName();  
+8.    }  
+```
+
+这样当自动装配的时候会直接将成员变量phone引用 applePhone这个bean。
