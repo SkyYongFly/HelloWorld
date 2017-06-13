@@ -8045,3 +8045,80 @@ Person.java
 ```
 
 这样当自动装配的时候会直接将成员变量phone引用 applePhone这个bean。
+
+* 自定义注解
+
+我们可以利用自定义注解标注要被引用的bean，然后在自动装配的时候指定要装配这个bean。具体例子见下一小节。
+
+#### 31.3. **自定义注解**
+
+自定义的注解 @Apple
+
+```java
+1.package com.example.annotation;  
+2.  
+3.import java.lang.annotation.ElementType;  
+4.import java.lang.annotation.Retention;  
+5.import java.lang.annotation.RetentionPolicy;  
+6.import java.lang.annotation.Target;  
+7.  
+8.import org.springframework.beans.factory.annotation.Qualifier;  
+9.  
+10./** 
+11. * 自定义注解 
+12. *  
+13. * Target定义该注解可以应用的对象 
+14. * Retention标注该注解哪个时期产生作用  
+15. *  
+16. * @author zhu 
+17. */  
+18.@Target({ElementType.METHOD, ElementType.TYPE ,  
+19.        ElementType.FIELD , ElementType.CONSTRUCTOR})  
+20.@Retention(RetentionPolicy.RUNTIME)  
+21.@Qualifier  
+22.public @interface Apple {  
+23.  
+24.}  
+```
+
+使用自定义注解：
+
+```java
+1.package com.example.multibeans;  
+2.  
+3.import org.springframework.context.annotation.Primary;  
+4.import org.springframework.core.Ordered;  
+5.import org.springframework.stereotype.Component;  
+6.  
+7.import com.example.annotation.Apple;  
+8.  
+9.@Component  
+10.@Apple  
+11.public class ApplePhone implements Phone,Ordered{  
+12.  
+13.    @Override  
+14.    public void printName() {  
+15.        System.out.println("苹果手机");  
+16.    }  
+17.  
+18.    @Override  
+19.    public int getOrder() {  
+20.        return 2;  
+21.    }  
+22.  
+23.}  
+```
+
+自动装配：
+
+```java
+1.@Autowired  
+2.@Apple  
+3.private Phone phone;  
+4.      
+5.public void printPhoneName3(){  
+6.     phone.printName();  
+7.}  
+```
+
+这样在自动装配的时候会寻找标注@Apple注解的bean，并设置引用。
