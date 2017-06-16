@@ -8122,3 +8122,93 @@ Person.java
 ```
 
 这样在自动装配的时候会寻找标注@Apple注解的bean，并设置引用。
+
+### 34. Java代码装配
+
+前面介绍了XML和注解的方式声明Bean，其中XML的方式可以自行独立声明完成装配，但是注解的方式因为需要使用到自动扫描所以需要借助一个XML配置文件。
+
+其实我们还可以利用Java实现Bean的配置，完全不需要XML文件的辅助，即Java利用注解实现Bean声明以及装配。我们来看下实际的例子。
+
+StoreConfig.java：
+
+```java
+1.package com.example.bean.config;  
+2.  
+3.import org.springframework.context.annotation.Bean;  
+4.import org.springframework.context.annotation.Configuration;  
+5.  
+6.import com.example.bean.IntegerStore;  
+7.import com.example.bean.StringStore;  
+8.  
+9.@Configuration  
+10.public class StoreConfig {  
+11.      
+12.    @Bean  
+13.    public StringStore getStringStore(){  
+14.        return new StringStore();  
+15.    }  
+16.      
+17.    @Bean(name="integerStore")  
+18.    public IntegerStore getIntegerStore(){  
+19.        return new IntegerStore();  
+20.    }  
+21.      
+22.      
+23.    @Bean(name="storeManager")  
+24.    public StoreManager getStoreManager(){  
+25.        return new StoreManager();  
+26.    }  
+27.}  
+```
+
+（代码中用到的几个类就不给出了，就是简单的类定义）
+
+我们看到新使用了注解：@Bean，这个作用是什么呢？它的作用就是声明方法返回的对象被声明为了一个Bean。其实想一想还是很有必要的，因为有些时候某些Bean不一定是直接由类定义的，可能需要根据某些条件经过处理而封装成的对象，我们就可以借助这种方式来定义一个bean了。
+
+同时我们的Java配置类需要加注解 @Configuration  来声明 这是一个Java配置类。
+
+那么我们如何使用这个配置类呢，即如何获取到声明的Bean呢？
+
+1) 一种方式就是可以结合XML方式，声明扫描路径，利用XML配置文件加载方式来获取，容器扫描到该配置类时知道这是一个Java配置类，然后注册方法声明的bean；
+
+2) 另外一种我们可以直接利用Java的配置，其实就是声明扫描路径，即使用@ComponentScan注解。
+
+```java
+1.@Configuration  
+2.@ComponentScan  
+3.public class StoreConfig {  
+4.      
+5.    @Bean  
+6.    public StringStore getStringStore(){  
+7.        return new StringStore();  
+8.    }  
+9.      
+10.    @Bean(name="integerStore")  
+11.    public IntegerStore getIntegerStore(){  
+12.        return new IntegerStore();  
+13.    }  
+14.      
+15.      
+16.    @Bean(name="storeManager")  
+17.    public StoreManager getStoreManager(){  
+18.        return new StoreManager();  
+19.    }  
+20.}  
+```
+
+使用Bean:
+
+```java
+1.@Test  
+2.    public void  testJavaConfig(){  
+3.         //1. 声明Spring上下文，采用java配置类  
+4.        ApplicationContext context = new AnnotationConfigApplicationContext(StoreConfig.class);  
+5.          
+6. 			//2. 通过Spring上下文获取Bean，在这里Spring通过自动扫描
+7.          //    发现了PersonHelloWorld的实现，并自动创建bean。  
+8.        IntegerStore store = (IntegerStore) context.getBean("integerStore");  
+9.          
+10.        System.out.println(store.hashCode());  
+    }  
+```
+
