@@ -8212,3 +8212,116 @@ StoreConfig.java：
     }  
 ```
 
+### 35. **代理**
+
+#### 35.1.说明
+
+我们要学习spring 的AOP，在学习之前我们先学习一下代理。那么这个是什么东西呢？
+
+举个实际的例子，我们在编程中要将数据保存到数据库，我们要启用事务机制，在保存数据之前开启事务，保存数据完毕，提交事务。如果我们只是操作一两次的数据保存操作，可能觉得每次事务的操作没有什么，但是试想在大型软件程序中，将会产生大量的数据层操作，那么事务的操作次数将是成千上万次的，每次都要进行相同繁琐的操作，岂不是很累人，而且像这种事务的操作是在目标方法的前后都有相应的行为，该如何解决这种重复性的、在目标方法前后都会有动作的问题呢？
+
+Spring的AOP可以解决此类问题，不过我们先从最开始的演化说起。
+
+#### 35.2. **静态代理**
+
+* 利用静态代理可以解决上述问题。
+
+  1) 工程文件
+
+![1498479974940](README.assets/1498479974940.png)
+
+各文件内容如下：
+
+PersonDao.java
+
+```java
+1.package com.example.dao;  
+2.  
+3.public interface PersonDao {  
+4.    public void updataPerson();  
+5.}  
+```
+
+一个简单的接口
+
+PersonDaoImpl.java
+
+```java
+1.package com.example.dao;  
+2.public class PersonDaoImpl implements PersonDao {  
+3.    public void updataPerson() {  
+4.        System.out.println("update person");  
+5.    }  
+} 
+```
+
+Transaction.java    事务操作
+
+```java
+1.package com.example.dao;  
+2.  
+3.public class Transaction {  
+4.    public void beginTransaction(){  
+5.        System.out.println("begin transaction");  
+6.    }  
+7.    public void commint(){  
+8.        System.out.println("commit");  
+9.    }  
+}  
+```
+
+Proxy.java:   静态代理类，实现目标接口
+
+```java
+1.package com.example.dao;  
+2.  
+3.public class Proxy implements PersonDao{  
+4.    private PersonDao personDao;  
+5.    private Transaction transaction;  
+6.  
+7.    public Proxy(PersonDao personDao,Transaction transaction) {  
+8.        this.personDao = personDao;  
+9.        this.transaction = transaction;  
+10.    }  
+11.  
+12.    //利用静态代理实现类方法的事物操作  
+13.    public void updataPerson() {  
+14.        transaction.beginTransaction();  
+15.        personDao.updataPerson();  
+16.        transaction.commint();  
+17.    }  
+18.}  
+```
+
+测试：
+
+ProxyTest.java
+
+```java
+1.package com.example.test;  
+2.  
+3.import org.junit.Test;  
+4.import com.example.dao.PersonDao;  
+5.import com.example.dao.PersonDaoImpl;  
+6.import com.example.dao.Proxy;  
+7.import com.example.dao.Transaction;  
+8.  
+9.public class ProxyTest {  
+10.    @Test  
+11.    public void testProxy(){  
+12.        PersonDao personDao = new PersonDaoImpl();  
+13.        Transaction transaction = new Transaction();  
+14.        Proxy proxy = new Proxy(personDao, transaction);  
+15.        proxy.updataPerson();  
+16.    }  
+17.}  
+```
+
+* 分析说明
+
+  在该工程中我们创建了一个测试目标类PersonDaoImpl,实现了接口PersonDao,其中简单的设置了一个更新数据的操作，这个操作需要事务的控制。我们新建代理类Proxy ，构造方法实例化目标类和事务类，同样实现了PersonDao接口，在目标方法中实现事务操作。这个其实就是利用代理类对我们的目标方法进行了一层封装，当我们实际需要进行操作目标方法时，就是利用代理类来进行操作，也就是测试方法中proxy.updataPerson()的操作。
+
+  这样我们以后凡是PersonDao实现类的updatePerson的操作都可以利用这个代理类，简单方便。
+
+  但是我们仔细分析一下，这个是最好的方法吗？显然不是，明显存在以下缺点：一是如果我们有其他的目标类需要实现事务呢？还需要写代理类。二是如果对于同一个目标类但是有很多目标方法呢？每个目标方法都需要单独控制。三是如果有多个像事务操作这样的动作增加呢?很明显这几个缺点都是因为不灵活而产生的，一个变需要大量的改变文件，不可取。
+
