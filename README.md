@@ -8325,3 +8325,114 @@ ProxyTest.java
 
   但是我们仔细分析一下，这个是最好的方法吗？显然不是，明显存在以下缺点：一是如果我们有其他的目标类需要实现事务呢？还需要写代理类。二是如果对于同一个目标类但是有很多目标方法呢？每个目标方法都需要单独控制。三是如果有多个像事务操作这样的动作增加呢?很明显这几个缺点都是因为不灵活而产生的，一个变需要大量的改变文件，不可取。
 
+#### 35.3.  **动态代理**
+
+##### 35.3.1. 工程文件
+
+![1498571670288](README.assets/1498571670288.png)
+
+Daomain对象和事务操作和上述静态代理一样，这里不再列出。
+
+MyInterceptor.java:
+
+```java
+1.package com.example.dao;  
+2.  
+3.import java.lang.reflect.InvocationHandler;  
+4.import java.lang.reflect.Method;  
+5.  
+6./** 
+7. * 拦截器 
+8. *    1、目标类导入进来 
+9. *    2、事务导入进来 
+10. *    3、invoke完成 
+11. *        1、开启事务 
+12. *        2、调用目标对象的方法 
+13. *        3、事务的提交 
+14. */  
+15.public class MyInterceptor implements InvocationHandler{  
+16.    private PersonDao personDao;  
+17.    private Transaction transaction;  
+18.      
+19.    public MyInterceptor(PersonDao personDao,Transaction transaction){  
+20.        super();  
+21.        this.personDao = personDao;  
+22.        this.transaction = transaction;  
+23.    }  
+24.  
+25.    public Object invoke(Object proxy, Method method, Object[] args)  
+26.            throws Throwable {  
+27.        String methodName = method.getName();  
+28.        if("updatePerson".equals(methodName)){  
+29.            transaction.beginTransaction();  
+30.            method.invoke(personDao);  
+31.            transaction.commint();  
+32.        }else{  
+33.            method.invoke(personDao);  
+34.        }  
+35.          
+36.        return null;  
+37.    }  
+38.  
+39.}  
+```
+
+测试文件ProxyTest.java:
+
+```java
+1.package com.example.test;  
+2.  
+3.import java.lang.reflect.Proxy;  
+4.  
+5.import org.junit.Test;  
+6.  
+7.import com.example.dao.MyInterceptor;  
+8.import com.example.dao.PersonDao;  
+9.import com.example.dao.PersonDaoImpl;  
+10.import com.example.dao.Transaction;  
+11.  
+12./** 
+13. * 1、拦截器的invoke方法是在时候执行的？ 
+14. *     当在客户端，代理对象调用方法的时候，进入到了拦截器的invoke方法 
+15. * 2、代理对象的方法体的内容是什么？ 
+16. *     拦截器的invoke方法的内容就是代理对象的方法的内容 
+17. * 3、拦截器中的invoke方法中的参数method是谁在什么时候传递过来的？ 
+18. *     代理对象调用方法的时候，进入了拦截器中的invoke方法，所以invoke方法中的参数method就是 
+19. *       代理对象调用的方法 
+20. * 
+21. */  
+22.public class ProxyTest {  
+23.    @Test  
+24.    public void testProxy(){  
+25.        /** 
+26.         * 1、创建一个目标对象 
+27.         * 2、创建一个事务 
+28.         * 3、创建一个拦截器 
+29.         * 4、动态产生一个代理对象 
+30.         */  
+31.        PersonDaoImpl personDao = new PersonDaoImpl();  
+32.        Transaction transaction = new Transaction();  
+33.        MyInterceptor myInterceptor = new MyInterceptor(personDao, transaction);  
+34.          
+35.        /** 
+36.         * 1、目标类的类加载器 
+37.         * 2、目标类实现的所有的接口 
+38.         * 3、拦截器 
+39.         */  
+40.        PersonDao personDao2 = (PersonDao) Proxy.newProxyInstance(personDao.getClass().getClassLoader(),  
+41.                personDao.getClass().getInterfaces(),myInterceptor);  
+42.        personDao2.updatePerson();  
+43.    }  
+44.      
+45.}  
+```
+
+##### 35.3.2. 分析
+
+动态代理依然是利用代理类来实现对目标方法的事务操作的，只不过静态代理直接实现目标类实现的接口，这样当目标类执行时直接运行代理类的方法，而动态代理使用的是jskproxy,利用反射来实现事务操作。
+
+动态代理类MyInterceptor 实现了InvocationHandler接口，invoke方法中有三个参数，其中第二个为我们所要执行的目标方法，利用反射传入目标类 personDao ,便执行了目标方法：method.invoke(personDao)。而在目标方法前后正好实现事务操作。
+
+当真正使用的时候，通过Proxy.*newProxyInstance**（）*来创建目标类对象，这样执行目标方法的时候，实际执行的就是invoke方法。
+
+可以看出动态代理拥有了一些拥抱变化的特征，例如对多个类具有相同的事务操作的情况下，可以使用同一个代理类进行操作。当然缺点也明显，例如在invoke方法中判断方法名称，显然是写死了。
