@@ -8436,3 +8436,239 @@ MyInterceptor.java:
 当真正使用的时候，通过Proxy.*newProxyInstance**（）*来创建目标类对象，这样执行目标方法的时候，实际执行的就是invoke方法。
 
 可以看出动态代理拥有了一些拥抱变化的特征，例如对多个类具有相同的事务操作的情况下，可以使用同一个代理类进行操作。当然缺点也明显，例如在invoke方法中判断方法名称，显然是写死了。
+
+### 36. Spring  **AOP**
+
+#### 36.1. **AOP的概念**
+
+**1) 概述**
+
+不管是静态代理还是动态代理(或者还有cglibproxy),其实根本性地目的在于对原有的目标方法的基础上增加一些操作，而这种操作通常都是公共的、经常出现的操作。这些操作可能在目标方法执行前发生也有可能在目标方法执行结束后发生，我们可以想象这样一个模型。
+
+就是对目标方法的一种封装，或者说拦截。
+
+**2) 基础概念**
+
+![1498876084770](README.assets/1498876084770.png)
+
+这两个截图需要结合前面的示例来理解。
+
+> 切面：目标方法附加操作的对象，例如事务处理、日志管理。
+
+> 通知：切面中的方法。
+
+> 连接点：客户端调用的目标方法，就是实际使用的方法。
+
+> 切入点：目标方法执行的前提条件，就是代理类对目标方法进行封装，但是在什么情况下才代理是需要一定的条件的。
+
+#### 36.2. **AOP配置使用**
+
+##### 36.2.1. 工程文件
+
+使用spring AOP需要导入一些jar包，spring AOP 底层的依赖实现就是cglib这些东西。
+
+![1498876184842](README.assets/1498876184842.png)
+
+同样的给出目标类和代理类，下面配置spring配置文件，注意这里需要声明一些命名空间：
+
+ApplicationContext.xml   
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.       xmlns:aop="http://www.springframework.org/schema/aop"  
+4.       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+5.       xsi:schemaLocation="http://www.springframework.org/schema/beans   
+6.          http://www.springframework.org/schema/beans/spring-beans-2.5.xsd  
+7.           http://www.springframework.org/schema/aop   
+8.           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">  
+9.             
+10.    <bean id="personDao" class="com.example.dao.PersonDaoImpl"></bean>  
+11.    <bean id="transaction" class="com.example.dao.Transaction"></bean>  
+12.      
+13.    <aop:config>  
+14.        <!-- 切入点表达式，目的是确定目标类 -->  
+15.        <aop:pointcut   
+16.            expression="execution(* com.example.dao.PersonDaoImpl.*(..))"  
+17.            id="perform"/>  
+18.          
+19.<!-- 声明切面对象，ref指代的就是切面对象，aop:before声明目标方法之前前执行的代理方法 -->  
+20.        <aop:aspect ref="transaction">  
+21.            <aop:before method="beginTransaction" pointcut-ref="perform"/>  
+22.            <aop:after method="commit" pointcut-ref="perform"/>  
+23.        </aop:aspect>  
+24.    </aop:config>  
+25.</beans>  
+```
+
+测试文件AopTest.java	：
+
+```java
+1.package com.example.test;  
+2.  
+3.import org.junit.Test;  
+4.import org.springframework.context.ApplicationContext;  
+5.import org.springframework.context.support.ClassPathXmlApplicationContext;  
+6.  
+7.import com.example.dao.PersonDao;  
+8.  
+9.public class AopTest {  
+10.    @Test  
+11.    public void testSpringAop(){  
+12.        ApplicationContext context =   
+13.                new ClassPathXmlApplicationContext("applicationContext.xml");  
+14.        PersonDao personDao = (PersonDao) context.getBean("personDao");  
+15.        personDao.updatePerson();  
+16.    }  
+17.      
+18.}  
+```
+
+##### 36.2.2. 分析说明
+
+其实spring 的AOP底层实现也是动态代理、cglib这些技术，只不过它进行了深层的封装，我们要想使用不需要自己亲自写复杂的代理类，只需要进行相关的配置就行，spring在运行的时候自动读取配置文件，处理生成对应的代理对象。
+
+在上述配置中重点在于AOP的配置，首先声明目标类，就是我们要对那些类方法进行代理操作，使用到了一种表达式:
+
+**expression="execution(* com.example.dao.PersonDaoImpl.*(..))"**  
+
+它的含义就是目标类是com.example.dao.PersonDaoImpl类下面的任意方法。很显然这种表单式的写法很容易筛选目标方法。
+
+接着声明切面对象，直接用ref引用上面的bean，就是告诉spring  Transaction类就是切面。那切面里面的方法在什么时候执行呢？通过<aop:before> 和<aop:after> 声明在目标方法执行前、后运行哪个切面方法，而pointcut-ref声明切面方法是作用于那个目标类上的，就是上面声明的切入点。
+
+这样我们在客户端使用的时候，我们不用关注具体的代理过程啥的，我们只需要根据bean获取目标对象，然后执行目标方法即可。其实这也就实现了纯粹的面向对象编程的思想，只关心目标对象，其它的实现处理细节不管。
+
+##### 36.2.3. 切面的通知
+
+切面中的方法不仅仅有在目标方法执行之前、后运行的方法，还可以配置在目标方法产生异常等情况下执行的方法。
+
+例如：
+
+Transaction.java:
+
+```java
+1.package com.example.dao;  
+2.  
+3.import org.aspectj.lang.JoinPoint;  
+4.import org.aspectj.lang.ProceedingJoinPoint;  
+5.  
+6.public class Transaction {  
+7.    /* 
+8.     * 前置通知，在目标方法执行之前 
+9.     * 参数：连接点 
+10.     */  
+11.    public void beginTransaction(JoinPoint joinPoint){  
+12.        String methodName = joinPoint.getSignature().getName();  
+13.        System.out.println("连接点的名称："+methodName);  
+14.        System.out.println("目标类："+joinPoint.getTarget().getClass());  
+15.        System.out.println("begin transaction");  
+16.    }  
+17.      
+18.    /* 
+19.     * 后置通知：在目标方法执行之后 
+20.     */  
+21.    public void commit(JoinPoint joinPoint,Object val){  
+22.        System.out.println("目标方法返回值是："+val);  
+23.        System.out.println("commit");  
+24.    }  
+25.      
+26.    /* 
+27.     * 最终通知 
+28.     */  
+29.    public void finallyMethod(){  
+30.        System.out.println("finally method");  
+31.    }  
+32.      
+33.    /* 
+34.     * 异常通知 
+35.     */  
+36.    public void throwingMethod(JoinPoint joinPoint,Throwable throwable){  
+37.        System.err.println("产生异常信息：" + throwable.getMessage());  
+38.    }  
+39.      
+40.    /* 
+41.     * 环绕通知：控制目标方法的执行 
+42.     * joinPoint.proceed();这个代码如果在环绕通知中不写，则目标方法不再执行 
+43.     */  
+44.    public void aroundMethod(ProceedingJoinPoint joinPoint) throws Throwable{  
+45.        System.out.println("环绕通知");  
+46.        joinPoint.proceed();//调用目标方法  
+47.    }  
+48.}  
+```
+
+当然这些方法需要spring配置一下才能真正的作用于目标方法。
+
+ApplicationContext.xml
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.       xmlns:aop="http://www.springframework.org/schema/aop"  
+4.       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+5.       xsi:schemaLocation="http://www.springframework.org/schema/beans   
+6.          http://www.springframework.org/schema/beans/spring-beans-2.5.xsd  
+7.           http://www.springframework.org/schema/aop   
+8.           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">  
+9.             
+10.    <bean id="personDao" class="com.example.dao.PersonDaoImpl"></bean>  
+11.    <bean id="transaction" class="com.example.dao.Transaction"></bean>  
+12.      
+13.    <aop:config>  
+14.        <aop:pointcut   
+15.            expression="execution(* com.example.dao.PersonDaoImpl.*(..))"  
+16.            id="perform"/>  
+17.          
+18.        <aop:aspect ref="transaction">  
+19.            <!-- 前置通知：目标方法执行之前执行 -->  
+20.            <aop:before method="beginTransaction" pointcut-ref="perform"/>  
+21.              
+22.            <!-- 后置通知：  
+23.                1、目标方法执行之后执行  
+24.                2、当目标方法产生异常，后置通知将不再继续执行，可以获取到异常返回值  
+25.             -->  
+26.            <aop:after-returning method="commit" pointcut-ref="perform" returning="val"/>  
+27.              
+28.            <!-- 最终通知：无论目标方法是否产生异常，都会执行 -->  
+29.            <aop:after method="finallyMethod" pointcut-ref="perform"/>  
+30.              
+31.            <!-- 异常通知 -->  
+32.            <aop:after-throwing method="throwingMethod" throwing="throwable" pointcut-ref="perform"/>  
+33.              
+34.            <!--   
+35.                环绕通知  
+36.                        能控制目标方法的执行  
+37.                        前置通知和后置通知能在目标方法的前面和后面加一些代码，但是不能控制目标方法的执行  
+38.             -->  
+39.             <aop:around method="aroundMethod" pointcut-ref="perform"/>  
+40.        </aop:aspect>  
+41.    </aop:config>  
+42.</beans>  
+```
+
+我们的目标方法如果有返回值，例如：
+
+```java
+1.package com.example.dao;  
+2.  
+3.public class PersonDaoImpl implements PersonDao {  
+4.  
+5.    public String updatePerson() {  
+6.        System.out.println("update person");  
+7.        return "haha";  
+8.    }  
+9.  
+10.}  
+```
+
+那么调用目标方法执行将输出如下内容：
+
+![1498876308348](README.assets/1498876308348.png)
+
+环绕通知在目标方法执行之前执行，为什么呢？很简单，因为环绕通知是控制目标方法是否执行的，如果目标方法执行后，还用得着控制吗，那肯定是目标方法执行之前进行控制了。
+
+如果目标类产生异常：
+
+![1498876331799](README.assets/1498876331799.png)
+
+可以看到后置通知没有执行，因为目标方法产生异常。
