@@ -8672,3 +8672,84 @@ ApplicationContext.xml
 ![1498876331799](README.assets/1498876331799.png)
 
 可以看到后置通知没有执行，因为目标方法产生异常。
+
+#### 36.3. **AOP注解**
+
+##### 36.3.1. 概述
+
+我们使用spring的进行各种操作，将AOP的操作配置在xml配置文件中，其实也可以利用注解实现AOP，例如事务的管理。
+
+##### 36.3.2. 工程
+
+![1498896728007](README.assets/1498896728007.png)
+
+注意相关jar包的引入
+
+##### 36.3.3. 代码
+
+配置文件：
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.       xmlns:aop="http://www.springframework.org/schema/aop"  
+4.       xmlns:context="http://www.springframework.org/schema/context"  
+5.       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+6.       xsi:schemaLocation="http://www.springframework.org/schema/beans   
+7.          http://www.springframework.org/schema/beans/spring-beans-2.5.xsd  
+8.           http://www.springframework.org/schema/aop   
+9.           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd  
+10.           http://www.springframework.org/schema/context  
+11.   http://www.springframework.org/schema/context/spring-context-2.5.xsd">  
+12.      <context:component-scan  base-package="com.example.transaction">  
+13.      </context:component-scan>  
+14.        
+15.      <aop:aspectj-autoproxy></aop:aspectj-autoproxy>    
+16.</beans>  
+```
+
+切面--事务：
+
+```java
+1.package com.example.transaction;  
+2.  
+3.import org.aspectj.lang.annotation.AfterReturning;  
+4.import org.aspectj.lang.annotation.Aspect;  
+5.import org.aspectj.lang.annotation.Before;  
+6.import org.aspectj.lang.annotation.Pointcut;  
+7.import org.springframework.stereotype.Component;  
+8.  
+9.@Component("transaction")  
+10.@Aspect  
+11.public class Transaction {  
+12.    @Pointcut("execution (* com.example.transaction.PersonDaoImpl.*(..))")  
+13.    private void point(){}//方法签名，指代目标类方法  
+14.      
+15.    @Before("point()")  
+16.    public void beginTransaction(){  
+17.        System.out.println("begin transaction");  
+18.    }  
+19.      
+20.    @AfterReturning("point()")  
+21.    public void commit(){  
+22.        System.out.println("transaction commit");  
+23.    }  
+24.  
+25.}  
+```
+
+切入点---目标类方法：
+
+```java
+1.package com.example.transaction;  
+2.  
+3.import org.springframework.stereotype.Repository;  
+4.  
+5.@Repository("persondao")  
+6.public class PersonDaoImpl  implements PersonDao{  
+7.    public void getPerson() {  
+8.        System.out.println("get the person");  
+9.    }  
+10.}  
+```
+
