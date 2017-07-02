@@ -8753,3 +8753,47 @@ ApplicationContext.xml
 10.}  
 ```
 
+#### 36.4. 多切面
+
+##### 36.4.1. 说明
+
+Spring的多切面只需要在配置文件中依次声明相关切面即可。
+
+##### 36.4.2. 代码
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.       xmlns:aop="http://www.springframework.org/schema/aop"  
+4.       xmlns:context="http://www.springframework.org/schema/context"  
+5.       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+6.       xsi:schemaLocation="http://www.springframework.org/schema/beans   
+7.           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd  
+8.           http://www.springframework.org/schema/aop   
+9.           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd  
+10.           http://www.springframework.org/schema/context  
+11.           http://www.springframework.org/schema/context/spring-context-2.5.xsd">  
+12.             
+13.      <bean id="personDao" class="com.example.test.PersonDaoImpl"> </bean>   
+14.      <bean id="transaction" class="com.example.test.Transaction"> </bean>  
+15.      <bean id="log" class="com.example.test.Log"> </bean>  
+16.        
+17.      <!-- 多个切面 -->  
+18.      <aop:config>  
+19.        <!-- 切入点：目标类方法 -->  
+20.        <aop:pointcut expression="execution (* com.example.test.PersonDaoImpl.*(..))" id="tran"/>  
+21.          
+22.        <!-- 切面1-->  
+23.        <aop:aspect ref="transaction">  
+24.            <aop:before method="beginTransaction" pointcut-ref="tran"/>         
+25.            <aop:after method="commit" pointcut-ref="tran"/>  
+26.        </aop:aspect>  
+27.        <!-- 切面2-->  
+28.        <aop:aspect ref="log">  
+29.            <aop:before method="beginLog" pointcut-ref="tran"/>  
+30.            <aop:after method="endLog" pointcut-ref="tran"/>  
+31.        </aop:aspect>  
+32.      </aop:config>  
+33.</beans>  
+```
+
