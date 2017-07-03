@@ -8797,3 +8797,201 @@ Spring的多切面只需要在配置文件中依次声明相关切面即可。
 33.</beans>  
 ```
 
+### 37. Spring与JDBC
+
+#### 37.1. 工程
+
+![1498977537532](README.assets/1498977537532.png)
+
+#### 37.2. **代码**
+
+##### 37.2.1. 自定义
+
+自己实现数据库操作：对应jdbc1包
+
+配置 applicationContext.xml：
+
+```java
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.       xmlns:aop="http://www.springframework.org/schema/aop"  
+4.       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+5.       xsi:schemaLocation="http://www.springframework.org/schema/beans   
+6.          http://www.springframework.org/schema/beans/spring-beans-2.5.xsd  
+7.           http://www.springframework.org/schema/aop   
+8.           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">  
+9.             
+10.     <!-- 引入jdbc配置文件 -->  
+11.     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+12.        <property name="locations">  
+13.            <value>classpath:jdbc.properties</value>  
+14.        </property>  
+15.     </bean>  
+16.       
+17.     <!-- 定义数据源 -->  
+18.     <bean id="dataSource" destroy-method="close"  
+19.        class="org.apache.commons.dbcp.BasicDataSource">  
+20.        <property name="driverClassName" value="${jdbc.driverClassName}" />  
+21.        <property name="url" value="${jdbc.url}" />  
+22.        <property name="username" value="${jdbc.username}" />  
+23.        <property name="password" value="${jdbc.password}" />  
+24.    </bean>  
+25.      
+26.    <bean id="databaseutil" class="com.example.jdbc1.DatabaseUtil">  
+27.        <property name="dataSource">  
+28.            <ref bean="dataSource"/>  
+29.        </property>  
+30.    </bean>  
+31.      
+32.    <bean id="persondao" class="com.example.jdbc1.PersonDao" parent="databaseutil">  
+33.    </bean>  
+34.    </beans>  
+```
+
+Jdbc.peroperties:
+
+```
+1.jdbc.driverClassName=com.mysql.jdbc.Driver  
+2.jdbcjdbc.url=jdbc\:mysql\://localhost\:3306/yong  
+3.jdbc.username=root  
+jdbc.password=root 
+```
+
+DatabaseUtil.java:
+
+```java
+1.package com.example.jdbc1;  
+2.  
+3.import java.sql.Connection;  
+4.import java.sql.SQLException;  
+5.import java.sql.Statement;  
+6.  
+7.import javax.sql.DataSource;  
+8.  
+9.//操作数据库  
+10.public class DatabaseUtil {  
+11.    private DataSource dataSource;  
+12.      
+13.    public DatabaseUtil() {  
+14.    }  
+15.      
+16.    public DatabaseUtil(DataSource dataSource){  
+17.        this.dataSource = dataSource;  
+18.    }  
+19.      
+20.      
+21.    public DataSource getDataSource() {  
+22.        return dataSource;  
+23.    }  
+24.  
+25.    public void setDataSource(DataSource dataSource) {  
+26.        this.dataSource = dataSource;  
+27.    }  
+28.  
+29.    protected void insert(String sql) throws SQLException{  
+30.        Connection connection = dataSource.getConnection();  
+31.        Statement statement = connection.createStatement();  
+32.        statement.execute(sql);  
+33.        statement.close();  
+34.        connection.close();  
+35.    }  
+36.  
+}  
+```
+
+PersonDao.java:
+
+```java
+1.package com.example.jdbc1;  
+2.  
+3.import java.sql.SQLException;  
+4.  
+5.  
+6.public class PersonDao extends DatabaseUtil{  
+7.    public void savePerson() throws SQLException{  
+8.        this.insert("insert into person values('zhu',23)");  
+9.    }  
+10.}  
+```
+
+这里我们定义了DatabaseUtil类来获取数据源，然后操作数据库，在具体子类里面执行了插入操作。注意在spring配置文件中我们使用配置方式配置数据源，即告诉相关方法解析jdbc配置文件，然后获取连接，取得数据源。
+
+这种方式需要我们自己获取数据源操作数据库，比较麻烦，好在jdbc已经给我们做好了这些事，例子如下……
+
+##### 37.2.2. jdbc提供
+
+配置：     
+
+```xml
+xml1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.       xmlns:aop="http://www.springframework.org/schema/aop"  
+4.       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+5.       xsi:schemaLocation="http://www.springframework.org/schema/beans   
+6.          http://www.springframework.org/schema/beans/spring-beans-2.5.xsd  
+7.           http://www.springframework.org/schema/aop   
+8.           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">  
+9.             
+10.     <!-- 引入jdbc配置文件 -->  
+11.     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+12.        <property name="locations">  
+13.            <value>classpath:jdbc.properties</value>  
+14.        </property>  
+15.     </bean>  
+16.       
+17.     <!-- 定义数据源 -->  
+18.     <bean id="dataSource" destroy-method="close"  
+19.        class="org.apache.commons.dbcp.BasicDataSource">  
+20.        <property name="driverClassName" value="${jdbc.driverClassName}" />  
+21.        <property name="url" value="${jdbc.url}" />  
+22.        <property name="username" value="${jdbc.username}" />  
+23.        <property name="password" value="${jdbc.password}" />  
+24.    </bean>  
+25.      
+26.    <bean id="persondao2" class="com.example.jdbc2.PersonDao">  
+27.        <property name="dataSource">  
+28.            <ref bean="dataSource"/>  
+29.        </property>  
+30.    </bean>  
+31.</beans>  
+```
+
+ PersonDao.java:
+
+```java
+1.package com.example.jdbc2;  
+2.  
+3.import org.springframework.jdbc.core.support.JdbcDaoSupport;  
+4.  
+5.public class PersonDao extends JdbcDaoSupport{  
+6.    public void savePerson(String sql){  
+7.        this.getJdbcTemplate().execute(sql);  
+8.    }  
+9.}  
+```
+
+测试：
+
+```java
+1.package com.example.jdbc2;  
+2.  
+3.import java.sql.SQLException;  
+4.  
+5.import org.junit.Test;  
+6.import org.springframework.context.ApplicationContext;  
+7.import org.springframework.context.support.ClassPathXmlApplicationContext;  
+8.  
+9.public class PersondaoTest {  
+10.    @Test  
+11.    public void testSavePerson() throws SQLException{  
+12.        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");  
+13.        PersonDao personDao = (PersonDao) context.getBean("persondao2");  
+14.        personDao.savePerson("insert into person values('ping',22)");  
+15.    }  
+16.}  
+```
+
+##### 37.2.3. 结果
+
+![1499087589855](README.assets/1499087589855.png)
+
