@@ -9028,3 +9028,46 @@ MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过�
 * MyBatis专注于SQL本身，是一个足够灵活的DAO层解决方案。
 
   对性能的要求很高，或者需求变化较多的项目，如互联网项目，MyBatis将是不错的选择。
+
+### **41.** **SpringMVC初相识**
+
+#### **41.1.** **SpringMVC简介**
+
+Spring Web MVC是一种基于Java的实现了Web MVC设计模式的请求驱动类型的轻量级Web框架，即使用了MVC架构模式的思想，将web层进行职责解耦，基于请求驱动指的就是使用请求-响应模型，框架的目的就是帮助我们简化开发，Spring Web MVC也是要简化我们日常Web开发的。
+
+另外还有一种基于组件的、事件驱动的Web框架在此就不介绍了，如Tapestry、JSF等。
+
+Spring Web MVC也是服务到工作者模式的实现，但进行可优化。前端控制器是DispatcherServlet；应用控制器其实拆为处理器映射器(Handler Mapping)进行处理器管理和视图解析器(View Resolver)进行视图管理；页面控制器/动作/处理器为Controller接口（仅包含ModelAndView handleRequest(request, response) 方法）的实现（也可以是任何的POJO类）；支持本地化（Locale）解析、主题（Theme）解析及文件上传等；提供了非常灵活的数据验证、格式化和数据绑定机制；提供了强大的约定大于配置（惯例优先原则）的契约式编程支持。
+
+#### **41.2.** **作用和功能**
+
+![img](README.assets/wps13-1499256819919.png) 让我们能非常简单的设计出干净的Web层和薄薄的Web层；
+
+![img](README.assets/wps14.png) 进行更简洁的Web层的开发；
+
+![img](README.assets/wps15-1499256819919.png) 天生与Spring框架集成（如IoC容器、AOP等）；
+
+![img](README.assets/wps16.png) 提供强大的约定大于配置的契约式编程支持；
+
+![img](README.assets/wps17.png) 能简单的进行Web层的单元测试；
+
+![img](README.assets/wps18-1499256819919.png) 支持灵活的URL到页面控制器的映射；
+
+![img](README.assets/wps19-1499256819919.png) 非常容易与其他视图技术集成，如Velocity、FreeMarker等等，因为模型数据不放在特定的API里，而是放在一个Model里（Map数据结构实现，因此很容易被其他框架使用）；
+
+![img](README.assets/wps20-1499256819919.png) 非常灵活的数据验证、格式化和数据绑定机制，能使用任何对象进行数据绑定，不必实现特定框架的API；
+
+![img](README.assets/wps21-1499256819919.png) 提供一套强大的JSP标签库，简化JSP开发；
+
+![img](README.assets/wps22-1499256819919.png) 支持灵活的本地化、主题等解析；
+
+![img](README.assets/wps23-1499256819919.png) 更加简单的异常处理；
+
+![img](README.assets/wps24-1499256819919.png) 对静态资源的支持；
+
+![img](README.assets/wps25.png) 支持Restful风格
+
+#### **41.3.** **SpringMVC架构**
+
+Spring Web MVC框架也是一个基于请求驱动的Web框架，并且也使用了前端控制器模式来进行设计，再根据请求映射规则分发给相应的页面控制器（动作/处理器）进行处理。首先让我们整体看一下Spring Web MVC处理请求的流程：
+
