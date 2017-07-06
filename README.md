@@ -9071,3 +9071,70 @@ Spring Web MVC也是服务到工作者模式的实现，但进行可优化。前
 
 Spring Web MVC框架也是一个基于请求驱动的Web框架，并且也使用了前端控制器模式来进行设计，再根据请求映射规则分发给相应的页面控制器（动作/处理器）进行处理。首先让我们整体看一下Spring Web MVC处理请求的流程：
 
+##### 41.3.1. SpringMVC请求处理流程
+
+如图：
+
+![1499266090759](README.assets/1499266090759.png)
+
+具体执行步骤如下：
+
+1) 首先用户发送请求————>前端控制器，前端控制器根据请求信息（如URL）来决定选择哪一个页面控制器进行处理并把请求委托给它，即以前的控制器的控制逻辑部分；图中的1、2步骤；
+
+2) 页面控制器接收到请求后，进行功能处理，首先需要收集和绑定请求参数到一个对象，这个对象在Spring Web MVC中叫命令对象，并进行验证，然后将命令对象委托给业务对象进行处理；处理完毕后返回一个ModelAndView（模型数据和逻辑视图名）；图中的3、4、5步骤；
+
+3) 前端控制器收回控制权，然后根据返回的逻辑视图名，选择相应的视图进行渲染，并把模型数据传入以便视图渲染；图中的步骤6、7；
+
+4) 前端控制器再次收回控制权，将响应返回给用户，图中的步骤8；至此整个结束。
+
+##### 41.3.2. SpringMVC架构
+
+Spring Web MVC核心架构图，如图：
+
+![1499344808738](README.assets/1499344808738.png)
+
+核心架构的具体流程步骤如下：
+
+1) 首先用户发送请求——>DispatcherServlet，前端控制器收到请求后自己不进行处理，而是委托给其他的解析器进行处理，作为统一访问点，进行全局的流程控制；
+
+2) DispatcherServlet——>HandlerMapping, HandlerMapping将会把请求映射为HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象、多个HandlerInterceptor拦截器）对象，通过这种策略模式，很容易添加新的映射策略；
+
+3) DispatcherServlet——>HandlerAdapter，HandlerAdapter将会把处理器包装为适配器，从而支持多种类型的处理器，即适配器设计模式的应用，从而很容易支持很多类型的处理器；
+
+4) HandlerAdapter——>处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理；并返回一个ModelAndView对象（包含模型数据、逻辑视图名）；
+
+5) ModelAndView的逻辑视图名——> ViewResolver， ViewResolver将把逻辑视图名解析为具体的View，通过这种策略模式，很容易更换其他视图技术；
+
+6) View——>渲染，View会根据传进来的Model模型数据进行渲染，此处的Model实际是一个Map数据结构，因此很容易支持其他视图技术；
+
+7) 返回控制权给DispatcherServlet，由DispatcherServlet返回响应给用户，到此流程结束。
+
+#### 41.4. **SpringMVC优势**
+
+![img](README.assets/wps27-1499344831213.png) 清晰的角色划分：前端控制器（DispatcherServlet）、请求到处理器映射（HandlerMapping）、处理器适配器（HandlerAdapter）、视图解析器（ViewResolver）、处理器或页面控制器（Controller）、验证器（Validator）、命令对象（Command  请求参数绑定到的对象就叫命令对象）、表单对象（Form Object 提供给表单展示和提交到的对象就叫表单对象）；
+
+![img](README.assets/wps28-1499344831213.png) 分工明确，而且扩展点相当灵活，可以很容易扩展，虽然几乎不需要；
+
+![img](README.assets/wps29-1499344831213.png) 由于命令对象就是一个POJO，无需继承框架特定API，可以使用命令对象直接作为业务对象；
+
+![img](README.assets/wps30.png) 和Spring 其他框架无缝集成，是其它Web框架所不具备的；
+
+![img](README.assets/wps31-1499344831213.png) 可适配，通过HandlerAdapter可以支持任意的类作为处理器；
+
+![img](README.assets/wps32-1499344831213.png) 可定制性，HandlerMapping、ViewResolver等能够非常简单的定制；
+
+![img](README.assets/wps33.png) 功能强大的数据验证、格式化、绑定机制；
+
+![img](README.assets/wps34.png) 利用Spring提供的Mock对象能够非常简单的进行Web层单元测试；
+
+![img](README.assets/wps35.png) 本地化、主题的解析的支持，使我们更容易进行国际化和主题的切换;
+
+![img](README.assets/wps36.png) 强大的JSP标签库，使JSP编写更容易；
+
+![img](README.assets/wps37.png) RESTful风格的支持；
+
+![img](README.assets/wps38.png) 简单的文件上传；
+
+![img](README.assets/wps39.png) 约定大于配置的契约式编程支持；
+
+![img](README.assets/wps40.png) 基于注解的零配置支持等等。
