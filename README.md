@@ -9138,3 +9138,166 @@ Spring Web MVC核心架构图，如图：
 ![img](README.assets/wps39.png) 约定大于配置的契约式编程支持；
 
 ![img](README.assets/wps40.png) 基于注解的零配置支持等等。
+
+### 42. **SpringMVC入门示例**
+
+按照契约式的精神，我们要写的第一个程序是啥呢？那肯定是—— Hello World啦！所以我们来开发我们的基于SpringMVC的第一个程序——Hello World 。
+
+#### 42.1.**环境**
+
+1) 开发环境：IntelliJ IDEA
+
+2) 程序环境: Tomcat8 + Java8
+
+#### 42.2.**步骤**
+
+##### 42.2.1. 创建web应用
+
+应用名称：SpringMVC_HelloWorld
+
+需要注意引入相应的依赖jar包，包括：
+
+![img](README.assets/wps42.png) Spring官网下载的 spring-framework-4.3.10.RELEASE-dist.zip下libs中的所有jar包
+
+![img](README.assets/wps43.png) Spring依赖的commons-logging-1.2.jar包
+
+这里因为使用的是IDEA，创建项目的时候选择类型为SpringMVC，它会自动下载所需要的Jar包 （真的很方便啊……）。
+
+创建完目录结构显示：
+
+![img](README.assets/wps44.jpg)
+
+可以看出工程目录结构，包括基础的jar包依赖，以及web工程所需要的web.xml等文件，这里由于IDEA太智能，在web.xml中已经配置好相关设置，并创建了其他两个xml文件（先忽略这两个文件）。但是我们刚开始还是需要自动手动写，来加强学习。
+
+##### 42.2.2. web.xml设置
+
+前端控制器： DispatcherServlet。在web.xml文件中配置内容如下：
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"  
+3.         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+4.         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"  
+5.         version="3.1">  
+6.  
+7.    <!--定义Spring MVC前端控制器-->  
+8.    <servlet>  
+9.        <servlet-name>springmvc</servlet-name>  
+10.        <servlet-class>  
+11.            org.springframework.web.servlet.DispatcherServlet  
+12.        </servlet-class>  
+13.        <init-param>  
+14.            <param-name>contextConfigLocation</param-name>  
+15.            <param-value>/WEB-INF/springmvc-config.xml</param-value>  
+16.        </init-param>  
+17.        <load-on-startup>1</load-on-startup>  
+18.    </servlet>  
+19.  
+20.    <servlet-mapping>  
+21.        <servlet-name>springmvc</servlet-name>  
+22.        <url-pattern>/</url-pattern>  
+23.    </servlet-mapping>  
+24.  
+25.</web-app>  
+```
+
+这里我们定义了一个servlet，拦截所有的请求，通过DispatcherServlet前端控制器来分发请求，并且我们设置了初始化参数，加载springmvc配置文件，并且在tomcat容器一启动的时候就进行初始化。
+
+##### 42.2.3. SpringMVC配置文件
+
+springmvc-config.xml：
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+4.       xsi:schemaLocation="http://www.springframework.org/schema/beans  
+5.       http://www.springframework.org/schema/beans/spring-beans.xsd">  
+6.  
+7.    <!--设置hello请求处理controller-->  
+8.    <bean name="/hello" class="com.example.controller.HelloController"/>  
+9.  
+10.    <!--处理映射器将bean的name作为URL进行查找，需要在配置Handle时指定name(即URL)-->  
+11.    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>  
+12.  
+13.    <!--SimpleControllerHandlerAdapter是一个处理适配器，所有处理适配器都要实现HandlerAdapter接口-->  
+14.    <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/>  
+15.  
+16.    <!--视图解析器-->  
+17.    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"/>  
+18.</beans>  
+```
+
+在本配置文件中，声明了HelloController业务控制器类，用于处理/hello请求，即在浏览器地址栏中输入访问地址，例如 http://localhost:8080/HelloWorld/hello ,会直接请求到该处理类。
+
+同时配置了处理映射器、处理适配器、识图解析器，如果Spring的版本是4.0以后，不用设置，容器会使用默认的适配器、解析器。
+
+##### 42.2.4. 处理控制器
+
+Controller实现类
+
+```java
+1.package com.example.controller;  
+2.  
+3.import org.apache.commons.logging.Log;  
+4.import org.apache.commons.logging.LogFactory;  
+5.import org.springframework.web.servlet.ModelAndView;  
+6.import org.springframework.web.servlet.mvc.Controller;  
+7.  
+8.import javax.servlet.http.HttpServletRequest;  
+9.import javax.servlet.http.HttpServletResponse;  
+10.  
+11./** 
+12. * 处理前端 hello请求 
+13. */  
+14.public class HelloController  implements Controller{  
+15.  
+16.    private static  final Log logger = LogFactory.getLog(HelloController.class);  
+17.  
+18.    @Override  
+19.    public ModelAndView handleRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {  
+20.        logger.info("handle被调用");  
+21.  
+22.        //创建ModelAndView对象  
+23.        ModelAndView modelAndView = new ModelAndView();  
+24.        //添加模型数据  
+25.        modelAndView.addObject("message","Hello World");  
+26.        //设置显示的逻辑视图名  
+27.        modelAndView.setViewName("/WEB-INF/content/welcome.jsp");  
+28.  
+29.        return  modelAndView;  
+30.    }  
+31.}  
+```
+
+HelloController处理类实现了Controller接口，实现了handleRequest方法，通过该方法可以获取HttpServletRequest、HttpServletResponse对象。在handleRequest中我们新建了模型视图对象，并添加了模型数据，相当于我们在直接用servlet时候给response设置附带参数数据一样。这里还设置了显示的逻辑视图名，指示/hello请求后会转至的页面，即welcome.jsp。最后方法需要返回模型视图对象。
+
+需要注意的是，我们这种实现接口的方式，类只能处理单一的请求，即只能处理/hello请求，因为我们只能实现一个接口的方法，后续说的利用注解的方式可以处理多个请求，就是可以定义不同的方法处理不同的请求，就是类似于REST请求的处理方式。
+
+##### 42.2.5. 视图页面
+
+Welcome.jsp
+
+```xml
+1.<%@ page contentType="text/html;charset=UTF-8" language="java" %>  
+2.<html>  
+3.<head>    
+4.</head>  
+5.<body>  
+6. 	 ${requestScope.message}
+7.</body>  
+</html> 
+```
+
+在展示页面中我们简单的输出在控制层往模型视图对象中添加的参数信息。
+
+##### 42.2.6. 运行访问
+
+我们部署并启动应用，在浏览器中输入访问：
+
+![1500039467611](README.assets/1500039467611.png)
+
+可以看到我们的应用运行成功啦！
+
+有木有感觉很开心？……不开心…呜呜呜…第一次使用IDEA，各种不顺心，配置各种烦，另外我们从浏览器的访问地址能看出啥？我去，竟然不用输入应用名称，直接跟着我们定义的/hello请求……直接一直有应用名称，死活没用……我也是醉了…这个回头要好好研究下为啥。
+
