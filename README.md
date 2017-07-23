@@ -9301,3 +9301,92 @@ Welcome.jsp
 
 有木有感觉很开心？……不开心…呜呜呜…第一次使用IDEA，各种不顺心，配置各种烦，另外我们从浏览器的访问地址能看出啥？我去，竟然不用输入应用名称，直接跟着我们定义的/hello请求……直接一直有应用名称，死活没用……我也是醉了…这个回头要好好研究下为啥。
 
+### 43. **SpringMVC注解应用**
+
+#### 43.1. **前言**
+
+前面已经说了Controller利用实现接口的方式来完成对请求的处理只能处理单一的请求，我们可以利用注解的方式来配置一个类处理多个请求。另外利用注解的方式，也简化了工程的配置，可以很快捷清晰的看出类方法处理的是哪个请求。
+
+下面我们就来看下如何利用注解的方式写一个SpringMVC应用。
+
+#### 43.2. **步骤**
+
+开发IDE： Eclipse for J2EE
+
+工程：
+
+![img](README.assets/wps45.jpg)
+
+##### 43.2.1. SpringMVC配置文件
+
+springmvc.xml：
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+4.       xmlns:context="http://www.springframework.org/schema/context"  
+5.       xsi:schemaLocation="http://www.springframework.org/schema/beans  
+6.       http://www.springframework.org/schema/beans/spring-beans.xsd  
+7.       http://www.springframework.org/schema/context  
+8.       http://www.springframework.org/schema/context/spring-context-4.3.xsd ">  
+9.  
+10.    <!--配置注解扫描路径-->  
+11.    <context:component-scan base-package="com.jsm.controller"/>  
+12.  
+13.    <!--处理映射器将bean的name作为URL进行查找，需要在配置Handle时指定name(即URL)-->  
+14.    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>  
+15.  
+16.    <!--SimpleControllerHandlerAdapter是一个处理适配器，所有处理适配器都要实现HandlerAdapter接口-->  
+17.    <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/>  
+18.  
+19.    <!--视图解析器-->  
+20.    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"/>  
+21.</beans>  
+```
+
+该配置文件相比较第一个HelloWorld中，删除了对于 /hello bean的定义，增加了Spring扫描配置，目的是为了扫描目标类路径下的配置了注解的类，将他们注册到bean容器中。
+
+##### 43.2.2. Controller配置类
+
+```java
+1.package com.jsm.controller;  
+2.  
+3.import org.apache.commons.logging.Log;  
+4.import org.apache.commons.logging.LogFactory;  
+5.import org.springframework.stereotype.Controller;  
+6.import org.springframework.web.bind.annotation.RequestMapping;  
+7.import org.springframework.web.servlet.ModelAndView;  
+8.  
+9./** 
+10. * 利用注解方式配置Controller类 
+11. * 处理前端 hello请求 
+12. */  
+13.@Controller  
+14.public class HelloController{  
+15.  
+16.    private static  final Log logger = LogFactory.getLog(HelloController.class);  
+17.  
+18.    @RequestMapping(value = "/hello")  
+19.    public ModelAndView  hello(){  
+20.        logger.info("handle被调用");  
+21.  
+22.        //创建ModelAndView对象  
+23.        ModelAndView modelAndView = new ModelAndView();  
+24.        //添加模型数据  
+25.        modelAndView.addObject("message","Hello World");  
+26.        //设置显示的逻辑视图名  
+27.        modelAndView.setViewName("/WEB-INF/content/welcome.jsp");  
+28.  
+29.        return  modelAndView;  
+30.    }  
+31.}  
+```
+
+本controller类不采用实现接口的方式，而是使用了注解的方式，注解 @Controller表明HelloController类是SpringMVC的控制器类。方法 hello() 使用了@RequestMapping() 来表明要对应处理哪个访问请求，这里表明要处理的请求是 /hello 。
+
+##### 43.2.3. 访问测试
+
+部署请求  hello：
+
+![1500795971548](README.assets/1500795971548.png)
