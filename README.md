@@ -9420,3 +9420,96 @@ springmvc.xml：
 ![img](README.assets/wps49.jpg) 
 
 我们定义拦截所有的后缀为.action的请求，然后交由默认的转发控制器处理，同时注入我们的SpringMVC配置文件，配置文件中定义了请求具体由哪个控制器来处理以及视图适配器等。
+
+### 44.**SpringMVC注解**
+
+#### 44.1. **@Controller注解**
+
+##### 44.1.1. 说明
+
+@Controller注解用于标注一个Java类，表明注解的类将作为Spring容器的一个Bean，不过这个Bean有点特殊，不同于普通的Bean，它是一个SpringMVC控制器对象，用于处理应用请求。和REST类似，我们用注解标注一个类及方法，当实际请求的时候，就会根据URL路径格式来对应匹配对应的处理类及方法。不同的是Spring	MVC中的请求后需要返回模型视图对象，以便于用于前端页面解析渲染展示。
+
+Ø 注册
+
+为了使注册的控制器类能正常使用，需要在Spring的配置文件中注册该bean，用了注解的方式，我们一般在Spring配置文件中定义自动扫描，由Spring容器去指定路径下扫描注册添加了注解的类。例如：
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+4.       xmlns:context="http://www.springframework.org/schema/context"  
+5.       xsi:schemaLocation="http://www.springframework.org/schema/beans  
+6.       http://www.springframework.org/schema/beans/spring-beans.xsd  
+7.       http://www.springframework.org/schema/context  
+8.       http://www.springframework.org/schema/context/spring-context-4.3.xsd ">  
+9.  
+10.    <!--配置注解扫描路径-->  
+11.    <context:component-scan base-package="com.example.controller"/>  
+12.</beans>  
+```
+
+##### 44.1.2. 注解使用
+
+1) Springmvc-config.xml
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+4.       xmlns:context="http://www.springframework.org/schema/context"  
+5.       xsi:schemaLocation="http://www.springframework.org/schema/beans  
+6.       http://www.springframework.org/schema/beans/spring-beans.xsd  
+7.       http://www.springframework.org/schema/context  
+8.       http://www.springframework.org/schema/context/spring-context-4.3.xsd ">  
+9.  
+10.    <!--配置注解扫描路径-->  
+11.    <context:component-scan base-package="com.example.controller"/>  
+12.  
+13.    <!--视图解析器-->  
+14.    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
+15.        <!--返回的视图页面前缀，即所在路径-->  
+16.        <property name="prefix">  
+17.            <value>/WEB-INF/content/</value>  
+18.        </property>  
+19.  
+20.        <!--返回的视图页面后缀，即为jsp页面-->  
+21.        <property name="suffix">  
+22.            <value>.jsp</value>  
+23.        </property>  
+24.    </bean>  
+25.</beans>  
+```
+
+这里配置了视图解析器，设定了初始化参数是，设定Controller控制器返回的视图路径及格式，即返回的视图页面必须是   /WEB-INF/content/ 路径下的已 .jsp为结尾的文件。
+
+2) Controller控制器
+
+```java
+1.package com.example.controller;  
+2.  
+3.import org.springframework.stereotype.Controller;  
+4.import org.springframework.ui.Model;  
+5.import org.springframework.web.bind.annotation.RequestMapping;  
+6.  
+7.@Controller  
+8.public class HelloSpring {  
+9.  
+10.    @RequestMapping(value = "/hellospring")  
+11.    public String  handleRequest(Model model){  
+12.        model.addAttribute("message","Hello Spring!");  
+13.        return "welcome";  
+14.    }  
+15.}  
+```
+
+这里控制器处理的请求为 /hellospring  ，然后往模型视图中添加了一个名称为“message”的字符串对象。最后返回 welcome 字符串，这个不是普通字符串，而是目标视图页面名称，即和上面的配置文件中描述的视图解析器结合，最终的目标页面就是——
+
+ WEB-INF/content/welcome.jsp
+
+在welcome.jsp页面中可以利用request来获取在控制器里往模型里新增的message的值。
+
+（由于welcome.jsp及其它剩下的文件配置和第一个HelloWorld相同，此处不再贴出。）
+
+3) 部署访问
+
+![1501155689990](README.assets/1501155689990.png)
