@@ -9513,3 +9513,52 @@ springmvc.xml：
 3) 部署访问
 
 ![1501155689990](README.assets/1501155689990.png)
+
+#### 44.2. **@RequestMapping**
+
+##### 44.2.1. 说明
+
+@RequestMapping注解用于注解类或方法，指示用哪个类的哪个方法来处理目标请求。@RequestMapping注解控制器类的时候，相当于定义一个高一级访问请求，而定义到方法的则是低级的请求。
+
+##### 44.2.2. 注解使用
+
+```java
+1./** 
+2. * SpringMVC 控制器  
+3. *  
+4. * @author zhu 
+5. */  
+6.@Controller  
+7.@RequestMapping("/user")  
+8.public class UserController {  
+9.      
+10.    /** 
+11.     * 处理用户注册请求 
+12.     * @return 
+13.     */  
+14.    @RequestMapping(value = "/register")  
+15.    public String register(Model model){  
+16.        model.addAttribute("message", "注册成功！");  
+17.        return "welcome";  
+18.    }  
+19.      
+20.    /** 
+21.     * 用户登录 
+22.     * @return 
+23.     */  
+24.    @RequestMapping("/login")  
+25.    public String login(Model model){  
+26.        model.addAttribute("message", "登录成功！");  
+27.        return "welcome";  
+28.    }  
+29.}  
+```
+
+浏览器访问：
+
+![1501245000277](README.assets/1501245000277.png)
+
+![1501155832354](README.assets/1501155832354.png)
+
+这里我们在控制器类上面加注解 @RequestMapping，定义类一级处理的请求是 /user。类与方法结合而成的访问路径对应应用请求时的URL，即 /user/register , /user/login。
+
