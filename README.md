@@ -9626,3 +9626,30 @@ Value属性执行类或方法处理的请求名称，例如
 
 
 
+##### 44.2.4. 控制器请求处理方法可出现参数类型
+
+我们的请求处理方法可以传递不同类型的参数。例如之前的示例中参数Model，我们可以自由的定义使用。同样的如果我们需要HttpServletRequest或者HttpSession参数对象，我们也可以在方法参数中定义。
+
+![img](README.assets/wps59.jpg) 
+
+我们在方法中定义的参数，Spring容器会帮我们创建或者获取注入进来。
+
+​	下表列出处理方法可出现的参数：
+
+​	![img](README.assets/wps60.jpg)
+
+![img](README.assets/wps61.jpg) 
+
+##### 44.2.5. 请求方法可返回类型
+
+请求方法可返回类型列表：
+
+![img](README.assets/wps62.jpg) 
+
+1) Model和ModelAndView
+
+对于SpringMVC框架而言，主要的事情就是控制器处理发送请求，然后返回模型数据（Model）和解析模型数据并展示的视图（View）。
+
+Spring提供了多种方式将模型数据传递给视图：
+
+![img](README.assets/wps63.jpg) 
