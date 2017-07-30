@@ -9562,3 +9562,67 @@ springmvc.xml：
 
 这里我们在控制器类上面加注解 @RequestMapping，定义类一级处理的请求是 /user。类与方法结合而成的访问路径对应应用请求时的URL，即 /user/register , /user/login。
 
+##### 44.2.3. 注解支持属性
+
+使用@RequestMapping注解支持一下列表所示属性：
+
+![img](README.assets/wps50.jpg)
+
+**1) value属性**
+
+Value属性执行类或方法处理的请求名称，例如
+
+![img](README.assets/wps51.jpg)
+
+这里value指定的值是 /hello ，则这里的hello方法对应的处理请求就是 /hello。
+
+注意，如果@RequestMapping中使用的属性只有value，那么value可以省略，即可以如下使用：
+
+![img](README.assets/wps52.jpg) 
+
+**2) method属性**
+
+用于指定方法处理哪些HTTP请求方式。
+
+* 单个方式
+
+![img](README.assets/wps53.jpg) 
+
+​	该方法仅处理请求名称为/hello，且请求方式为POST的请求。
+
+* 多种方式
+
+![img](README.assets/wps54.jpg) 
+
+​	该方法可以处理POST或者GET请求，即method可以定义多个请求方式。
+
+* 任意方式
+
+  如果没有定义请求方式，则可以处理任意方式的请求。
+
+**2) consumes属性**
+
+该属性指定处理的请求的提交内容类型（Content-Type）。
+
+![img](README.assets/wps55.jpg) 
+
+该方法仅处理请求（request）的Content-Type为 application/json的请求。
+
+**3) produces属性**
+
+![img](README.assets/wps56.jpg) 
+
+**4) params属性**
+
+该属性设定方法处理包含指定请求参数的请求。例如：
+
+![img](README.assets/wps57.jpg) 
+
+方式仅处理名称为 /hello ，请求方式为POST，且请求参数名为myParam、值为myValue的请求。
+
+**5) headers属性**
+
+![img](README.assets/wps58.jpg) 
+
+
+
