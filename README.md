@@ -9653,3 +9653,112 @@ Value属性执行类或方法处理的请求名称，例如
 Spring提供了多种方式将模型数据传递给视图：
 
 ![img](README.assets/wps63.jpg) 
+
+#### 44.3. **参数绑定注解**
+
+在实际的请求中，会有一些参数提交到处理控制器方法，那么方法如何获取提交的参数呢？这里就要用到参数绑定注解了，下面我们具体看下有哪些参数绑定注解以及他们的使用。
+
+##### 44.3.1. @RequestParam
+
+###### 44.3.1.1. **说明**
+
+@RequestParam用于将请求参数赋值给方法中的形参。
+
+@RequestParam属性列表：
+
+![img](README.assets/wps64.jpg) 
+
+例如：
+
+![img](README.assets/wps65.jpg) 
+
+如果我们的请求是：http://localhost/Test/user/login?loginname=zhu&password=123
+
+那么请求中的loginname对应的值：zhu就被赋值给方法login中的loginname参数，
+
+同样的请求中的password对应的值：123被赋值给方法login中的password参数。
+
+ 
+
+这里示例没有用到其他属性，只用到了name，因此可以像上面不写属性名称，当然如果有多个属性，就需要明确指定了，例如：
+
+![img](README.assets/wps66.jpg) 
+
+###### **44.3.1.2.** **示例程序**
+
+现在我们写个简单的登录小程序，模拟用户登录操作。
+
+基本框架以及SpringMVC的相关配置同之前的示例，相同的配置页面就不再赘述。
+
+1) 工程
+
+![img](README.assets/wps67.jpg)
+
+2) login.jsp
+
+```xml
+1.<%@ page language="java" contentType="text/html; charset=UTF-8"  
+2.    pageEncoding="UTF-8"%>  
+3.<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">  
+4.<html>  
+5.<head>  
+6.    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">  
+7.    <title>用户登录界面</title>  
+8.</head>  
+9.<body>  
+10.    <form action="login" method="POST">  
+11.        名字：<input  name="username" style="width:200px" />  
+12.        密码：<input      name="password" style="width:200px" />  
+13.          
+14.        <input value="登录"  type="submit"/>  
+15.    </form>  
+16.  
+17.</body>  
+18.</html>  
+```
+
+User.java
+
+```java
+1.package com.example.controller;  
+2.  
+3.import org.springframework.stereotype.Controller;  
+4.import org.springframework.ui.Model;  
+5.import org.springframework.web.bind.annotation.RequestMapping;  
+6.import org.springframework.web.bind.annotation.RequestParam;  
+7.  
+8.@Controller  
+9.@RequestMapping("/user")  
+10.public class User {  
+11.  
+12.    @RequestMapping("/login")  
+13.    public String login(@RequestParam("username") String username, @RequestParam("password") String password, Model model) {  
+14.        System.out.println("登录用户：" + username);  
+15.        System.out.println("登录密码：" + password);  
+16.          
+17.        model.addAttribute("message", "登录成功！");  
+18.        return "welcome";  
+19.    }  
+20.  
+21.}  
+```
+
+3) 实际访问效果
+
+ 
+
+登录界面：
+
+![1502108869671](README.assets/1502108869671.png)
+
+点击登录，后台输出信息：
+
+![img](README.assets/wps68.jpg)
+
+然后跳转到登录成功页面：
+
+![1502108930495](README.assets/1502108930495.png)
+
+4) 说明
+
+这个例子中，我们在页面输入用户名、密码，然后表单提交，根据form的action，决定提交的请求，然后根据/user/login路径交由User类的login()方法处理，login()方法利用@RequestParam获取表单提交的参数值，经过验证,最后跳转到登录成功界面。
