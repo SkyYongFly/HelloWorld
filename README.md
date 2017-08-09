@@ -9762,3 +9762,37 @@ User.java
 4) 说明
 
 这个例子中，我们在页面输入用户名、密码，然后表单提交，根据form的action，决定提交的请求，然后根据/user/login路径交由User类的login()方法处理，login()方法利用@RequestParam获取表单提交的参数值，经过验证,最后跳转到登录成功界面。
+
+##### 44.3.2. @PathVariable
+
+@PathVariable用于获取URL请求中的动态参数，例如：
+
+![img](README.assets/wps69.jpg) 
+
+当我们的请求为：http://localhost:8080/Test/pathVariableTest/xiaoming 的时候，会自动根据请求的HTTP地址截取对应部分的值，并赋值给方法的形参，这里即 方法的 userId参数。
+
+@PathVariable只支持一个属性value，类型String。如果不指定的话，那么默认是参数同名值。
+
+##### 44.3.3. @RequestHeader
+
+@RequestHeader注解用于将请求头信息区中的数据绑定到方法参数。
+
+![img](README.assets/wps70.jpg) 
+
+例如：
+
+![img](README.assets/wps71.jpg) 
+
+示例程序会将对应请求的请求头信息中的“User-Agent”赋值给userAgent参数，“Accept”赋值给accepts参数。
+
+##### 44.3.4. @CookieValue
+
+@CookieValue用于将Cookie数据绑定到方法参数。
+
+![img](README.assets/wps72.jpg) 
+
+例如：
+
+![img](README.assets/wps73.jpg) 
+
+JSESSIONID的值会被赋值到方法中的sessionId参数。
