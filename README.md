@@ -9796,3 +9796,94 @@ User.java
 ![img](README.assets/wps73.jpg) 
 
 JSESSIONID的值会被赋值到方法中的sessionId参数。
+
+##### 44.3.5. @PathVariable、@RequestHeader、@CookieValue测试
+
+1) 工程
+
+![img](README.assets/wps74.jpg) 
+
+2) test.jsp
+
+```html
+1.<%@ page language="java" contentType="text/html; charset=UTF-8"  
+2.    pageEncoding="UTF-8"%>  
+3.<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">  
+4.<html>  
+5.<head>  
+6.    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">  
+7.    <title>参数绑定测试</title>  
+8.</head>  
+9.<body>  
+10.    <h2>参数绑定测试</h2>  
+11.      
+12.    <a href="getUserInfo/hong">@PathVariable测试</a> <br/><br/>  
+13.    <a href="header">@RequestHeader测试</a><br/><br/>  
+14.    <a href="cookie">@CookieValue测试</a>  
+15.  
+16.</body>  
+17.</html>  
+```
+
+3) User.java
+
+```java
+1.package com.example.controller;  
+2.  
+3.import org.springframework.stereotype.Controller;  
+4.import org.springframework.ui.Model;  
+5.import org.springframework.web.bind.annotation.CookieValue;  
+6.import org.springframework.web.bind.annotation.PathVariable;  
+7.import org.springframework.web.bind.annotation.RequestHeader;  
+8.import org.springframework.web.bind.annotation.RequestMapping;  
+9.import org.springframework.web.bind.annotation.RequestParam;  
+10.  
+11.@Controller  
+12.@RequestMapping("/user")  
+13.public class User {  
+14.       
+15.    @RequestMapping(value="/getUserInfo/{userId}")  
+16.    public String  getUserInfo(@PathVariable String userId){  
+17.        System.out.println("用户ID：" + userId);  
+18.          
+19.        return "welcome";  
+20.    }  
+21.      
+22.    @RequestMapping(value="/header")  
+23.    public String  getHeader(@RequestHeader
+24.                 ("User-Agent")String agent, @RequestHeader("Accept")String[] accepts){  
+25.        System.out.println("userAgent  : " + agent + "\n");  
+26.          
+27.        for(String accept : accepts){  
+28.            System.out.println(accept);  
+29.        }  
+30.          
+31.        return "welcome";  
+32.    }  
+33.      
+34.    @RequestMapping(value="/cookie")  
+35.    public String  getSessionId(@CookieValue(value = "JSESSIONID",
+36.                                                          defaultValue="")String sessionId){  
+37.        System.out.println("sessionId : " + sessionId);  
+38.          
+39.        return "welcome";  
+40.    }  
+41.  
+42.}  
+```
+
+4) 测试
+
+![1502714624279](README.assets/1502714624279.png)
+
+点击第一个，系统后台：
+
+![img](README.assets/wps75.jpg) 
+
+第二个：
+
+![1502714658083](README.assets/1502714658083.png)
+
+第三个：
+
+![1502714672509](README.assets/1502714672509.png)
