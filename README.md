@@ -9887,3 +9887,135 @@ JSESSIONID的值会被赋值到方法中的sessionId参数。
 第三个：
 
 ![1502714672509](README.assets/1502714672509.png)
+
+##### 44.3.6. @SessionAttributes
+
+###### 44.3.6.1. **说明**
+
+@SessionAttributes注解指定Model中的哪些属性需要保存到HttpSession对象中。
+
+我们每次请求的时候，可以在方法里面指定Model参数，这个参数我们并没有显示的去赋值、初始化，那么如何产生的呢？其实是Spring容器帮我们注入了Model对象，而这个Model对象正是本次请求中的，可以看成是单例的。当我们用@SessionAttributes去指定要保存到session中的属性的时候，框架便会去Model中寻找对应的属性，然后设置到session中。
+
+@SessionAttributes注解支持属性：
+
+![img](README.assets/wps76.jpg) 
+
+@SessionAttributes注解**只能声明在类上**，不能声明在方法上。
+
+###### 44.3.6.2. **示例**
+
+1) 工程
+
+![img](README.assets/wps77.jpg) 
+
+2) login2.jsp
+
+```html
+1.<%@ page language="java" contentType="text/html; charset=UTF-8"  
+2.    pageEncoding="UTF-8"%>  
+3.<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">  
+4.<html>  
+5.<head>  
+6.    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">  
+7.    <title>用户登录界面</title>  
+8.</head>  
+9.<body>  
+10.    <form action="login2" method="POST">  
+11.        名字：<input  name="username" style="width:200px" />  
+12.        密码：<input      name="password" style="width:200px" />  
+13.          
+14.        <input value="登录"  type="submit"/>  
+15.    </form>  
+16.  
+17.</body>  
+18.</html>  
+```
+
+3) User.java
+
+```java
+1.package com.example.bean;  
+2.  
+3.import java.io.Serializable;  
+4.  
+5.public class User implements Serializable{  
+6.    private static final long serialVersionUID = 1L;  
+7.      
+8.    private String username;  
+9.    private String password;  
+10.      
+11.    public String getUsername() {  
+12.        return username;  
+13.    }  
+14.    public void setUsername(String username) {  
+15.        this.username = username;  
+16.    }  
+17.    public String getPassword() {  
+18.        return password;  
+19.    }  
+20.    public void setPassword(String password) {  
+21.        this.password = password;  
+22.    }  
+23.}  
+```
+
+4) User2.java
+
+```java
+1.package com.example.controller;  
+2.  
+3.import org.springframework.stereotype.Controller;  
+4.import org.springframework.ui.Model;  
+5.import org.springframework.web.bind.annotation.RequestMapping;  
+6.import org.springframework.web.bind.annotation.RequestParam;  
+7.import org.springframework.web.bind.annotation.SessionAttributes;  
+8.  
+9.import com.example.bean.User;  
+10.  
+11./** 
+12. * 测试 @SessionAttributes注解 
+13. *  
+14. * @author zhu 
+15. */  
+16.@Controller  
+17.@RequestMapping("/user")  
+18.@SessionAttributes("user")  
+19.public class User2 {  
+20.      
+21.    @RequestMapping("/login2")  
+22.    public String  login(@RequestParam("username")String username, @RequestParam("password")String password, Model model){  
+23.        User  user = new User();  
+24.        user.setUsername(username);  
+25.        user.setPassword(password);  
+26.          
+27.        model.addAttribute(user);  
+28.          
+29.        return "sessionatt";  
+30.    }  
+31.  
+32.}  
+```
+
+5) sessionatt.jsp
+
+```html
+1.<%@ page contentType="text/html;charset=UTF-8" language="java" %>  
+2.<html>  
+3.<head>  
+4.</head>  
+5.<body>  
+6.    request作用域中的user对象username : ${requestScope.user.username}  
+7.    </br>  
+8.    session作用域中的user对象username : ${sessionScope.user.username}  
+9.</body>  
+10.</html> 
+```
+
+6) 测试
+
+![img](README.assets/wps78.jpg) 
+
+ 
+
+![img](README.assets/wps79.jpg) 
+
