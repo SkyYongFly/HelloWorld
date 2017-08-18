@@ -10019,3 +10019,104 @@ JSESSIONID的值会被赋值到方法中的sessionId参数。
 
 ![img](README.assets/wps79.jpg) 
 
+##### 44.3.7. @ModelAttribute
+
+###### 44.3.7.1. **说明**
+
+@ModelAttribute注解将请求的参数绑定到Model对象。
+
+只有一个属性：value，类型string。即说明要将哪个参数绑定到Model。
+
+@ModelAttribute注解的方法会在Controller中每个方法之前执行。想一想，这是为什么呢？因为该注解是为了往Model中设置绑定参数的，而其它方法例如请求处理方法一般会用到Model对象，那么用的时候需要取设置的参数，既然后面的要用到，那么肯定需要先设置啦，所以@ModelAttribute注解的方法会优先执行。
+
+@ModelAttribue注解注解应用场景比较多，例如：
+
+*![img](README.assets/wps81.png)* *注解返回具体类的方法*
+
+*![img](README.assets/wps82.png)* *注解返回void的方法*
+
+*![img](README.assets/wps83.png)* *和@**R**e**questMapping**同时注解一个方法*
+
+*![img](README.assets/wps84.png)* *注解一个参数方法*
+
+###### 44.3.7.2. **示例**
+
+我们这里只给出：@ModelAttribute(value=””)注解返回具体值的方法
+
+1) 工程
+
+![img](README.assets/wps85.jpg) 
+
+login3.jsp
+
+```html
+1.<form action="login3" method="POST">  
+2.        名字：<input  name="username" style="width:200px" />  
+3.        密码：<input      name="password" style="width:200px" />  
+4.          
+5.        <input value="登录"  type="submit"/>  
+6.    </form>  
+```
+
+2) User3.java
+
+```java
+1./** 
+2. * 测试 @SessionAttributes注解 
+3. *  
+4. * @author zhu 
+5. */  
+6.@Controller  
+7.@RequestMapping("/user")  
+8.public class User3 {  
+9.      
+10.    @ModelAttribute(value="username")  
+11.    public String userModel(@RequestParam("username") String username){  
+12.        return username;  
+13.    }  
+14.      
+15.    @RequestMapping("/login3")  
+16.    public String  login(){  
+17.        return "modelatt";  
+18.    }  
+19.} 
+```
+
+3) modelatt.jsp
+
+```html
+1.<%@ page contentType="text/html;charset=UTF-8" language="java" %>  
+2.<html>  
+3.<head>  
+4.</head>  
+5.<body>  
+6.    ${requestScope.username}  
+7.</body>  
+</html>  
+```
+
+测试
+
+![img](README.assets/wps86.jpg)
+
+ 
+
+![img](README.assets/wps87.jpg) 
+
+这里我们用@ModelAttribute注解方法userModel，注解中的value值为：username，这个就是要绑定到Model中属性的属性名称，而方法userModel的返回值就是绑定到Model中属性的值。在这个例子中就是请求的用户名称：username。其实往Model中绑定参数值就是相当于增加了一个键值对。
+
+那么@ModelAttribute注解绑定到Model中的一定要是请求的参数吗？其实并不是，@ModelAttribute中的value值只是表示要绑定到Model中的属性名称，而属性值是由方法返回值决定的，方法返回值是啥就是啥，而方法返回值不一定要求是请求参数啊，可以是个常量值或者其它值，所以@ModelAttribute绑定到Model中的不一定非要是请求参数。
+
+​	另外很显然，@ModelAttribute中的value值也不一定要是请求的参数名称。
+
+​	例如：
+
+​	修改上面的代码：
+
+![img](README.assets/wps88.jpg) 
+
+![img](README.assets/wps89.jpg) 
+
+![img](README.assets/wps90.jpg) 
+
+结果证实保存到Model中的键值对就是：  name——1111
