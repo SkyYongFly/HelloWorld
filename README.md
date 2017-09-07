@@ -9401,6 +9401,110 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 
 ![1505035928628](README.assets/1505035928628.png)
 
+### 40.Spring与MyBatis整合
+
+#### 40.1. 概述
+
+在实际的Web项目开发中，需要涉及的不仅仅是持久层的开发，还要涉及视图层、控制层等，大体上可以概述为MVC架构。我们普遍选择Spring作为工程控制层、逻辑层或视图层的开发框架，持久层可以选择不同的ORM框架，如果选择MyBatis，那么如何整合Spring和MyBatis这两个框架呢？
+
+#### 40.2. **工程概览**
+
+我们首先还是创建一个Web工程，导入相应的jar包，然后进行相关的配置。我们不妨先首先看下配置完整后的目录以有个整体的印象及目标。
+
+![img](README.assets/wps18.jpg) 
+
+##### 40.2.1. 包结构定义
+
+com.example.sky.* 包路径下的内容其实和MyBatis一节中配置的内容是一致的，包括junit——测试包，mappers——MyBatis的mapper接口及SQL定义，pojo——Java实体定义。
+
+##### 40.2.2. Jar包引用
+
+WEB-INF下的lib文件夹没啥好说的，就是Spring和Mybatis框架用到的相关jar包。详细jar包引用如下（jar包中包含了JSTL或者SpringMVC前端用到的jar包，在本例子中可以删除）：
+
+![img](README.assets/wps19.jpg)    ![img](file:///C:\Users\zhuyong\AppData\Local\Temp\ksohtml9392\wps20.jpg)
+
+##### 40.2.3. 核心配置文件
+
+工程配置的核心文件很明显，便是以下四个文件：
+
+![img](README.assets/wps21.jpg) 
+
+![img](README.assets/wps22-1504780665950.png) database.properties是数据库连接配置文件：
+
+![img](README.assets/wps23.jpg) 
+
+![img](README.assets/wps24-1504780665950.png) log4j.properties是日志框架配置文件：
+
+![img](README.assets/wps25.jpg) 
+
+核心的配置文件其实也就是Spring的配置文件和MyBatis的配置文件了，下面我们详细叙述下。
+
+#### 40.3. **Spring配置文件**
+
+##### 40.3.1. 文件内容
+
+applicationContext.xml：
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8"?>  
+2.<beans xmlns="http://www.springframework.org/schema/beans"  
+3.    xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p" 
+4.    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"  
+5.    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+6.    xsi:schemaLocation="
+7.  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+8.    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd 
+9.    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+10.  http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd  
+11.    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">  
+12.  
+13.    <!-- 配置数据源连接配置文件 -->  
+14.    <context:property-placeholder    location="classpath:database.properties"/>  
+15.      
+16.    <!-- 数据库连接池 -->  
+17.    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">  
+18.        <property name="driverClassName" value="${jdbc.driver}" />  
+19.        <property name="url" value="${jdbc.url}" />  
+20.        <property name="username" value="${jdbc.username}" />  
+21.        <property name="password" value="${jdbc.password}" />  
+22.        <property name="maxActive" value="10"/>  
+23.        <property name="maxIdle" value="5"/>  
+24.    </bean>  
+25.      
+26.    <!-- MyBatis数据源连接工厂 -->  
+27.    <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">  
+28.        <property name="dataSource" ref="dataSource"></property>  
+29.        <property name="configLocation" value="classpath:mybatis-config.xml"></property>  
+30.    </bean>  
+31.      
+32.      
+33.    <!-- 注册Mapper: 底层数据源连接工厂注入Mapper，生成bean对象 -->  
+34.    <!-- 方式一：直接注册Mapper  -->  
+35.      
+36.    <!--  
+37.    <bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">  
+38.        <property name="sqlSessionFactory" ref="sqlSessionFactoryBean"></property>  
+39.        <property name="mapperInterface" value="com.example.sky.mappers.UserMapper"></property>  
+40.    </bean>  
+41.    -->  
+42.      
+43.    <!-- 方式二：包扫描 -->  
+44.    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">  
+45.        <property name="basePackage" value="com.example.sky.mappers"></property>  
+46.    </bean>  
+47.</beans>  
+```
+
+
+
+
+
+
+
+
+
+
+
 ### **41.** **SpringMVC初相识**
 
 #### **41.1.** **SpringMVC简介**
