@@ -9495,13 +9495,46 @@ applicationContext.xml：
 47.</beans>  
 ```
 
+##### 40.3.2. 配置详解
 
+配置文件首先加载数据源配置文件，然后设置数据库连接池，这些与在MyBatis框架中定义的配置作用是一致的。
 
+我们在MyBatis入门应用中搭建了一个数据源连接工厂，方便每次获取数据源连接，那么这里呢我们不需要自己去搭建了，Spring框架为我们默认实现了这样一个数据源连接工厂，我们只需要在配置文件中注入下所需要的数据源连接属性即可。这便是我们定有的sqlSessionFactoryBean，它的实际实现类是*org.mybatis.spring.SqlSessionFactoryBean*，我们注入数据库连接池dataSource bean对象。但是有些MyBatis的配置属性啥的并不能完全直接在Spring的配置文件中定义，需要在MyBatis的配置文件中自行定义，我们之前自己写数据源连连接session工厂的时候是主动读取的MyBatis配置文件，那么现在session连接工厂不是我们自己实现的，那么该如何读取MyBatis的配置文件即如何让Spring框架知道MyBatis配置文件呢？其实也是在这个sqlSessionFactoryBean中注入MyBatis配置文件，即configLocation属性，我们通过类加载路径去获取这个文件。
 
+在MyBatis自己单独定义配置的时候，我们定义了Mapper扫描，同样在这里，我们可以直接在Spring配置文件中注册Mapper接口。方式的话有两种，一是显示的定义，显然这种方式不好，因为会累死人的~~~~ 所以当然用第二种了，包扫描方式：注入basePackage属性为我们接口定义包路径。
 
+#### 40.4. MyBatis配置文件
 
+##### 40.4.1. 文件内容
 
+```xml
+1.<?xml version="1.0" encoding="UTF-8" ?>  
+2.<!DOCTYPE configuration  
+3.  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  
+4.  "http://mybatis.org/dtd/mybatis-3-config.dtd">  
+5.    
+6. <!-- MyBatis配置属性 ，注意元素配置顺序-->  
+7. <configuration>  
+8.    <!-- 为POJO定义别名 -->  
+9.    <typeAliases>  
+10.        <package name="com.example.sky.pojo"/>  
+11.    </typeAliases>  
+12. </configuration>   
+```
 
+##### 40.4.2. 配置详解
+
+这里我们看到MyBatis的配置文件只剩下别名的定义了，其实实际当中可能还有很多其他属性的配置与定义，这里只是最简单的内容了。
+
+#### 40.5. **测试**
+
+其实整合Spring与MyBatis后，MyBatis中的mapper已经被处理成了Spring框架中的bean对象，具体使用的时候我们可以直接获取mapper  bean，很方便。
+
+![img](README.assets/wps26.jpg) 
+
+输出结果：
+
+![1504871592608](README.assets/1504871592608.png)
 
 
 
