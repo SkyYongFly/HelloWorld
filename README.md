@@ -9094,7 +9094,61 @@ MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过�
 6.log4j.appender.stdout.layout.ConversionPattern=%5p [%t] - %m%n  
 ```
 
+#### 39.5. **配置数据源连接**
 
+既然要操作数据库，那么程序肯定需要要操作的数据库到底是哪一个，所以我们需要配置下程序中的数据源连接。我们同样在src目录下创建数据源连接文件：database.properties
+
+![img](README.assets/wps4.jpg) 
+
+```properties
+1.jdbc.driver=com.mysql.jdbc.Driver  
+2.jdbc.url=jdbc:mysql://localhost:3306/example?characterEncoding=utf-8  
+3.jdbc.username=root  
+4.jdbc.password=root  
+```
+
+数据源配置含义：
+
+![img](README.assets/wps6-1504921440140.png) jdbc.driver： 数据源连接驱动，因为我们这里使用的是MySql数据库，因此选用MySql驱动；
+
+![img](README.assets/wps7-1504921440140.png) jdbc.url：数据库连接路径，这里我们是本机mysql，所以IP地址为localhost，端口默认的3306，example是当前选用的数据库名称，后面为字符集
+
+![img](README.assets/wps8-1504921440140.png) jdbc.username：数据库连接用户名
+
+![img](README.assets/wps9-1504921440140.png) jdbc.password：数据库连接密码
+
+#### 39.6. **设置POJO**
+
+MyBatis是一种半自动话的ORM框架，虽然实际的SQL操作直接采用原生SQL语句，但是对于查询入参、查询结果的封装是采用面向对象的方式的，例如将查询结果匹配赋值到一个POJO对象，我们获取到这个结果对象后，就可以直接拿来用了。
+
+我们需要创建和数据库表对应的POJO类：
+
+![img](README.assets/wps10.jpg) 
+
+ 
+
+```java
+1.package com.example.sky.pojo;  
+2.  
+3.import java.io.Serializable;  
+4.import java.util.Date;  
+5.  
+6./** 
+7. * User POJO对象 
+8. *  
+9. * @author sky 
+10. */  
+11.public class User implements Serializable{  
+12.    private static final long serialVersionUID = 1L;  
+13.      
+14.    private Integer id;  
+15.    private String name;  
+16.    private String address;  
+17.    private Integer age;  
+18.    private Date birth;  
+```
+
+这里省略了相关的set**、get**以及构造方法，POJO类名和数据库表一致，属性字段和数据库表字段一致。
 
 ### **41.** **SpringMVC初相识**
 
