@@ -9029,6 +9029,73 @@ MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过�
 
   对性能的要求很高，或者需求变化较多的项目，如互联网项目，MyBatis将是不错的选择。
 
+### 39. MyBatis环境搭建与入门
+
+好啦，说这么多，心动不如心动，那就让我们来搭建一个MyBatis环境啦，写个Demo，输出个Hello World出来溜溜~~~
+
+#### **39.1.** 数据库环境搭建
+
+“工欲善其事必先利其器”，要操作持久层，没有对应的数据库还操作啥呢？来，我们先建个数据库、创建一些表、创造一些数据压压惊。这里我们以MySql为例。
+
+##### 39.1.1. 数据库建表
+
+![1504920958373](README.assets/1504920958373.png)
+
+##### 39.1.2. 设置数据
+
+我们随便插入一些数据：
+
+![1504921037791](README.assets/1504921037791.png)
+
+![1504921078322](README.assets/1504921078322.png)
+
+
+
+#### 39.2. **创建Web工程**
+
+![1504921112512](README.assets/1504921112512.png)
+
+
+
+具体一步步往下就行，这里就不再截图。
+
+#### 39.3. 导入jar包
+
+##### 39.3.1. JAR包下载
+
+官方下载：https://github.com/mybatis/mybatis-3/releases
+
+这里下载的是MyBatis官方的jar包，需要注意的是，因为我们操作数据库，所以还需要数据库连接驱动jar包，我们这里连接MySql使用：mysql-connector-java-5.1.44.jar包。 
+
+##### 39.3.2. JAR包依赖
+
+将jar包复制到工程的lib目录下
+
+![img](README.assets/wps1-1504921138674.jpg) 
+
+设置jar包依赖，添加到工程编译路径
+
+![img](README.assets/wps2.jpg) 
+
+#### 39.4. **日志设置**
+
+因为MyBatis框架用到日志框架，所以需要添加对应的日志配置文件，以方便的输出运行过程的日志信息。
+
+在src目录下创建 log4j.properties 日志配置文件：
+
+![img](README.assets/wps3.jpg) 
+
+```properties
+1.# Global logging configuration  
+2.log4j.rootLogger=DEBUG, stdout  
+3.# Console output...  
+4.log4j.appender.stdout=org.apache.log4j.ConsoleAppender  
+5.log4j.appender.stdout.layout=org.apache.log4j.PatternLayout  
+6.log4j.appender.stdout.layout.ConversionPattern=%5p [%t] - %m%n  
+```
+
+
+
 ### **41.** **SpringMVC初相识**
 
 #### **41.1.** **SpringMVC简介**
