@@ -9150,6 +9150,72 @@ MyBatis是一种半自动话的ORM框架，虽然实际的SQL操作直接采用�
 
 这里省略了相关的set**、get**以及构造方法，POJO类名和数据库表一致，属性字段和数据库表字段一致。
 
+#### 39.7. **创建SQL及映射文件**
+
+MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层与持久层交互来说还是采用面向对象的方式的，就是说对于逻辑层来说，操作数据库是感觉不到SQL存在的，只知道去调用持久层的类方法而已。MyBatis实现这种模式的方式是采用映射文件的方式，具体来说，创建一个接口类，类中定义了实际操作数据库的方法，例如查询某个数据啦、新增某个数据啦；另外需要创建一个与之对应的xml映射文件，也就是SQL文件，里面定义具体的SQL。这个映射接口类名称和XML文件的名称需要一致，XML 文件中SQL的ID要和接口类中定义的方法名一致，另外当然入参、返回值都要一致，这其中有个Java类型和数据库类型对应关系，双方要按照对应关系来保持持久层类型和逻辑层Java类型保持一致。另外映射文件俗称Mapper ，我们命名时一般也以Mapper为后缀。
+
+##### 39.7.1. 映射接口
+
+![img](README.assets/wps11.jpg) 
+
+```java
+1.package com.example.sky.mappers;  
+2.  
+3.import com.example.sky.pojo.User;  
+4.  
+5./** 
+6. * User 相关SQL操作Mapper接口 
+7. *  
+8. * @author sky 
+9. */  
+10.public interface UserMapper {  
+11.    /** 
+12.     * 根据用户ID获取用户信息 
+13.     *  
+14.     * @param   id  用户ID 
+15.     * @return      指定ID对应用户对象 
+16.     */  
+17.    User getUserById(Integer id);  
+18.      
+19.    /** 
+20.     * 添加用户 
+21.     *  
+22.     * @param user  要添加的用户对象 
+23.     */  
+24.    void addUser(User user);  
+25.  
+26.}  
+```
+
+##### 39.7.2. SQL文件
+
+![img](README.assets/wps12.jpg) 
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8" ?>  
+2.<!DOCTYPE mapper  
+3.  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+4.  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+5.    
+6.<!-- 需要定义命名空间，值为对应的Mapper接口完全限定名 -->    
+7.<mapper namespace="com.example.sky.mappers.UserMapper">  
+8.    <!-- 根据用户ID获取用户信息 -->  
+9.    <select id="getUserById" parameterType="int" resultType="user">  
+10.        select * from user where id = #{id}  
+11.    </select>  
+12.      
+13.    <!-- 添加用户 -->  
+14.    <insert id="addUser" parameterType="user">  
+15.        insert into   
+16.            user(id, name, address, age, birth)   
+17.        values  
+18.            (#{id}, #{name}, #{address}, #{age}, #{birth})  
+19.    </insert>  
+20.</mapper>  
+```
+
+
+
 ### **41.** **SpringMVC初相识**
 
 #### **41.1.** **SpringMVC简介**
