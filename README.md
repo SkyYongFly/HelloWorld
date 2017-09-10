@@ -9283,9 +9283,61 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 
 映射Mapper接口类注册是为了让MyBatis框架知道系统中SQL操作相关的方法，方便后续使用面向对象的方式调用对应持久层操作方法。注册的方法当然是通过包扫描的方式比较方便了，一个个注册肯定是繁琐的。
 
+#### 39.9. Session连接工厂
 
+![img](README.assets/wps15.jpg) 
 
+```java
+1.package com.example.sky.utils;  
+2.  
+3.import java.io.IOException;  
+4.import java.io.InputStream;  
+5.  
+6.import org.apache.ibatis.io.Resources;  
+7.import org.apache.ibatis.session.SqlSession;  
+8.import org.apache.ibatis.session.SqlSessionFactory;  
+9.import org.apache.ibatis.session.SqlSessionFactoryBuilder;  
+10.  
+11./** 
+12. * MyBatis 数据源连接公共基础类，包括数据源连接工程、获取数据源等功能 
+13. *  
+14. * @author sky 
+15. */  
+16.public class SqlSessionUtil {  
+17.    //数据源连接工厂  
+18.    private static SqlSessionFactory sessionFactory = null;  
+19.      
+20.    static {  
+21.        if(null == sessionFactory) {  
+22.            try {  
+23.                //获取配置文件  
+24.                String resource = "mybatis-config.xml";  
+25.                //读取配置  
+26.                InputStream  inputStream = Resources.getResourceAsStream(resource);  
+27.                //创建Session工厂  
+28.                sessionFactory = new SqlSessionFactoryBuilder().build(inputStream);  
+29.            } catch (IOException e) {  
+30.                e.printStackTrace();  
+31.            }  
+32.        }  
+33.    }  
+34.      
+35.    /** 
+36.     * 获取数据源连接对象 
+37.     *  
+38.     * @return 
+39.     */  
+40.    public static SqlSession    getSqlSession() {  
+41.        return sessionFactory.openSession();  
+42.    }  
+43.}  
+```
 
+在JDBC操作持久层的方式中，每次操作持久层每次都要获取数据库连接，同样在MyBatis中也是需要的，没有连接数据库再怎么操作都是白扯嘛。MyBatis的一次数据源叫做session，我们通过这个session去增删改查数据库。而具体session如何获取呢？就是 通过如上面的方法，首先根据配置文件获取数据库连接，创建数据源连接工厂——SqlSessionFactory，然后通过这个session工厂我们就可以获取对应的session了，最后就可以利用session来进行具体操作了。
+
+上面的写法是为了方便工程中session的获取，因为不能每次操作数据库都读取一次数据库连接配置，创建工厂再获取连接。
+
+那么我们每次获取一个数据库连接都是session工厂新建连接的吗？我们在MyBatis配置文件中设置了database 的type为POOLED ，这个表示采用数据库连接池的方式，即MyBatis框架内部会维持一个数据库连接池，其中会一直维持一定数量的空闲数据库连接session，每次实际需要连接数据库时直接从其中拿就行，用完继续放回线程池，可供下次使用，避免了频繁创建数据库连接。
 
 
 
