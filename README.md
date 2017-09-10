@@ -9214,6 +9214,79 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 20.</mapper>  
 ```
 
+#### 39.8. **MyBatis配置文件**
+
+下面就要配置MyBatis的核心配置文件了，就是我们设置了数据库连接、SQL操作文件等，但是具体这些内容如何被MyBatis框架知道呢？MyBatis支持以XML文件的方式来配置相关内容的。我们在src路径下创建MyBatis核心配置文件 mybatis-config.xml文件。
+
+![img](README.assets/wps13.jpg) 
+
+```xml
+1.<?xml version="1.0" encoding="UTF-8" ?>  
+2.<!DOCTYPE configuration  
+3.  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  
+4.  "http://mybatis.org/dtd/mybatis-3-config.dtd">  
+5.    
+6. <!-- MyBatis配置属性 ，注意元素配置顺序-->  
+7. <configuration>  
+8.    <!-- 数据库连接配置文件 -->  
+9.    <properties resource="database.properties"/>  
+10.      
+11.    <!-- 为POJO定义别名 -->  
+12.    <typeAliases>  
+13.        <!-- 方法一：直接定义POJO别名 -->  
+14.        <!-- <typeAlias alias="user"  type="com.example.sky.pojo.User"/> -->  
+15.          
+16.        <!-- 方法二：包扫描，默认以POJO名称首字母小写名字为别名-->  
+17.        <package name="com.example.sky.pojo"/>  
+18.    </typeAliases>  
+19.   
+20.    <!--   
+21.        连接数据库环境配置  
+22.        1、注意这里配置的default的值，意思选择启用  
+23.             下面哪个数据库，和下面environment的ID值一致   
+24.    -->  
+25.    <environments default="mysql">  
+26.        <environment id="mysql">  
+27.            <!-- 事务管理，采用JDMC管理器 -->  
+28.            <transactionManager type="JDBC">  
+29.            </transactionManager>  
+30.              
+31.            <!-- 数据库连接，并采用连接池方式 -->  
+32.            <dataSource type="POOLED">  
+33.                <property name="driver"   value="${jdbc.driver}"/>  
+34.                <property name="url"       value="${jdbc.url}"/>  
+35.                <property name="username" value="${jdbc.username}"/>  
+36.                <property name="password" value="${jdbc.password}"/>  
+37.            </dataSource>           
+38.        </environment>  
+39.    </environments>  
+40.      
+41.    <!-- 注册mapper -->  
+42.    <mappers>  
+43.        <!-- 方法一：直接注册Mapper接口 -->  
+44.        <!--   <mapper class="com.example.sky.mappers.UserMapper"/> -->  
+45.          
+46.        <!-- 方法二：包扫描 -->  
+47.        <package name="com.example.sky.mappers"/>  
+48.    </mappers>  
+49.      
+50. </configuration>   
+```
+
+上面的配置文件中已经注释详细说明了相关的配置项含义，主要功能包括数据库连接配置、POJO别名定义、注册Mapper接口。需要注意的是这些配置项是有顺序的，不能弄错顺序，否则MyBatis加载解析不了。
+
+别名定义有啥作用呢？在SQL文件中，我们可以看到getUserById 操作的返回值类类型为 user，即resultType=”user”，这个user就是 我们为User类定义的别名。定义别名的好处很显然，我们定义SQL操作入参类型或者返回结果类型可以用类的全限定路径名定义，但是每次这样写未免太繁琐，别名可以大大简化我们的编码工作量。别名可以用@Alias显示定义，例如：
+
+![img](README.assets/wps14.jpg) 
+
+如果我们没有显示定义的话，默认会使用类明首字母小写的名称作为POJO类的别名。
+
+映射Mapper接口类注册是为了让MyBatis框架知道系统中SQL操作相关的方法，方便后续使用面向对象的方式调用对应持久层操作方法。注册的方法当然是通过包扫描的方式比较方便了，一个个注册肯定是繁琐的。
+
+
+
+
+
 
 
 ### **41.** **SpringMVC初相识**
