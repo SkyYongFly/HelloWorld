@@ -9339,7 +9339,67 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 
 那么我们每次获取一个数据库连接都是session工厂新建连接的吗？我们在MyBatis配置文件中设置了database 的type为POOLED ，这个表示采用数据库连接池的方式，即MyBatis框架内部会维持一个数据库连接池，其中会一直维持一定数量的空闲数据库连接session，每次实际需要连接数据库时直接从其中拿就行，用完继续放回线程池，可供下次使用，避免了频繁创建数据库连接。
 
+#### 39.10. **测试类** 
 
+```java
+1./** 
+2. * 测试类 
+3. *  
+4. * @author sky 
+5. */  
+6.public class JunitTest {  
+7.    @Test  
+8.    public void testGetUserMapper() throws IOException {  
+9.        SqlSession session = SqlSessionUtil.getSqlSession();  
+10.        UserMapper userMapper = session.getMapper(UserMapper.class);  
+11.        User user = userMapper.getUserById(2);  
+12.        System.out.println("用户名：" + user.getName());  
+13.        session.close();  
+14.    }  
+15.      
+16.    @Test  
+17.    public void testAddUser() throws ParseException {  
+18.        SqlSession session = SqlSessionUtil.getSqlSession();  
+19.        UserMapper userMapper = session.getMapper(UserMapper.class);  
+20.          
+21.        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");  
+22.        Date birth = dateFormat.parse("1998-01-01");  
+23.        User user = new User(3, "李四", "中国", 20, birth);  
+24.          
+25.        try {  
+26.            userMapper.addUser(user);  
+27.            session.commit();  
+28.        }catch (Exception e) {  
+29.            session.rollback();  
+30.            e.printStackTrace();  
+31.        }finally {  
+32.            if(null != session) {  
+33.                session.close();      
+34.            }  
+35.        }  
+36.    }  
+37.}  
+```
+
+##### 39.10.1. 说明
+
+终于来到了最终的实际使用环节，这里我们创建一个测试用例来测试下我们的MyBatis配置框架。
+
+首先我们通过我们写的公共session获取类来获取session连接，然后就是关键的一步了，之前的Mapper映射文件终于派上了用场，session通过getMapper方法将对应的接口映射文件加载，加载完毕返回对应的Mapper接口“实例”对象，通过这个对象我们便可以直接调用SQL操作方法类进行相关的SQL操作了。
+
+另外我们在进行增删改操作的时候需要注意事务的操作。
+
+##### 39.10.2. 测试结果
+
+测试1：
+
+![img](README.assets/wps16.jpg) 
+
+测试2：
+
+操作完查询数据库
+
+![1505035166934](README.assets/1505035166934.png)
 
 ### **41.** **SpringMVC初相识**
 
