@@ -9536,8 +9536,6 @@ applicationContext.xml：
 
 ![1504871592608](README.assets/1504871592608.png)
 
-
-
 ### **41.** **SpringMVC初相识**
 
 #### **41.1.** **SpringMVC简介**
@@ -10629,3 +10627,47 @@ login3.jsp
 ![img](README.assets/wps90.jpg) 
 
 结果证实保存到Model中的键值对就是：  name——1111
+
+### 45. SSM三大框架整合
+
+#### 45.1. **概述**
+
+终于迎来了激动人心的时刻了，终于到了要将三巨头整合的时刻了！
+
+整合完SpringMVC、Spring、MyBatis三大框架基本上就奠定了我们web应用构件的基础框架，我们在这基础上就可以愉快的根据业务需求来进行细节的功能开发了，进而构建出完美实用的Web应用了。
+
+其实SSM框架也是MVC思想的体现，SpringMVC作为视图层框架，负责视图层与控制层（逻辑层）的交互，Spring作为控制层的主导角色，利用IoC以及AOP等特性来完成控制层的逻辑处理，MyBatis作为ORM框架，负责数据层的数据处理。当然这其中Spring作为整个框架的核心枢纽，其实是维系着三大框架的耦合。
+
+说了这么多，早已急不可耐啦，我们还是赶快开始吧~ ~ ~
+
+#### 45.2. **整合步骤**
+
+##### 45.2.1. 导入jar包
+
+别的不说，首先上来直接导入jar包，当然后期可以直接考虑使用Maven，以此来极大的提高开发效率，我们现在还是用简单的方法。
+
+![img](README.assets/wps28.jpg) ![img](file:///C:\Users\zhuyong\AppData\Local\Temp\ksohtml9392\wps29.jpg)
+
+##### 45.2.2. 创建工程包
+
+![img](README.assets/wps30.jpg) 
+
+![img](README.assets/wps31-1504877686642.png) controller ：请求控制器层，负责接收处理前端请求；
+
+![img](README.assets/wps32-1504877686642.png) service ：逻辑处理层，为控制器层和持久层之间的过渡层，主要负责一些复杂的逻辑处理；
+
+![img](README.assets/wps33-1504877686642.png) mappers ：持久层，包括Mapper接口定义以及SQL实现文件；
+
+![img](README.assets/wps34-1504877686642.png) pojo ：模型层，定义POJO对象；
+
+![img](README.assets/wps35-1504877686642.png) junit ：测试类所在包。
+
+另外在WEB-INF 下面建立jsp文件夹，作为视图页面所在位置：
+
+![img](README.assets/wps36.jpg) 
+
+##### 45.2.3. 日志配置
+
+src / log4j.properties：
+
+![img](README.assets/wps37.jpg) 
