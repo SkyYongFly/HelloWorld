@@ -10671,3 +10671,31 @@ login3.jsp
 src / log4j.properties：
 
 ![img](README.assets/wps37.jpg) 
+
+##### 45.2.4. MyBatis配置
+
+1) 数据源
+
+src / database.properties：
+
+![img](README.assets/wps38.jpg) 
+
+2) MyBatis配置文件
+
+这里只配置了POJO别名
+
+src / mybatis-config.xml：
+
+![img](README.assets/wps39.jpg) 
+
+##### 45.2.5. SpringMVC配置
+
+src /springmvc.xml ：
+
+![1522156383061](README.assets/1522156383061.png) 
+
+##### 45.2.6. Spring配置
+
+src /applicationContext.xml ：
+
+![1522156438407](README.assets/1522156438407.png)
