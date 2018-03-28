@@ -10699,3 +10699,41 @@ src /springmvc.xml ：
 src /applicationContext.xml ：
 
 ![1522156438407](README.assets/1522156438407.png)
+
+##### 45.2.7. web.xml 配置
+
+核心配置文件web.xml，因为我们之前的测试都是写测试单元去手动加载框架的，但是在实际web项目中肯定不是我们手动去启动Spring框架了，所以我们在web.xml中配置框架的自启动以及相关初始化设置。
+
+![1522156511548](README.assets/1522156511548.png)
+
+##### 45.2.8. 具体程序编写
+
+整合完框架后，下面就是具体程序的编写了。例如我们现在做一个从数据库查询所有用户并页面展示的功能。
+
+![img](README.assets/wps43.jpg) 
+
+1) User.java
+
+![img](README.assets/wps44-1522156532076.jpg) 
+
+2) UserMapper.java
+
+![img](README.assets/wps45-1522156532076.jpg) 
+
+ 
+
+3) UserMapper.xml
+
+![1522236340947](README.assets/1522236340947.png)
+
+4) UserController.java
+
+![1522236354593](README.assets/1522236354593.png) 
+
+5) showuser.jsp
+
+ ![1522236369004](README.assets/1522236369004.png)
+
+6) 结果
+
+![1522236382791](README.assets/1522236382791.png) 
