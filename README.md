@@ -1,10 +1,306 @@
-[TOC]
+- [1. Web基础](#head1)
+	- [1.1. 概念](#head2)
+	- [1.2. Servlet/JSP应用架构](#head3)
+	- [ 1.3.HTTP](#head4)
+- [2. SAX解析xml文档](#head5)
+	- [2.1. 解析思想](#head6)
+	- [2.2. SAX解析优缺点](#head7)
+	- [2.3. 示例代码](#head8)
+		- [2.3.1 解析步骤](#head9)
+		- [2.3.2 适配器模式](#head10)
+- [3. DOM解析xml文档](#head11)
+	- [3.1. 基础概念](#head12)
+	- [3.2. DOM解析的优缺点](#head13)
+	- [3.3. 示例代码](#head14)
+- [4. Servlets](#head15)
+	- [4.1. Servlet API](#head16)
+	- [4.2. Servlet](#head17)
+	- [4.3.  编写Servlet应用](#head18)
+	- [4.4.  ServletRequest](#head19)
+	- [4.5. ServletResponse](#head20)
+	- [4.6. ServletConfig](#head21)
+	- [4.7. ServletContext](#head22)
+	- [4.8. GenericServlet](#head23)
+	- [4.9. HTTPServlet](#head24)
+	- [4.10.  部署描述符](#head25)
+- [5. Servlet应用](#head26)
+	- [5.1.  基础概念](#head27)
+	- [5.2. 步骤](#head28)
+	- [5.3. 示例步骤](#head29)
+		- [5.3.1. 编写FirstServlet.java程序](#head30)
+		- [5.3.2.  编译FirstServlet.java](#head31)
+		- [5.3.3.  在Tomcat中配置web应用](#head32)
+		- [5.3.4. 浏览器访问](#head33)
+- [6. ServletConfig](#head34)
+	- [6.1. 基础概念](#head35)
+	- [6.3. 相关方法](#head36)
+	- [6.3. 作用](#head37)
+	- [6.4. 程序](#head38)
+- [7. ServletContext](#head39)
+	- [7.1. 基础概念](#head40)
+	- [7.2. 作用](#head41)
+	- [ 7.3.示例代码](#head42)
+- [8. ServletResponse](#head43)
+	- [8.1.  基础概念](#head44)
+	- [8.2. 示例程序](#head45)
+		- [8.2.1. 输出数据](#head46)
+		- [8.2.2. 设置回应头](#head47)
+		- [8.2.3. 定时刷新页面](#head48)
+		- [8.2.4 不缓存资源](#head49)
+		- [8.2.5. 实现请求重定向](#head50)
+- [9. ServletRequest](#head51)
+	- [9.1. 基础概念](#head52)
+	- [9.2. 通过Request对象进行的常用操作](#head53)
+	- [9.3. 实际例子](#head54)
+		- [9.3.1. 获取客户机信息](#head55)
+		- [9.3.2. 获取请求头信息](#head56)
+		- [9.3.3. 实践—模拟网站防盗链](#head57)
+- [10.JavaServer Pages(JSP)](#head58)
+	- [10.1. 基础概念](#head59)
+	- [10.2. 简单例程](#head60)
+- [11. Cookie](#head61)
+	- [11.1. 基础概念](#head62)
+	- [11.2. 实际例程](#head63)
+- [12. Session](#head64)
+	- [12.1. 基础概念](#head65)
+	- [12.2. 实际例程](#head66)
+- [13. 会话管理](#head67)
+	- [13.1.  概述](#head68)
+	- [13.2.  URL重写](#head69)
+	- [13.3.  隐藏域](#head70)
+	- [13.4. Cookies](#head71)
+	- [13.5. HttpSession对象](#head72)
+- [ 14.EL表达式](#head73)
+	- [14.1. 定义](#head74)
+	- [14.2. EL主要作用：](#head75)
+	- [14.3. 实例](#head76)
+- [15. 自定义标签](#head77)
+	- [15.1. 传统标签:](#head78)
+	- [15.2. 简单标签](#head79)
+	- [15.3. 控制简单自定义标签的执行](#head80)
+		- [15.3.1. 控制标签体是否执行 ](#head81)
+		- [15.3.2. 控制标签之后的内容是否执行](#head82)
+		- [15.3.3. 控制标签体重复执行](#head83)
+		- [15.3.4. 修改标签体后输出](#head84)
+	- [15.4. 自定义标签来增加一个属性:](#head85)
+- [ 16.JDBC](#head86)
+	- [16.1. JDBC快速入门](#head87)
+	- [16.2. 对数据库进行增删改查操作](#head88)
+- [17. 利用PreparedStatement防止SQL注入](#head89)
+- [ 18.JDBC批处理](#head90)
+	- [18.1. Statement批处理](#head91)
+	- [18.2. preparedStatement 批处理机制](#head92)
+- [19. 事务](#head93)
+	- [19.1. 基础概念](#head94)
+	- [19.2. 事务使用](#head95)
+	- [19.3. 设置事务回滚点](#head96)
+- [ 20.手动编写连接池](#head97)
+	- [20.1. 实际示例](#head98)
+- [21. 开源数据库连接池](#head99)
+	- [ 21.1.JDBC](#head100)
+	- [21.2. C3P0](#head101)
+	- [ 21.1.tomcat内置的数据源(DBCP)](#head102)
+- [22. JDBC元数据API](#head103)
+	- [22.1. 基础概念](#head104)
+	- [22.2. 测试实例](#head105)
+- [23. Apache—DBUtils框架](#head106)
+	- [23.1. 基础概念](#head107)
+	- [23.2. 代码示例](#head108)
+- [ 24.监听器（活化和钝化）](#head109)
+	- [24.1. 监听器](#head110)
+	- [24.2. 监听器分类](#head111)
+	- [24.3. 实例代码](#head112)
+		- [24.3.1  ServletContextListener](#head113)
+		- [24.3.2  HttpSessionListener](#head114)
+		- [24.3.3 ServletRequestListener](#head115)
+- [25. 过滤器](#head116)
+	- [25.1. Filter](#head117)
+	- [25.2. Filter的生命周期](#head118)
+	- [25.3. 开发实例](#head119)
+- [26. 文件的上传](#head120)
+	- [26.1. 文件的上传步骤](#head121)
+	- [26.2. 实例](#head122)
+- [ 27.文件的下载](#head123)
+	- [ 27.1.实现方式](#head124)
+	- [ 27.2.实例](#head125)
+- [28. 邮件](#head126)
+	- [28.1. 实际示例](#head127)
+- [29. Jsp页面中嵌入Javascript程序](#head128)
+	- [29.1. 代码示例](#head129)
+	- [29.2. 注意事项](#head130)
+- [ 30.注解+本地线程+动态代理实现事务管理](#head131)
+	- [30.1. 概述](#head132)
+	- [ 30.2.示例](#head133)
+		- [30.2.1. 泛型](#head134)
+		- [30.2.2. 注解](#head135)
+		- [30.2.3. ThreadLocal](#head136)
+- [31. Spring](#head137)
+	- [31.1. Spring初探](#head138)
+		- [31.1.1. Spring是什么](#head139)
+		- [31.1.2. Spring框架](#head140)
+		- [31.1.3. Spring的作用](#head141)
+	- [31.2. 小试牛刀](#head142)
+		- [31.2.1. 代码结构](#head143)
+		- [31.2.2. 文件说明](#head144)
+	- [31.2. IoC容器](#head145)
+		- [31.2.1. 什么是IoC](#head146)
+		- [31.2.2. DI](#head147)
+		- [21.2.3. 注入方式](#head148)
+- [32. Spring Bean](#head149)
+	- [32.1.  基础概念](#head150)
+	- [32.2. 初始化](#head151)
+	- [32.3. 配置项](#head152)
+		- [32.3.1. 作用域](#head153)
+		- [32.3.2. 懒加载](#head154)
+	- [32.4. 生命周期](#head155)
+		- [32.4.1. 自定义](#head156)
+		- [32.4.2. 实现接口](#head157)
+	- [32.5. 创建对象的方式](#head158)
+		- [32.5.1. 构造器](#head159)
+		- [32.5.2. 静态工厂](#head160)
+		- [32.5.3. 实例工厂](#head161)
+- [33. Spring注解](#head162)
+	- [33.1. 定义Bean](#head163)
+		- [33.1.1. 基本配置](#head164)
+		- [31.1.2. 作用域](#head165)
+		- [31.1.3. Required](#head166)
+	- [31.2. 自动装配](#head167)
+		- [31.2.1. 基本概念](#head168)
+		- [31.2.2. 注解自动装配使用](#head169)
+		- [31.2.3 自动装配对象](#head170)
+		- [31.2.4. 自动装配冲突](#head171)
+	- [31.3. 自定义注解](#head172)
+- [34. Java代码装配](#head173)
+- [35. 代理](#head174)
+	- [ 35.1.说明](#head175)
+	- [35.2. 静态代理](#head176)
+	- [35.3.  动态代理](#head177)
+		- [35.3.1. 工程文件](#head178)
+		- [35.3.2. 分析](#head179)
+- [36. Spring  AOP](#head180)
+	- [36.1. AOP的概念](#head181)
+	- [36.2. AOP配置使用](#head182)
+		- [36.2.1. 工程文件](#head183)
+		- [36.2.2. 分析说明](#head184)
+		- [36.2.3. 切面的通知](#head185)
+	- [36.3. AOP注解](#head186)
+		- [36.3.1. 概述](#head187)
+		- [36.3.2. 工程](#head188)
+		- [36.3.3. 代码](#head189)
+	- [36.4. 多切面](#head190)
+		- [36.4.1. 说明](#head191)
+		- [36.4.2. 代码](#head192)
+- [37. Spring与JDBC](#head193)
+	- [37.1. 工程](#head194)
+	- [37.2. 代码](#head195)
+		- [37.2.1. 自定义](#head196)
+		- [37.2.2. jdbc提供](#head197)
+		- [37.2.3. 结果](#head198)
+- [38. MyBatis初识](#head199)
+	- [38.1. MyBatis简介](#head200)
+	- [38.2. MyBatis框架优缺点](#head201)
+		- [38.2.1. 优点](#head202)
+		- [38.2.2. 缺点](#head203)
+	- [ 38.3.MyBatis框架适用场景](#head204)
+- [39. MyBatis环境搭建与入门](#head205)
+	- [39.1. 数据库环境搭建](#head206)
+		- [39.1.1. 数据库建表](#head207)
+		- [39.1.2. 设置数据](#head208)
+	- [39.2. 创建Web工程](#head209)
+	- [39.3. 导入jar包](#head210)
+		- [39.3.1. JAR包下载](#head211)
+		- [39.3.2. JAR包依赖](#head212)
+	- [39.4. 日志设置](#head213)
+	- [39.5. 配置数据源连接](#head214)
+	- [39.6. 设置POJO](#head215)
+	- [39.7. 创建SQL及映射文件](#head216)
+		- [39.7.1. 映射接口](#head217)
+		- [39.7.2. SQL文件](#head218)
+	- [39.8. MyBatis配置文件](#head219)
+	- [39.9. Session连接工厂](#head220)
+	- [39.10. 测试类](#head221)
+		- [39.10.1. 说明](#head222)
+		- [39.10.2. 测试结果](#head223)
+- [ 40.Spring与MyBatis整合](#head224)
+	- [40.1. 概述](#head225)
+	- [40.2. 工程概览](#head226)
+		- [40.2.1. 包结构定义](#head227)
+		- [40.2.2. Jar包引用](#head228)
+		- [40.2.3. 核心配置文件](#head229)
+	- [40.3. Spring配置文件](#head230)
+		- [40.3.1. 文件内容](#head231)
+		- [40.3.2. 配置详解](#head232)
+	- [40.4. MyBatis配置文件](#head233)
+		- [40.4.1. 文件内容](#head234)
+		- [40.4.2. 配置详解](#head235)
+	- [40.5. 测试](#head236)
+- [41. SpringMVC初相识](#head237)
+	- [41.1. SpringMVC简介](#head238)
+	- [41.2. 作用和功能](#head239)
+	- [41.3. SpringMVC架构](#head240)
+		- [41.3.1. SpringMVC请求处理流程](#head241)
+		- [41.3.2. SpringMVC架构](#head242)
+	- [41.4. SpringMVC优势](#head243)
+- [42. SpringMVC入门示例](#head244)
+	- [ 42.1.环境](#head245)
+	- [ 42.2.步骤](#head246)
+		- [42.2.1. 创建web应用](#head247)
+		- [42.2.2. web.xml设置](#head248)
+		- [42.2.3. SpringMVC配置文件](#head249)
+		- [42.2.4. 处理控制器](#head250)
+		- [42.2.5. 视图页面](#head251)
+		- [42.2.6. 运行访问](#head252)
+- [43. SpringMVC注解应用](#head253)
+	- [43.1. 前言](#head254)
+	- [43.2. 步骤](#head255)
+		- [43.2.1. SpringMVC配置文件](#head256)
+		- [43.2.2. Controller配置类](#head257)
+		- [43.2.3. 访问测试](#head258)
+	- [43.3. SpringMVC配置文件](#head259)
+		- [43.3.1. 映射器等配置](#head260)
+		- [43.3.2. 视图前后缀](#head261)
+	- [ 43.4.web.xml配置](#head262)
+- [ 44.SpringMVC注解](#head263)
+	- [44.1. @Controller注解](#head264)
+		- [44.1.1. 说明](#head265)
+		- [44.1.2. 注解使用](#head266)
+	- [44.2. @RequestMapping](#head267)
+		- [44.2.1. 说明](#head268)
+		- [44.2.2. 注解使用](#head269)
+		- [44.2.3. 注解支持属性](#head270)
+		- [44.2.4. 控制器请求处理方法可出现参数类型](#head271)
+		- [44.2.5. 请求方法可返回类型](#head272)
+	- [44.3. 参数绑定注解](#head273)
+		- [44.3.1. @RequestParam](#head274)
+			- [44.3.1.1. 说明](#head275)
+			- [44.3.1.2. 示例程序](#head276)
+		- [44.3.2. @PathVariable](#head277)
+		- [44.3.3. @RequestHeader](#head278)
+		- [44.3.4. @CookieValue](#head279)
+		- [44.3.5. @PathVariable、@RequestHeader、@CookieValue测试](#head280)
+		- [44.3.6. @SessionAttributes](#head281)
+			- [44.3.6.1. 说明](#head282)
+			- [44.3.6.2. 示例](#head283)
+		- [44.3.7. @ModelAttribute](#head284)
+			- [44.3.7.1. 说明](#head285)
+			- [44.3.7.2. 示例](#head286)
+- [45. SSM三大框架整合](#head287)
+	- [45.1. 概述](#head288)
+	- [45.2. 整合步骤](#head289)
+		- [45.2.1. 导入jar包](#head290)
+		- [45.2.2. 创建工程包](#head291)
+		- [45.2.3. 日志配置](#head292)
+		- [45.2.4. MyBatis配置](#head293)
+		- [45.2.5. SpringMVC配置](#head294)
+		- [45.2.6. Spring配置](#head295)
+		- [45.2.7. web.xml 配置](#head296)
+		- [45.2.8. 具体程序编写](#head297)
 
 ------
 
-### 1. **Web基础**
+### <span id="head1">1. Web基础</span>
 
-#### **1.1.** **概念**
+#### <span id="head2">1.1. 概念</span>
 
 * Java Servlet技术简称Servlet技术，是Java开发Web应用的底层技术
 
@@ -14,7 +310,7 @@
 
 *  MVC代表 Model-View-Controller
 
-#### **1.2.** **Servlet/JSP应用架构**
+#### <span id="head3">1.2. Servlet/JSP应用架构</span>
 
 * Servlet是一个Java程序，一个Servlet应用有一个或者多个Servlet程序
 
@@ -26,7 +322,7 @@
 
 * Servlet/JSP容器是一个可以同时处理Servlet和静态内容的Web容器
 
-#### **1.3.** **HTTP**
+#### <span id="head4"> 1.3.HTTP</span>
 
 * 通过URL连接或者地址来访问资源，如http://google.com/index.html
 
@@ -56,9 +352,9 @@
 
 * HTTP响应报文的正文是HTML文档
 
-### **2. SAX解析xml文档**
+### <span id="head5">2. SAX解析xml文档</span>
 
-#### **2.1. 解析思想**
+#### <span id="head6">2.1. 解析思想</span>
 
 * SAX（Simple API for XML） 
 
@@ -68,7 +364,7 @@
 
 通过读取器读取XML文档，当读取到文档的某一部分时，（文档的开始，元素的开始，元素的结束，文档的结束）， 都会调用事件处理器的对应方法，读取的数据，以形参的方式传递给相应的方法。
 
-#### **2.2. SAX解析优缺点**
+#### <span id="head7">2.2. SAX解析优缺点</span>
 
 1) 优点
 
@@ -82,7 +378,7 @@
 
 Ø 每次解析只能处理一次，要想再次处理需要再次解析
 
-#### 2.3. 示例代码
+#### <span id="head8">2.3. 示例代码</span>
 
 例如解析如下XML文档：city.xml
 （注意文档在工程中的位置，直接放在工程根目录下，否则在查找文档时候需要加载绝对路径）
@@ -101,7 +397,7 @@
 11.</county>  
 ```
 
-##### 2.3.1 解析步骤
+##### <span id="head9">2.3.1 解析步骤</span>
 
 解析分为以下5个步骤：  
 
@@ -200,7 +496,7 @@
 
 那有木有好的方法呢？当然是有的，就是适配器设计模式。
 
-##### 2.3.2 适配器模式
+##### <span id="head10">2.3.2 适配器模式</span>
 
 何为适配器设计模式？简单的说就是这个类已经实现了ContentHandler接口，我们使用这个类时不需要复写所有的方法，只将自己需要的方法复写即可。
 
@@ -239,9 +535,9 @@
 32.}  
 ```
 
-### 3. **DOM解析xml文档**
+### <span id="head11">3. DOM解析xml文档</span>
 
-#### 3.1. **基础概念**
+#### <span id="head12">3.1. 基础概念</span>
 
 **1) DOM模型 **(document object model)
 
@@ -265,7 +561,7 @@ Node接口上提供了获取父节点、获取子节点的方法，由此可以�
 
 Node接口定义了增删改查节点方法由此可以修改文档树。
 
-#### 3.2. **DOM解析的优缺点**
+#### <span id="head13">3.2. DOM解析的优缺点</span>
 
 1) 优点
 
@@ -279,7 +575,7 @@ Node接口定义了增删改查节点方法由此可以修改文档树。
 
 > 需要将整个文档载入内存中，消耗内存 ，尤其当文档较大时候
 
-#### 3.3. **示例代码**
+#### <span id="head14">3.3. 示例代码</span>
 
 xml文档:
 
@@ -449,9 +745,9 @@ Java代码：
 145.}  
 ```
 
-### 4. Servlets
+### <span id="head15">4. Servlets</span>
 
-#### 4.1. Servlet API
+#### <span id="head16">4.1. Servlet API</span>
 
 ![1491012282282](README.assets/1491012282282.png)
 
@@ -467,7 +763,7 @@ Java代码：
 
 * 每个Servlet实例还有一个封装Servlet配置信息的ServletConfig。
 
-#### 4.2. **Servlet**
+#### <span id="head17">4.2. Servlet</span>
 
 Servlet定义了5个方法：
 
@@ -487,7 +783,7 @@ Servlet定义了5个方法：
 
 注意Servlet线程安全性，Servlet不是线程安全的，而一个应用程序中所有的用户公用一个Servlet实例，因此不建议使用类级别的变量（只使用局部变量最好），除非是只读的或者java.utilconcurrent.atomic包中的成员。
 
-#### 4.3.  编写Servlet应用
+#### <span id="head18">4.3.  编写Servlet应用</span>
 
 1) Servlet需要运行在Servlet容器中，所以需要一个Servlet容器，我们使用免费且强大的Tomcat
 
@@ -602,7 +898,7 @@ Servlet定义了5个方法：
 
 而第二次以及之后的请求都不再输出了，说明只有在第一次请求Servlet的时候才调用init()方法。
 
-#### **4.4.  **ServletRequest
+#### <span id="head19">4.4.  ServletRequest</span>
 
 * 对于每一个HTTP请求，servlet容器会创建一个封装了HTTP请求的ServletRequest实例传递给servlet的service方法
 
@@ -612,13 +908,13 @@ Servlet定义了5个方法：
 
 * ServletRequest中最常用的方法就是：getParameter()，用于返回HTML表单域的值，或者HTTP请求URL查询字符串的值，例如：
 
-  *http**://example/context/servlet?id=123*
+*http**://example/context/servlet?id=123*
 
 ​	那我们就可以用如下方法获取请求中id对应的值：
 
 ​	String id = request.getParameter(“id);
 
-#### 4.5. ServletResponse
+#### <span id="head20">4.5. ServletResponse</span>
 
 * ServletResponse则表示一个Servlet响应，其影藏了将响应发给浏览器的复杂性。通过ServletRequest的方法你可以获取一些请求相关的参数，而ServletResponse则可以将设置一些返回参数信息，并且设置返回内容。返回内容之前一般会调用setContentType方法设置响应的内容类型，如果没有设置，大多数浏览器会默认以html的形式响应，不过为了避免出问题，我们一般都设置该项。
 
@@ -628,7 +924,7 @@ Servlet定义了5个方法：
 
 ![1491012762025](README.assets/1491012762025.png)
 
-#### 4.6. ServletConfig
+#### <span id="head21">4.6. ServletConfig</span>
 
 * ServletConfig封装可以通过@WebServlet或者web.xml传给一个Servlet的配置信息，以这种方式传递的每一条信息都称做初始化信息，初始化信息就是一个个K-V键值对。
 
@@ -679,7 +975,7 @@ Servlet定义了5个方法：
 
 ![1491017181512](README.assets/1491017181512.png)
 
-#### 4.7. ServletContext
+#### <span id="head22">4.7. ServletContext</span>
 
 * ServletContext是代表了Servlet应用程序。每个Web应用程序只有一个context。
 
@@ -736,7 +1032,7 @@ MyServletContext2:
 
 ![1491030065979](README.assets/1491030065979.png)
 
-#### 4.8. GenericServlet
+#### <span id="head23">4.8. GenericServlet</span>
 
 * 前面编写的Servlet应用中通过实现Servlet接口来编写Servlet，但是我们每次都必须为Servlet中的所有方法都提供实现，还需要将ServletConfig对象保存到一个类级别的变量中，GenericServlet抽象类就是为了为我们省略一些模板代码，实现了Servlet和ServletConfig，完成了一下几个工作：
 
@@ -744,20 +1040,20 @@ MyServletContext2:
 
 ```java
 public void init(ServletConfig config) throws ServletException {
-     this.config = config;
-     this.init();
+this.config = config;
+this.init();
 }
 ```
 
 * 同时为避免覆盖init方法后在子类中必须调用super.init(servletConfig)，GenericServlet还提供了一个不带参数的init方法，当ServletConfig赋值完成就会被第带参数的init方法调用。这样就可以通过覆盖不带参数的init方法编写初始化代码，而ServletConfig实例依然得以保存（这难道不是适配器模式吗？）
 
-  Ø 为Servlet接口中的所有方法提供默认实现。
+Ø 为Servlet接口中的所有方法提供默认实现。
 
-  Ø 提供方法来包装ServletConfig中的方法。
+Ø 提供方法来包装ServletConfig中的方法。
 
 * 我们可以通过继承GenericServlet来自定义Servlet(这里不再给出示例程序。。。)
 
-#### 4.9. **HTTPServlet**
+#### <span id="head24">4.9. HTTPServlet</span>
 
 * 在编写Servlet应用程序时，大多数都要用到HTTP，也就是说可以利用HTTP提供的特性，javax.servlet.http包含了编写Servlet应用程序的类和接口，其中很多覆盖了javax.servlet中的类型，我们自己在编写应用时大多时候也是继承的HttpServlet，以下为其中的重要成员:
 
@@ -865,7 +1161,7 @@ void sendRedirect(String location)
 
 ![1491097104847](README.assets/1491097104847.png)
 
-#### 4.10.  部署描述符
+#### <span id="head25">4.10.  部署描述符</span>
 
 前面我们设置servlet访问的URL地址或者初始化参数都是用的@WebServlet注解的方式，其实我们还可以用另外一种方式：部署描述符——即配置在应用中的web.xml文件。
 
@@ -998,13 +1294,13 @@ PersonInfoServlet:
 
 **整个应用级别的信息保存在ServletContext中**
 
-### 5. Servlet应用
+### <span id="head26">5. Servlet应用</span>
 
-#### 5.1.  **基础概念**
+#### <span id="head27">5.1.  基础概念</span>
 
 Servlet: 由SUN公司提供的一种动态web资源开发技术.本质上就是一段java小程序.可以将Servlet加入到Servlet容器中运行.
 
-#### 5.2. 步骤
+#### <span id="head28">5.2. 步骤</span>
 
 主要分为两步：
 
@@ -1012,9 +1308,9 @@ Servlet: 由SUN公司提供的一种动态web资源开发技术.本质上就是�
 
 2) 将编译好的带包的.class放到WEB-INF/classes下以外，还要配置web应用的 web.xml注册Servlet
 
-#### 5.3. **示例步骤**
+#### <span id="head29">5.3. 示例步骤</span>
 
-##### 5.3.1. 编写FirstServlet.java程序
+##### <span id="head30">5.3.1. 编写FirstServlet.java程序</span>
 
 为了对相关步骤结构由深入的认识，当然用记事本写啦  
 
@@ -1034,7 +1330,7 @@ Servlet: 由SUN公司提供的一种动态web资源开发技术.本质上就是�
 13.}   
 ```
 
-##### 5.3.2.  编译FirstServlet.java
+##### <span id="head31">5.3.2.  编译FirstServlet.java</span>
 
 打开 命令提示符窗口，切换到文件所在目录，输入javac  FirstServlet.java  ,但是显示错误
 
@@ -1068,7 +1364,7 @@ set classpath=%classpath%; (包的详细路径)
 
 ***com/example/servlet/FirstServlet.class***
 
-##### 5.3.3.  在Tomcat中配置web应用
+##### <span id="head32">5.3.3.  在Tomcat中配置web应用</span>
 
 在 Tomcat安装目录下的webapps下新建文件夹servlet
 
@@ -1076,13 +1372,13 @@ set classpath=%classpath%; (包的详细路径)
 
 **servlet  |**
 
-  			**|------WEB-INF** 
-
-  						**|----classes   此处将上面的com文件夹拷贝进来** 
-
- 						 **|----lib      所需依赖库，默认使用Tomcat的，可为空**
-
- 						 **|----web.xml   配置文件**
+			**|------WEB-INF** 
+	
+						**|----classes   此处将上面的com文件夹拷贝进来** 
+	
+						 **|----lib      所需依赖库，默认使用Tomcat的，可为空**
+	
+						 **|----web.xml   配置文件**
 
 关键在于配置web.xml文件:
 
@@ -1115,7 +1411,7 @@ set classpath=%classpath%; (包的详细路径)
 
 <url-pattern>里面是映射名称，即在浏览器中输入访问的名称，可以随便起
 
-##### 5.3.4. 浏览器访问
+##### <span id="head33">5.3.4. 浏览器访问</span>
 
 输入http://localhost:8080/servlet/FirstServlet
 
@@ -1123,9 +1419,9 @@ set classpath=%classpath%; (包的详细路径)
 
 ![1491391894263](README.assets/1491391894263.png)
 
-### 6. ServletConfig
+### <span id="head34">6. ServletConfig</span>
 
-#### 6.1. 基础概念
+#### <span id="head35">6.1. 基础概念</span>
 
 代表当前Servlet在web.xml中的配置信息，可以在web.xml中<servlet>中配置
 
@@ -1140,7 +1436,7 @@ set classpath=%classpath%; (包的详细路径)
 8.  </servlet>  
 ```
 
-#### 6.3. **相关方法**
+#### <span id="head36">6.3. 相关方法</span>
 
 > String getServletName()：获取当前Servlet在web.xml中配置的名字
 
@@ -1150,11 +1446,11 @@ set classpath=%classpath%; (包的详细路径)
 
 > ServletContext getServletContext()：获取代表当前web应用的ServletContext对象
 
-#### 6.3. 作用
+#### <span id="head37">6.3. 作用</span>
 
 不想在servlet中写死的内容可以配置到此处。
 
-#### 6.4. 程序
+#### <span id="head38">6.4. 程序</span>
 
 作为Init的参数，可以先定义类变量，复写父类Init()方法，在  doGet() 方法中进行相关操作
 
@@ -1244,13 +1540,13 @@ set classpath=%classpath%; (包的详细路径)
 }  
 ```
 
-### 7. ServletContext
+### <span id="head39">7. ServletContext</span>
 
-#### 7.1. **基础概念**
+#### <span id="head40">7.1. 基础概念</span>
 
 代表当前web应用对象
 
-#### 7.2. 作用
+#### <span id="head41">7.2. 作用</span>
 
 **1) 域对象**
 
@@ -1293,15 +1589,15 @@ set classpath=%classpath%; (包的详细路径)
 
 * 当在非servlet下获取资源文件时，就没有ServletContext对象用了，此时只能用类加载器。
 
-  classLoader.getResourceAsStream("../../1.properties")
+classLoader.getResourceAsStream("../../1.properties")
 
-  此方法利用类加载器直接将资源加载到内存中，有更新延迟的问题，以及如果文件太大，占用内存过大。
+此方法利用类加载器直接将资源加载到内存中，有更新延迟的问题，以及如果文件太大，占用内存过大。
 
-  ​	classLoader.getResource("../1.properties").getPath()
+​	classLoader.getResource("../1.properties").getPath()
 
-  直接返回资源的真实路径，没有更新延迟的问题。
+直接返回资源的真实路径，没有更新延迟的问题。
 
-#### 7.3.示例代码
+#### <span id="head42"> 7.3.示例代码</span>
 
 **1)** 作用一：**作为域对象可以在整个web应用范围共享数据**
 
@@ -1456,7 +1752,7 @@ Xml:
 
 * 例如读取工程目录中的context.properties文件
 
-  其在工程中的具体位置如下：
+其在工程中的具体位置如下：
 
 ![1491642284711](README.assets/1491642284711.png)
 
@@ -1489,7 +1785,7 @@ ServletContextDemo6.java :
 
 * 当在非servlet下获取资源文件时，就没有ServletContext对象用了，此时只能用类加载器
 
-  Context.properties 所在目录
+Context.properties 所在目录
 
 ![1491642329124](README.assets/1491642329124.png)
 
@@ -1533,9 +1829,9 @@ method():
 
 ![1491642372864](README.assets/1491642372864.png)
 
-### 8. ServletResponse
+### <span id="head43">8. ServletResponse</span>
 
-#### 8.1.  基础概念
+#### <span id="head44">8.1.  基础概念</span>
 
 1) Resonse的继承结构：ServletResponse--HttpServletResponse
 
@@ -1579,19 +1875,19 @@ method():
 
 * 控制浏览器缓存资源。即使不明确指定浏览器也会缓存资源，这种缓存没有截至日期。当在地址栏重新输入地址时会用缓存，但是当刷新或重新开浏览器访问时会重新获得资源。
 
-  如果明确指定缓存时间，浏览器缓存是，会有一个截至日期，在截至日期到期之前，当在地址栏重新输入地址或重新开浏览器访问时都会用缓存，而当刷新时会重新获得资源。
+如果明确指定缓存时间，浏览器缓存是，会有一个截至日期，在截至日期到期之前，当在地址栏重新输入地址或重新开浏览器访问时都会用缓存，而当刷新时会重新获得资源。
 
 7) Response实现请求重定向
 
 * 古老方法：
 
-  response.setStatus(302);
+response.setStatus(302);
 
-  response.addHeader("Location","URL");
+response.addHeader("Location","URL");
 
 * 快捷方式：
 
-  response.sendRedirect("URL");
+response.sendRedirect("URL");
 
 8) 输出验证码图片
 
@@ -1601,11 +1897,11 @@ method():
 
 * 利用Response输出数据的时候，并不是直接将数据写给浏览器，而是写到了Response的缓冲区中，等到整个service方法返回后，由服务器拿出response中的信息组成HTTP响应消息返回给浏览器。
 
-  service方法返回后，服务器会自己检查Response获取的OutputStream或者Writer是否关闭，如果没有关闭，服务器自动帮你关闭，一般情况下不要自己关闭这两个流。	
+service方法返回后，服务器会自己检查Response获取的OutputStream或者Writer是否关闭，如果没有关闭，服务器自动帮你关闭，一般情况下不要自己关闭这两个流。	
 
-#### 8.2. 示例程序
+#### <span id="head45">8.2. 示例程序</span>
 
-##### 8.2.1. 输出数据
+##### <span id="head46">8.2.1. 输出数据</span>
 
 ```java
 1.public class response extends HttpServlet {  
@@ -1632,7 +1928,7 @@ method():
 22.}  
 ```
 
-##### 8.2.2. 设置回应头
+##### <span id="head47">8.2.2. 设置回应头</span>
 
 例如通知浏览器以下载方式保存图片
 
@@ -1696,7 +1992,7 @@ method():
 
 ![1491996892232](README.assets/1491996892232.png)
 
-##### 8.2.3. 定时刷新页面
+##### <span id="head48">8.2.3. 定时刷新页面</span>
 
 ```java
 1.public class RefreshServlet extends HttpServlet {  
@@ -1717,7 +2013,7 @@ method():
 16.}  
 ```
 
-##### 8.2.4 不缓存资源
+##### <span id="head49">8.2.4 不缓存资源</span>
 
 ```java
 1.public class CacheServlet extends HttpServlet {  
@@ -1758,7 +2054,7 @@ method():
 }  
 ```
 
-##### 8.2.5. 实现请求重定向
+##### <span id="head50">8.2.5. 实现请求重定向</span>
 
 ```java
 1.public class RedirectServlet extends HttpServlet {  
@@ -1780,13 +2076,13 @@ method():
 
 http://localhost/ServletResponseTest/index.jsp
 
-### 9. ServletRequest
+### <span id="head51">9. ServletRequest</span>
 
-#### 9.1. 基础概念
+#### <span id="head52">9.1. 基础概念</span>
 
 HttpServletRequest对象代表客户端的请求，当客户端通过HTTP协议访问服务器时，HTTP请求中的所有信息都封装在这个对象中，开发人员通过这个对象的方法，可以获得客户这些信息。
 
-#### 9.2. 通过Request对象进行的常用操作
+#### <span id="head53">9.2. 通过Request对象进行的常用操作</span>
 
 * 获取客户机信息
 
@@ -1796,9 +2092,9 @@ HttpServletRequest对象代表客户端的请求，当客户端通过HTTP协议�
 
 *  利用请求域传递对象
 
-#### 9.3. **实际例子**
+#### <span id="head54">9.3. 实际例子</span>
 
-##### 9.3.1. 获取客户机信息
+##### <span id="head55">9.3.1. 获取客户机信息</span>
 
 ```java
 1.package com.example.request;  
@@ -1847,7 +2143,7 @@ HttpServletRequest对象代表客户端的请求，当客户端通过HTTP协议�
 
 ![1492234438966](README.assets/1492234438966.png)
 
-##### 9.3.2. 获取请求头信息
+##### <span id="head56">9.3.2. 获取请求头信息</span>
 
 ```java
 1.public class RequestGetHeader extends HttpServlet {  
@@ -1873,13 +2169,13 @@ HttpServletRequest对象代表客户端的请求，当客户端通过HTTP协议�
 
 ![1492234471282](README.assets/1492234471282.png)
 
-##### 9.3.3. 实践—模拟网站防盗链
+##### <span id="head57">9.3.3. 实践—模拟网站防盗链</span>
 
 * 新建一个模拟正常网站
 
-  新建开始页面 163.html
+新建开始页面 163.html
 
-  ![1492234555313](README.assets/1492234555313.png)
+![1492234555313](README.assets/1492234555313.png)
 
 ```xml
 1.<!DOCTYPE html>  
@@ -1919,15 +2215,15 @@ HttpServletRequest对象代表客户端的请求，当客户端通过HTTP协议�
 ```
 
 * 创建盗版网站 [www.165.com
-  ](http://www.165.com)修改hosts文件（C:\Windows\System32\drivers\etc下）
+](http://www.165.com)修改hosts文件（C:\Windows\System32\drivers\etc下）
 
-  加入  127.0.0.1   [www.165.com](http://www.165.com)  使地址指向本地
+加入  127.0.0.1   [www.165.com](http://www.165.com)  使地址指向本地
 
 ​	  在Tomcat配置文件server.xml原有 <Host> 标签下加入
 
 ​	  <Host  name="www.165.com"    appBase="f:/165"/>
 
- 	在对应的f盘下新建165文件夹，作为缺省应用，里面新建ROOT文件夹，ROOT下新建index.html，作为165网	 址的主页
+	在对应的f盘下新建165文件夹，作为缺省应用，里面新建ROOT文件夹，ROOT下新建index.html，作为165网	 址的主页
 
 ```xml
 1.<h1>165独家新闻</h1><hr>  
@@ -2033,9 +2329,9 @@ HttpServletRequest对象代表客户端的请求，当客户端通过HTTP协议�
 30.}  
 ```
 
-### 10.JavaServer Pages(JSP)
+### <span id="head58">10.JavaServer Pages(JSP)</span>
 
-#### 10.1. 基础概念
+#### <span id="head59">10.1. 基础概念</span>
 
 JSP全称是Java Server Pages，它和servle技术一样，都是SUN公司定义的一种用于开发动态web资源的技术
 
@@ -2053,7 +2349,7 @@ JSP全称是Java Server Pages，它和servle技术一样，都是SUN公司定义
 
 5) 应用程序中的每一个JSP页面都可以直接在浏览器中输入路径页面访问
 
-#### 10.2. 简单例程
+#### <span id="head60">10.2. 简单例程</span>
 
 1) 工程结构
 
@@ -2081,13 +2377,13 @@ JSP全称是Java Server Pages，它和servle技术一样，都是SUN公司定义
 17.</html>  
 ```
 
-### 11. Cookie
+### <span id="head61">11. Cookie</span>
 
-#### 11.1. 基础概念
+#### <span id="head62">11.1. 基础概念</span>
 
 Cookie是客户端技术，程序把每个用户的数据以cookie的形式写给用户各自的浏览器。当用户使用浏览器再去访问服务器中的web资源时，就会带着各自的数据去。这样，web资源处理的就是用户各自的数据了
 
-#### 11.2. 实际例程
+#### <span id="head63">11.2. 实际例程</span>
 
 1) 利用cookie判断用户是否访问过页面
 
@@ -2304,9 +2600,9 @@ Cookie是客户端技术，程序把每个用户的数据以cookie的形式写�
 34.}  
 ```
 
-### 12. Session
+### <span id="head64">12. Session</span>
 
-#### 12.1. **基础概念**
+#### <span id="head65">12.1. 基础概念</span>
 
 1) 在WEB开发中，服务器可以为每个用户浏览器创建一个会话对象（session对象），注意：**一个浏览器独占一个session对象**(默认情况下)。因此，在需要保存用户数据时，服务器程序可以把用户数据写到用户浏览器独占的session中，当用户使用浏览器访问其它程序时，其它程序可以从用户的session中取出该用户的数据，为用户服务。
 
@@ -2318,7 +2614,7 @@ Cookie是客户端技术，程序把每个用户的数据以cookie的形式写�
 
 **Session技术把用户的数据写到用户独占的session中,服务器端**
 
-#### 12.2. 实际例程
+#### <span id="head66">12.2. 实际例程</span>
 
 1) 利用session模拟网页支付
 
@@ -2593,15 +2889,15 @@ URL重写
 </web-app>  
 ```
 
-### 13. 会话管理
+### <span id="head67">13. 会话管理</span>
 
-#### 13.1.  概述
+#### <span id="head68">13.1.  概述</span>
 
 1) HTTP是**无状态性的**，一个Web服务器无法区分一个HTTP请求是否是第一次访问
 
 2) 4种不同的状态保存技术：URL重写，隐藏域，cookies和HTTPSession对象，其实就是缓存技术
 
-#### **13.2.**  URL重写
+#### <span id="head69">13.2.  URL重写</span>
 
 1) URL重写是一种会话跟踪技术，将一个或多个token添加到URL的查询字符串中，每个token为
 
@@ -2615,7 +2911,7 @@ a) url **? key-1=value-1&key-2=value-2**...
 
 5) 某些信息是敏感的，直接放在URL请求中是不合适的，例如用户密码
 
-#### 13.3.  隐藏域
+#### <span id="head70">13.3.  隐藏域</span>
 
 1) 将信息保存到HTML表单的隐藏域中
 
@@ -2623,11 +2919,11 @@ a) url **? key-1=value-1&key-2=value-2**...
 
 3) 例如我们在HTML页面中定义一个隐藏标签：
 
- <input  type=”hidden” name=”id” value=”1”/>
+<input  type=”hidden” name=”id” value=”1”/>
 
 这个标签在页面展示时候并不会显示出来，但是当表单提交的时候，它会被提交到服务端，我们在Servlet里面可以通过  request.getParameter(“id”) 来获取它的值，这里即 1
 
-#### 13.4. Cookies
+#### <span id="head71">13.4. Cookies</span>
 
 1) Cookies 是一个很少的信息片段，可自动的在浏览器和Web服务器之间交互，因此cookies可以存储在多个页面之间传递的信息
 
@@ -2786,7 +3082,7 @@ a) url **? key-1=value-1&key-2=value-2**...
 
 第二次请求在请求中携带着之前客户端缓存的cookie信息，同时服务器端也返回这个cookie了。
 
-#### 13.5. HttpSession对象
+#### <span id="head72">13.5. HttpSession对象</span>
 
 1) 一个用户**有且最多**有一个HttpSession，并且**不会被其他用户访问到**
 
@@ -2930,7 +3226,7 @@ a) url **? key-1=value-1&key-2=value-2**...
 47.}  
 ```
 
- **LoginPage.java：**
+**LoginPage.java：**
 
 ```java
 1. /** 
@@ -3022,7 +3318,7 @@ a) url **? key-1=value-1&key-2=value-2**...
 36.}  
 ```
 
-  ①  请求应用：
+①  请求应用：
 
 ![1493216193558](README.assets/1493216193558.png)
 
@@ -3060,13 +3356,13 @@ a) url **? key-1=value-1&key-2=value-2**...
 
 ⑤ 当我们清除浏览器缓存或者关闭浏览器重新请求这个应用时，又回到了登录界面，因为之前的浏览器端缓存已经失效或者丢失了，服务器端新生成了HttpSession，而新的HttpSession中并没有用户名和密码信息，所以认为客户端没有登录过，因此需要重新登录。
 
-### 14.EL表达式
+### <span id="head73"> 14.EL表达式</span>
 
-#### 14.1. 定义
+#### <span id="head74">14.1. 定义</span>
 
 EL 全名为Expression Language
 
-#### 14.2. EL主要作用：
+#### <span id="head75">14.2. EL主要作用：</span>
 
 1) 获取数据：
 
@@ -3084,7 +3380,7 @@ EL 表达式定义了一些隐式对象，利用这些隐式对象，web开发�
 
 EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表达式调用Java类的方法。
 
-#### 14.3. 实例
+#### <span id="head76">14.3. 实例</span>
 
 1) EL获取数据
 
@@ -3219,9 +3515,9 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 
 ![1493532489847](README.assets/1493532489847.png)
 
-### 15. 自定义标签
+### <span id="head77">15. 自定义标签</span>
 
-#### 15.1. 传统标签:
+#### <span id="head78">15.1. 传统标签:</span>
 
 例：显示ip地址
 
@@ -3327,7 +3623,7 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 
 传统标签的这种开发方式,需要我们分析发现开始标签和发现结束标签时都需要执行什么代码,还需要分析到底要返回什么样的标签体控制程序执行,相对来说相当的繁琐。
 
-#### 15.2. 简单标签
+#### <span id="head79">15.2. 简单标签</span>
 
 (1) 写一个类实现SimpleTag接口(继承SimpleTag接口的默认实现类SimpleTagSupport)
 
@@ -3415,9 +3711,9 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 19.</html>  
 ```
 
-#### 15.3. 控制简单自定义标签的执行
+#### <span id="head80">15.3. 控制简单自定义标签的执行</span>
 
-##### 15.3.1. 控制标签体是否执行 
+##### <span id="head81">15.3.1. 控制标签体是否执行 </span>
 
 ```java
 1.public class SimpleTagControl extends SimpleTagSupport{  
@@ -3478,7 +3774,7 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 
 ![1493902353184](README.assets/1493902353184.png)
 
-##### 15.3.2. 控制标签之后的内容是否执行
+##### <span id="head82">15.3.2. 控制标签之后的内容是否执行</span>
 
 ```java
 1.public class SimpleTagControl extends SimpleTagSupport{  
@@ -3535,7 +3831,7 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 
 ![1493987111742](README.assets/1493987111742.png)
 
-##### 15.3.3. 控制标签体重复执行
+##### <span id="head83">15.3.3. 控制标签体重复执行</span>
 
 ```java
 1.public class SimpleTagControl extends SimpleTagSupport{  
@@ -3593,7 +3889,7 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 
 ![1493991277523](README.assets/1493991277523.png)
 
-##### 15.3.4. 修改标签体后输出
+##### <span id="head84">15.3.4. 修改标签体后输出</span>
 
 ```java
 1.public class SimpleTagControl extends SimpleTagSupport{  
@@ -3651,7 +3947,7 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 
 ![1493991323719](README.assets/1493991323719.png)
 
-#### 15.4. 自定义标签来增加一个属性:
+#### <span id="head85">15.4. 自定义标签来增加一个属性:</span>
 
 1) 在标签处理类中增加一个javabean属性,这个属性就是要增加的标签的属性,并对外提供setXXX方法
 
@@ -3698,13 +3994,13 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 5.  </body>  
 ```
 
-### 16.JDBC
+### <span id="head86"> 16.JDBC</span>
 
-#### 16.1. JDBC快速入门
+#### <span id="head87">16.1. JDBC快速入门</span>
 
 * 导入JDBC  jar包到当前工程lib目录，添加到编译路径
 
-  操作数据库，新建数据库 day10 , 在其中新建表user ，
+操作数据库，新建数据库 day10 , 在其中新建表user ，
 
 ![1494059972885](README.assets/1494059972885.png)
 
@@ -3751,7 +4047,7 @@ EL表达式允许用户开发自定义EL函数，以在JSP页面中通过EL表�
 
 结果显示数据库中 name 对应的值
 
-#### 16.2. 对数据库进行增删改查操作
+#### <span id="head88">16.2. 对数据库进行增删改查操作</span>
 
 * 先将操作中的共性方法封装成类
 
@@ -3955,7 +4251,7 @@ password=root
 106.}  
 ```
 
-### 17. 利用PreparedStatement防止SQL注入
+### <span id="head89">17. 利用PreparedStatement防止SQL注入</span>
 
 ```java
 1.package com.example.jdbc;  
@@ -3998,9 +4294,9 @@ password=root
 38.}  
 ```
 
-### 18.JDBC批处理
+### <span id="head90"> 18.JDBC批处理</span>
 
-#### 18.1. Statement批处理
+#### <span id="head91">18.1. Statement批处理</span>
 
 优点：可以执行多条不同结构的sql语句
 
@@ -4067,7 +4363,7 @@ password=root
 58.}  
 ```
 
-#### 18.2. preparedStatement 批处理机制
+#### <span id="head92">18.2. preparedStatement 批处理机制</span>
 
 优点：有预编译机制，效率较高，执行多条结构相同，参数不同的sql语句时，不需要重复写sql的主干语句
 
@@ -4115,11 +4411,11 @@ password=root
 39.}  
 ```
 
-### 19. 事务
+### <span id="head93">19. 事务</span>
 
-#### **19.1.** **基础概念**
+#### <span id="head94">19.1. 基础概念</span>
 
-#### **19.2.** **事务使用**
+#### <span id="head95">19.2. 事务使用</span>
 
 ```java
 1.package com.example.tran;  
@@ -4190,7 +4486,7 @@ password=root
 }  
 ```
 
-#### 19.3. 设置事务回滚点
+#### <span id="head96">19.3. 设置事务回滚点</span>
 
 ```java
 1.package com.example.tran;  
@@ -4279,9 +4575,9 @@ password=root
 84.}  
 ```
 
-### 20.手动编写连接池
+### <span id="head97"> 20.手动编写连接池</span>
 
-#### **20.1.** 实际示例
+#### <span id="head98">20.1. 实际示例</span>
 
 1) 编写JDBC公共方法
 
@@ -4550,9 +4846,9 @@ uri=jdbc\:mysql\://localhost\:3306/day11
 35.}  
 ```
 
-### 21. **开源数据库连接池**
+### <span id="head99">21. 开源数据库连接池</span>
 
-#### **21.1.** **JDBC**
+#### <span id="head100"> 21.1.JDBC</span>
 
 1) 在系统中增加如下两个 jar 文件：
 
@@ -4629,7 +4925,7 @@ password=root
 55.}  
 ```
 
-#### 21.2. C3P0
+#### <span id="head101">21.2. C3P0</span>
 
 1) 导入jar包
 
@@ -4709,7 +5005,7 @@ password=root
 50.}  
 ```
 
-#### 21.1.tomcat内置的数据源(DBCP)
+#### <span id="head102"> 21.1.tomcat内置的数据源(DBCP)</span>
 
 1) 为tomcat配置数据源
 
@@ -4793,9 +5089,9 @@ password=root
 56.}  
 ```
 
-### 22. JDBC元数据API
+### <span id="head103">22. JDBC元数据API</span>
 
-#### 22.1. **基础概念**
+#### <span id="head104">22.1. 基础概念</span>
 
 1) 元数据：数据库、表、列的定义信息
 
@@ -4807,7 +5103,7 @@ ParameterMetaData
 
 ResultSetMetaData
 
-#### 22.2. 测试实例
+#### <span id="head105">22.2. 测试实例</span>
 
 1) 导入c3p0相关类库，配置c3p0-config.xml
 
@@ -5040,9 +5336,9 @@ ResultSetMetaData
 67.}  
 ```
 
-### 23. Apache—DBUtils框架
+### <span id="head106">23. Apache—DBUtils框架</span>
 
-#### **23.1.** **基础概念**
+#### <span id="head107">23.1. 基础概念</span>
 
 1) commons-dbutils 是 Apache 组织提供的一个开源 JDBC工具类库，它是对JDBC的简单封装
 
@@ -5060,7 +5356,7 @@ org.apache.commons.dbutils.DbUtils  工具类
 
 4) QueryRunner:可以简化对数据库的操作
 
-#### 23.2. 代码示例
+#### <span id="head108">23.2. 代码示例</span>
 
 ⑴ 导入相关DBUtils和c3p0类库，配置c3p0-config.xml
 
@@ -5326,13 +5622,13 @@ MyResultSetHandler 接口：
 8.}  
 ```
 
-### 24.监听器（活化和钝化）
+### <span id="head109"> 24.监听器（活化和钝化）</span>
 
-#### 24.1. 监听器
+#### <span id="head110">24.1. 监听器</span>
 
 监听器就是一个java程序，功能是监听另一个java对象变化（方法调用、属性变更）
 
-#### 24.2. 监听器分类
+#### <span id="head111">24.2. 监听器分类</span>
 
 **1) 8个监听器**
 
@@ -5365,13 +5661,13 @@ a) 用来监听三大作用域的创建和销毁的监听器
 
 * 钝化
 
-  当服务器正常关闭时,还存活着的session会随着服务器的关闭被以文件的形式存储在tomcat的work目录下,这个过程叫做session的钝化
+当服务器正常关闭时,还存活着的session会随着服务器的关闭被以文件的形式存储在tomcat的work目录下,这个过程叫做session的钝化
 
 * 活化
 
-  当服务器再次正常开启时,服务器会找到之前的SESSIONS.ser文件从中恢复之前保存起来的session对象这个过程叫做session的活化
+当服务器再次正常开启时,服务器会找到之前的SESSIONS.ser文件从中恢复之前保存起来的session对象这个过程叫做session的活化
 
-  **想要随着Session被钝化活化的对象它的类必须实现Serializable接口**
+**想要随着Session被钝化活化的对象它的类必须实现Serializable接口**
 
 * ServletRequestListener  用来监听ServletRequest对象创建和销毁的监听
 
@@ -5403,9 +5699,9 @@ c) 使javabean自己感知自己在Session中状态变化的监听器,
 
 ​		javabean随着session被活化：sessionDidActive(HttpSessionBindingEvent event)
 
-#### 24.3. **实例代码**
+#### <span id="head112">24.3. 实例代码</span>
 
-##### 24.3.1  ServletContextListener
+##### <span id="head113">24.3.1  ServletContextListener</span>
 
 ​	步骤：
 
@@ -5456,7 +5752,7 @@ c) 使javabean自己感知自己在Session中状态变化的监听器,
 
 web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的方法
 
-##### 24.3.2  HttpSessionListener
+##### <span id="head114">24.3.2  HttpSessionListener</span>
 
 ​	步骤：
 
@@ -5565,13 +5861,13 @@ web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的
 
 *  当第一次访问 HSListenerDemo1 时 
 
-  （当服务器正常关闭后再打开在访问不会出现，因为服务器将session中信息	保存起来了，下次会使用这些信息，当非正常关闭不会保存这些信息，就是**钝化**和**活化**）
+（当服务器正常关闭后再打开在访问不会出现，因为服务器将session中信息	保存起来了，下次会使用这些信息，当非正常关闭不会保存这些信息，就是**钝化**和**活化**）
 
 ![1495869141862](README.assets/1495869141862.png)
 
 * 访问 HSGetValue  
 
-  ![1495869169382](README.assets/1495869169382.png)
+![1495869169382](README.assets/1495869169382.png)
 
 * 访问  HttpSessionInvalidate
 
@@ -5579,7 +5875,7 @@ web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的
 
 **注意，如果在HttpSession中想要是设置的Javabean 相关值能够钝化和活化,需要使Javabean实现   Serializable 接口**
 
-##### 24.3.3 ServletRequestListener
+##### <span id="head115">24.3.3 ServletRequestListener</span>
 
 * 新建类实现ServletRequestListener接口
 
@@ -5608,37 +5904,37 @@ web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的
 
 * 验证功能
 
-  当访问上例中的 HSGetValue   时
+当访问上例中的 HSGetValue   时
 
 ![1495869327734](README.assets/1495869327734.png)
 
 4) 其它监听器省略示例
 
-### 25. **过滤器**
+### <span id="head116">25. 过滤器</span>
 
-#### 25.1. **Filter**
+#### <span id="head117">25.1. Filter</span>
 
 也称之为过滤器，它是Servlet技术中最实用的技术，WEB开发人员通过Filter技术，对web服务器管理的所有web资源：例如Jsp, Servlet, 静态图片文件或静态 html 文件等进行拦截，从而实现一些特殊的功能。例如实现URL级别的权限访问控制、过滤敏感词汇、压缩响应信息等一些高级功能。
 
-#### 25.2. **Filter的生命周期**
+#### <span id="head118">25.2. Filter的生命周期</span>
 
 * init(FilterConfig filterConfig)throws ServletException：
 
-  和我们编写的Servlet程序一样，Filter的创建和销毁由WEB服务器负责。 web 应用程序启动时，web 服务器将创建Filter 的实例对象，并调用其init方法进行初始化
+和我们编写的Servlet程序一样，Filter的创建和销毁由WEB服务器负责。 web 应用程序启动时，web 服务器将创建Filter 的实例对象，并调用其init方法进行初始化
 
-  开发人员通过init方法的参数，可获得代表当前filter配置信息的FilterConfig对象。
+开发人员通过init方法的参数，可获得代表当前filter配置信息的FilterConfig对象。
 
 * doFilter(ServletRequest,ServletResponse,FilterChain)
 
-  每次filter进行拦截都会执行;
+每次filter进行拦截都会执行;
 
-  在实际开发中方法中参数request和response通常转换为HttpServletRequest和HttpServletResponse类型进行操作;
+在实际开发中方法中参数request和response通常转换为HttpServletRequest和HttpServletResponse类型进行操作;
 
 * destroy()：
 
 ​      在Web容器卸载 Filter 对象之前被调用。
 
-#### 25.3. **开发实例**
+#### <span id="head119">25.3. 开发实例</span>
 
 1) Filter开发分为二个步骤：
 
@@ -5776,9 +6072,9 @@ web 应用销毁则销毁ServletContext, 触发监听器中的监听销毁时的
     </filter-mapping>  
 ```
 
-### 26. **文件的上传**
+### <span id="head120">26. 文件的上传</span>
 
-#### 26.1. 文件的上传步骤
+#### <span id="head121">26.1. 文件的上传步骤</span>
 
 1) 在web页面中添加上传输入项
 
@@ -5798,7 +6094,7 @@ Request对象提供了一个**getInputStream**方法，通过这个方法可以�
 
 使用Commons-fileupload组件实现文件上传，需要导入该组件相应的支撑jar包：**Commons-fileupload**和**commons-io**。commons-io 不属于文件上传组件的开发jar文件，但Commons-fileupload 组件从1.1 版本开始，它工作时需要commons-io包的支持
 
-#### 26.2. **实例**
+#### <span id="head122">26.2. 实例</span>
 
 * 导入所需要的jar包
 
@@ -6003,7 +6299,7 @@ Request对象提供了一个**getInputStream**方法，通过这个方法可以�
 
 * 结果
 
-  浏览器访问应用
+浏览器访问应用
 
 ![1495965417721](README.assets/1495965417721.png)
 
@@ -6019,9 +6315,9 @@ Request对象提供了一个**getInputStream**方法，通过这个方法可以�
 
 （上面在在字段中输入数据的话将会将数据传送出去，打印出来）
 
-### 27.**文件的下载**
+### <span id="head123"> 27.文件的下载</span>
 
-#### 27.1.**实现方式**
+#### <span id="head124"> 27.1.实现方式</span>
 
 Web应用中实现文件下载的两种方式：
 
@@ -6029,7 +6325,7 @@ Web应用中实现文件下载的两种方式：
 
 2) 程序实现下载需设置两个响应头
 
-   设置**Content-Type** 的值为：下载文件对应**MIME** 类型、
+设置**Content-Type** 的值为：下载文件对应**MIME** 类型、
 
 Web 服务器希望浏览器不直接处理相应的实体内容，而是由用户选择将相应的实体内容
 
@@ -6037,7 +6333,7 @@ Web 服务器希望浏览器不直接处理相应的实体内容，而是由用�
 
 在设置 Content-Dispostion 之前一定要指定 Content-Type.
 
-#### 27.2.**实例**
+#### <span id="head125"> 27.2.实例</span>
 
 * 例如在如下目录保存两个图片
 
@@ -6114,15 +6410,15 @@ Web 服务器希望浏览器不直接处理相应的实体内容，而是由用�
 
 * 结果
 
-  浏览器访问，点击图片1
+浏览器访问，点击图片1
 
 ![1496319514053](README.assets/1496319514053.png)
 
 选择保存或打开，得到图片1
 
-### 28. **邮件**
+### <span id="head126">28. 邮件</span>
 
-#### 28.1. **实际示例**
+#### <span id="head127">28.1. 实际示例</span>
 
 1) 手动创建本地邮件服务器：易邮
 
@@ -6223,9 +6519,9 @@ Web 服务器希望浏览器不直接处理相应的实体内容，而是由用�
 
 至此本地邮件收发就完成了。
 
-### 29. **Jsp页面中嵌入Javascript程序**
+### <span id="head128">29. Jsp页面中嵌入Javascript程序</span>
 
-#### 29.1. **代码示例**
+#### <span id="head129">29.1. 代码示例</span>
 
 1) 注册界面处理，Javascript完成对输入内容是否为空及合法性的判断
 
@@ -6337,7 +6633,7 @@ Web 服务器希望浏览器不直接处理相应的实体内容，而是由用�
 105.</html>  
 ```
 
-#### 29.2. **注意事项**
+#### <span id="head130">29.2. 注意事项</span>
 
 1) Javascript和java程序是不一样的,有些在java中的语法在javascript中是没有用的
 
@@ -6364,13 +6660,13 @@ Web 服务器希望浏览器不直接处理相应的实体内容，而是由用�
 8.  }  
 ```
 
-### 30.**注解+本地线程+动态代理实现事务管理**
+### <span id="head131"> 30.注解+本地线程+动态代理实现事务管理</span>
 
-#### 30.1. **概述**
+#### <span id="head132">30.1. 概述</span>
 
 在项目开发中由于某些问题使得程序出错，通常出错了我们要么抛出异常，要么对其进行处理。但是在某些场合程序的前后逻辑存在一定的耦合关系，要么一起完成，要么一起不完成，比如A 和B两件事，但是有可能A完成了，但是在执行B或之前除了问题，导致B没有执行，这就可能出现打错。常用的一个例子就是银行转账问题，A给B转账，A已经将钱汇出，银行将A账户钱减少，但是在往B账户添加钱款时发生了断电或网络故障导致B的账户并没有收到钱款，这就造成了A用户的损失。所以我们使用事务对其进行控制。
 
-#### 30.2.**示例**
+#### <span id="head133"> 30.2.示例</span>
 
 对数据库进行操作的时候，用service向数据库中的订单表和订单项表中存入数据，由于两张表存在外键联系，所以要进行事务控制，
 
@@ -6435,7 +6731,7 @@ Web 服务器希望浏览器不直接处理相应的实体内容，而是由用�
 
 但这样依然有问题，我们的service和dao都是通过工厂类来获取的，但是我们的dao需要实现事务吗？service层调用了dao层，dao层当然就不需要了，可是工厂类中获取实例就只有这一个方法，怎么办呢？哎，我来一个getServiceInstance()和getDaoInstance()两个方法，只要在service实例方法中实现代理就可以了。但是如果我们在程序中应该调用getDaoInstance()方法的地方结果调用getServiceInstance()方法了，程序会识别出来吗？不会！那又怎么办啊？！
 
-##### 30.2.1. 泛型
+##### <span id="head134">30.2.1. 泛型</span>
 
 这里我们就要使用另一杀手锏了-----泛型！我们使service的类接口实现一个新定义的Service接口，dao类的接口实现新建的Dao接口，在工厂方法中限定获取方法的类型，不就可以了吗
 
@@ -6477,7 +6773,7 @@ public  <T extends Service> T getServiceInstance(Class<T> clazz){....} �
 
 但这样就好了吗？我们的service默认是使用事务的，但是如果我们的service不需要事务呢？那又怎么办啊？！
 
-##### 30.2.2. 注解
+##### <span id="head135">30.2.2. 注解</span>
 
 我们要使用另一秘密武器--------注解！注意，注解和注释是不同的，注释是给我们人看的，而注解是给程序看的，我们平时使用的 @Override 就是注解，它可表明该方法覆盖父类方法。注解可以实现程序的标识，那么好了，我们可以使用一个注解表明那些需要事务的方法啊，如果不需要事务的我们不给它通行证（注解）就行了呗！
 
@@ -6507,7 +6803,7 @@ public  <T extends Service> T getServiceInstance(Class<T> clazz){....} �
 我们该需要开启事务的添加注解，
 
 ```java
-  @Tran  
+@Tran  
   public void addOrderToSQL(Order order);  
 ```
 
@@ -6629,7 +6925,7 @@ method.isAnnotationPresent(Tran.class）
 
 我们思考一下，在web的使用中，我们的服务器端可能同时收到很多请求，这样就可能引发多线程安全问题，如果对数据库的连接只有一个connection，可能一个线程开启了事务，但是出现问题了需要回滚事务，但是此时另一个线程开挂抢了cpu资源提交了事务，那这就大事不好了。哎呀，那又应该怎么办呀？
 
-##### 30.2.3. ThreadLocal
+##### <span id="head136">30.2.3. ThreadLocal</span>
 
 好吧，你知道的，我又要使出一个杀手锏了，那就是ThreadLocal，这是个什么东西啊，乍看好像和线程有关，哎，我们要研究的不就是多线程么，看来靠谱，不过谁知道这怎么用啊，我们不妨先来看一下API文档。
 
@@ -6858,7 +7154,7 @@ QueryRunner runner = new QueryRunner(TransationManager.getSource()); 
 
 爽吧？不要考虑其他的事情，尽管使用！
 
-   哈哈，终于完成了，赶快打开浏览器连接服务器，操作，提交，duang，报错了！我去，报错了！这么辛辛苦苦，结果......不活了，跳楼去!不要激动嘛，我们看一下问题嘛，一翻译，什么“不能使用已经关闭的连接”，定位一下，在我们插入订单项的时候错误，也就是说插入订单后连接就断了，我去，这个为什么出现这个问题呢？仔细分析一下，ThreadLocal在使用完连接后会自动清除连接，这个可不是我们想要的，我下面还要使用呐，那怎么办啊？好办，我们只需要在他需要关闭的地方不让它关闭，最后一起关闭
+哈哈，终于完成了，赶快打开浏览器连接服务器，操作，提交，duang，报错了！我去，报错了！这么辛辛苦苦，结果......不活了，跳楼去!不要激动嘛，我们看一下问题嘛，一翻译，什么“不能使用已经关闭的连接”，定位一下，在我们插入订单项的时候错误，也就是说插入订单后连接就断了，我去，这个为什么出现这个问题呢？仔细分析一下，ThreadLocal在使用完连接后会自动清除连接，这个可不是我们想要的，我下面还要使用呐，那怎么办啊？好办，我们只需要在他需要关闭的地方不让它关闭，最后一起关闭
 
 ```java
 1.package com.example.utils;  
@@ -6994,11 +7290,11 @@ QueryRunner runner = new QueryRunner(TransationManager.getSource()); 
 
 但是这里要注意一个问题，因为我们的事务处理是根据异常来的，出现异常才回滚，所以dao层的异常一定要往上抛，否则service层一尾没有异常，明明有错误，就是不进行回滚，那就呵呵了......
 
-### 31. Spring
+### <span id="head137">31. Spring</span>
 
-#### 31.1. **Spring初探**
+#### <span id="head138">31.1. Spring初探</span>
 
-##### 31.1.1. Spring是什么
+##### <span id="head139">31.1.1. Spring是什么</span>
 
 * Spring是一个开源框架，为了解决企业应用开发复杂性而创建的，但是现在已经不止应用于企业应用。
 
@@ -7006,7 +7302,7 @@ QueryRunner runner = new QueryRunner(TransationManager.getSource()); 
 
 ![1496837556239](README.assets/1496837556239.png)
 
-##### 31.1.2. Spring框架
+##### <span id="head140">31.1.2. Spring框架</span>
 
 Spring基本框架如下图：
 
@@ -7014,7 +7310,7 @@ Spring基本框架如下图：
 
 可以看到Spring基本由几大模块组成，最下面的是测试框架（对Java测试框架做了增强）、核心容器（包括Beans容器、上下文、SpEL表达式）、对于AOP、Aspects、消息的支持、持久层框架的结合、Web开发支持（例如Spring MVC）。
 
-##### 31.1.3. Spring的作用
+##### <span id="head141">31.1.3. Spring的作用</span>
 
 * 作为一个容器，将Java对象当做Bean来处理，使Java对象之间松耦合，即IoC(或者DI)
 
@@ -7022,21 +7318,21 @@ Spring基本框架如下图：
 
 * 提供了对多种技术的支持
 
-  ——JMS
+——JMS
 
-  ——MQ支持
+——MQ支持
 
-  ——UnitTest
+——UnitTest
 
 * 提供了众多方便的应用的辅助类（JDBC Template等）
 
 * 对主流应用框架（如Hibernate）的良好支持
 
-#### 31.2. 小试牛刀
+#### <span id="head142">31.2. 小试牛刀</span>
 
 上面初步介绍了Spring的概念、框架组成及作用，那么Spring具体如何使用呢？这一小节我们先写一个小Demo,以方便后续章节的讲解。
 
-##### 31.2.1. 代码结构
+##### <span id="head143">31.2.1. 代码结构</span>
 
 传统的创建类的方法是通过new 的方式，但是在spring中，我们将这个工作交给spring容器来完成，我们无需显式的new即可创建对象，那如何创建呢？我们在Eclipse中新建一个工程。
 
@@ -7048,11 +7344,11 @@ Spring基本框架如下图：
 
 我们需要注意的是，使用spring框架需要引入对应的jar包，这里我只引入了基本的依赖jar包：spring.jar，另外一个commons-logging.jar，为日志依赖包。
 
-##### 31.2.2. 文件说明
+##### <span id="head144">31.2.2. 文件说明</span>
 
 * application.xml文件
 
-  从工程目录中我们可以很清楚的看到一个文件：applicationContext.xml文件。这个文件的作用是啥呢？该文件为spring的配置文件，我们看一下它的内容。
+从工程目录中我们可以很清楚的看到一个文件：applicationContext.xml文件。这个文件的作用是啥呢？该文件为spring的配置文件，我们看一下它的内容。
 
 ```xml
 1.<?xml version="1.0" encoding="UTF-8"?>  
@@ -7074,7 +7370,7 @@ Spring基本框架如下图：
 
 * TestSpring.java文件
 
-  我们到底应该如何使用声明的bean呢？这里写了一个测试类。
+我们到底应该如何使用声明的bean呢？这里写了一个测试类。
 
 ```java
 1. package com.example.test;  
@@ -7115,23 +7411,23 @@ Spring基本框架如下图：
 
 从上面的过程中可以看到，创建对象的步骤就是：创建一个类、在spring配置文件中声明<bean>、利用框架创建对象。
 
-#### 31.2. IoC容器
+#### <span id="head145">31.2. IoC容器</span>
 
-##### 31.2.1. 什么是IoC
+##### <span id="head146">31.2.1. 什么是IoC</span>
 
 *  基本概念
 
-  IoC(控制反转：Inverse of Control)。感觉很玄乎，嘛意思?其实从字面理解我们可以将其拆分为两部分：控制、反转。
+IoC(控制反转：Inverse of Control)。感觉很玄乎，嘛意思?其实从字面理解我们可以将其拆分为两部分：控制、反转。
 
-  我们从上面的示例程序看出什么东西出来没？或者说和我们平常写代码的方式有什么不一样么？最明显的差别就是我们平常创建要调用一个类的方法会怎么做呢，先获取一个类对象实例，然后通过这个对象实例来调用其中的方法，但是使用了Spring框架呢，我们好像并没有去new一个对象实例，而是利用容器去获取一个对象，而这个对象是被我们定义出的一个Spring对象——bean。那么这个过程中什么发生了变化呢？控制权——就是之前我们目标类需要自己去创建需要的对象实例，现在呢，不需要自己去new一个了，直接从容器中获取（上面的例子好像并不是非常好的体现出这个优点），从主动到被动，这就是所谓的控制反转。
+我们从上面的示例程序看出什么东西出来没？或者说和我们平常写代码的方式有什么不一样么？最明显的差别就是我们平常创建要调用一个类的方法会怎么做呢，先获取一个类对象实例，然后通过这个对象实例来调用其中的方法，但是使用了Spring框架呢，我们好像并没有去new一个对象实例，而是利用容器去获取一个对象，而这个对象是被我们定义出的一个Spring对象——bean。那么这个过程中什么发生了变化呢？控制权——就是之前我们目标类需要自己去创建需要的对象实例，现在呢，不需要自己去new一个了，直接从容器中获取（上面的例子好像并不是非常好的体现出这个优点），从主动到被动，这就是所谓的控制反转。
 
-  直接用大白话解释就是将对对象的管理交由框架。显而易见，我们使用spring来创建容器就是体现了这个概念。
+直接用大白话解释就是将对对象的管理交由框架。显而易见，我们使用spring来创建容器就是体现了这个概念。
 
 * 示意图
 
 ![1496837988973](README.assets/1496837988973.png)
 
-##### 31.2.2. DI
+##### <span id="head147">31.2.2. DI</span>
 
 这里我们还需要提出一个概念：DI（**依赖注入**），其实阐述的本质内容和IoC是一致的，就是将对象的使用通过容器注入的方式来获取，比如，对象A依赖B，A方法参数传入B的实例，这种就是注入的方式。
 
@@ -7139,7 +7435,7 @@ DI和IoC只不过是统一问题的两个角度不同的描述。
 
 IoC是Spring赖以存在的两大基础支撑概念之一。
 
-##### 21.2.3. 注入方式
+##### <span id="head148">21.2.3. 注入方式</span>
 
 Spring  bean之间的调用还是类之间的声明一个引用实例，然后调用目标方法，另外有些成员变量需要初始化设置为某些常量值，那么这些就需要涉及到Spring的注入方式。
 
@@ -7271,23 +7567,23 @@ Person bean发送短信时通过phone来完成的，而phone这个对象引用�
 
 <constructor-arg>表示的是构造注入，就是给类构造器中的变量设置具体值，这里利用  ref 引用另一个 bean ，这个bean就是上面定义的Phone。
 
-### 32. Spring Bean
+### <span id="head149">32. Spring Bean</span>
 
-#### 32.1.  **基础概念**
+#### <span id="head150">32.1.  基础概念</span>
 
 * Bean
 
-  Bean简单点说就是Spring对于类对象的自己定义，所有的对象在spring中都当作bean来处理，Spring容器正是一个大的Bean容器。可以把Spring容器理解成一个大型工厂，Bean就是该工厂的产品。
+Bean简单点说就是Spring对于类对象的自己定义，所有的对象在spring中都当作bean来处理，Spring容器正是一个大的Bean容器。可以把Spring容器理解成一个大型工厂，Bean就是该工厂的产品。
 
 * Spring 的 Bean 和 JavaBean比较
 
-  规范：Spring容器对Bean 没有特殊要求，不像JavaBean 一样遵循一些规范（为每个属性提供相应的setter 和 getter 方法），不过对于设值注入的Bean,一定要提供setter 方法。
+规范：Spring容器对Bean 没有特殊要求，不像JavaBean 一样遵循一些规范（为每个属性提供相应的setter 和 getter 方法），不过对于设值注入的Bean,一定要提供setter 方法。
 
-  作用：Spring 中的Bean 是 java 实例，java组件，它的作用几乎无所不包，任何应用组件都被称为Bean，而传统的Java应用中的JavaBean通常作为DTO（数据传输对象），来封装值对象，在各层之间传递数据。
+作用：Spring 中的Bean 是 java 实例，java组件，它的作用几乎无所不包，任何应用组件都被称为Bean，而传统的Java应用中的JavaBean通常作为DTO（数据传输对象），来封装值对象，在各层之间传递数据。
 
-  生命周期：传统的JavaBean作为值对象传递，不接受任何容器管理其生命周期，Spring中的Bean有Spring管理其生命周期行为。
+生命周期：传统的JavaBean作为值对象传递，不接受任何容器管理其生命周期，Spring中的Bean有Spring管理其生命周期行为。
 
-#### 32.2. 初始化
+#### <span id="head151">32.2. 初始化</span>
 
 创建对象是在加载applicationContext.xml的时候还是在具体的调用bean的时候呢？
 
@@ -7325,9 +7621,9 @@ Spring中类的创建时间是在加载配置文件时创建的。
 
 实际上spring加载配置文件时，会依次解析其中的<bean>，来创建相应的对象。
 
-#### 32.3. **配置项**
+#### <span id="head152">32.3. 配置项</span>
 
-##### 32.3.1. 作用域
+##### <span id="head153">32.3.1. 作用域</span>
 
 - 五种类型
 
@@ -7387,7 +7683,7 @@ Spring中类的创建时间是在加载配置文件时创建的。
 
 **“根据经验，对所有有状态的bean应该使用prototype作用域，而对无状态的bean则应该使用singleton作用域。“**
 
-##### 32.3.2. 懒加载
+##### <span id="head154">32.3.2. 懒加载</span>
 
 Bean是在加载配置文件的时候创建的，那可不可以在使用类的时候创建这个类对象呢？这个是可以得，可以利用懒加载。
 
@@ -7405,11 +7701,11 @@ Bean是在加载配置文件的时候创建的，那可不可以在使用类的�
 
 这个就涉及一个概念，单实例和多实例。
 
-#### 32.4. **生命周期**
+#### <span id="head155">32.4. 生命周期</span>
 
 既然Bean有创建时机，那肯定也应该有销毁的时候。初始化方法和销毁方法的调用有两种方式，一种是我们自定义初始化、销毁方法，然后在XML配置文件中声明；另一种是实现相应的接口，spring容器就知道bean有了初始化、销毁方法声明，在实际运行时会在合适的实际调用这两个方法。
 
-##### 32.4.1. 自定义
+##### <span id="head156">32.4.1. 自定义</span>
 
 HelloWorld.java :
 
@@ -7471,7 +7767,7 @@ HelloWorld.java :
 
 \* 如果spring容器执行了close方法，在执行该方法之前要执行销毁方法
 
-##### 32.4.2. 实现接口
+##### <span id="head157">32.4.2. 实现接口</span>
 
 ExampleBean.java
 
@@ -7521,7 +7817,7 @@ Test:
 
 ![1497077180610](README.assets/1497077180610.png)
 
-#### 32.5. **创建对象的方式**
+#### <span id="head158">32.5. 创建对象的方式</span>
 
 大多数情况下，BeanFactory 直接通过new 关键字调用构造器来创建Bean 实例，而class属性指定了Bean实例的实现类。但这并不是实例化Bean的唯一方法。
 
@@ -7533,11 +7829,11 @@ Test:
 
 ——调用实例工厂方法创建Bean。
 
-##### 32.5.1. 构造器
+##### <span id="head159">32.5.1. 构造器</span>
 
 上面我们创建对象的方式，其实底层就是通过构造器来创建类实例的。
 
-##### 32.5.2. 静态工厂
+##### <span id="head160">32.5.2. 静态工厂</span>
 
 ![1497082794553](README.assets/1497082794553.png)
 
@@ -7607,7 +7903,7 @@ TestSring.java 文件：
 
 这里面比较核心的就是 工厂bean中的 factory-method 了，它的作用就是告诉spring容器在创建工厂类的时候需要执行这个方法，而这个方法里面是什么东西呢？就是创建一个具体的类。所以我们在TestSpring中 context.getBean("helloStaticFactory")返回的对象不是工厂类对象，而是工厂类创建的实例对象。
 
-##### 32.5.3. 实例工厂
+##### <span id="head161">32.5.3. 实例工厂</span>
 
 同静态工厂不同，实例工厂在配置中的<bean>里面不直接声明factory-method 方法，
 
@@ -7644,15 +7940,15 @@ TestSring.java 文件：
 
 这样在具体的创建类时，直接调用 id 为 helloWorld2 的<bean> 。
 
-### 33. Spring注解
+### <span id="head162">33. Spring注解</span>
 
 上一章讲解了Bean相关的基础知识以及相关的配置使用方式，我们都是用XML配置的方式进行配置的，因为我们测试程序里面的bean是很少的，我们试想一下，在实际的项目中，有成千上万个bean，不谈bean之间引用装配的配置，单单声明一遍bean，我们的配置文件也是臃肿不堪的。那么有没有好的方式解决这一问题呢？那肯定是有的，就是我们要说的注解。
 
 注解的使用我们可能在其他应用功能中用过，比如说REST的配置声明，使用很是便捷，其实Spring注解也是，其实注解简单的理解就是我们给类、方法标识一下，告诉容器、框架我是谁谁谁，使用的时候可以找到我啥的。
 
-#### 33.1. **定义Bean**
+#### <span id="head163">33.1. 定义Bean</span>
 
-##### 33.1.1. 基本配置
+##### <span id="head164">33.1.1. 基本配置</span>
 
 我们先来看下如何用注解的方式声明一个bean。
 
@@ -7771,7 +8067,7 @@ applicationContext.xml:
 
 这时我们再去执行，发现测试代码可以愉快正常的运行了。我们看下我们的XML配置文件，里面只有一个配置项：<context:component-scan  >,这个作用就是告诉容器去扫描注册bean，那么扫描哪里呢，就是通过里面的  base-package 属性来配置的，一般我们指定bean 所在包名路径。注意，这里使用到了 context 命名空间，需要先注册，也就是上面 <beans>里面引入的context相关的内容。
 
-##### 31.1.2. 作用域
+##### <span id="head165">31.1.2. 作用域</span>
 
 在XML配置方式中我们使用scope 属性设置Bean的作用域，那么在注解方式中如何设置Bean的作用域呢？方式就是我们使用 @Scope 注解来设置。
 
@@ -7788,21 +8084,21 @@ applicationContext.xml:
 
 注解中我们可以定义参数来设置作用域，其实用法和XML配置方式是一样的
 
-##### 31.1.3. Required
+##### <span id="head166">31.1.3. Required</span>
 
 有时某些Bean在配置时需要依赖其他Bean，也就是被依赖的Bean必须先存在，那么如何让被依赖的Bean在目标Bean之前创建呢？我们可以使用 @Required 注解。
 
 ![1497271254871](README.assets/1497271254871.png)
 
-#### 31.2. **自动装配**
+#### <span id="head167">31.2. 自动装配</span>
 
-##### 31.2.1. 基本概念
+##### <span id="head168">31.2.1. 基本概念</span>
 
 在XML配置方式中，某个Bean中有另一个Bean的引用，我们会利用IoC容器注入功能对其初始化，可以set方法注入，也可以构造器注入，但是在实际项目中会有很多的Bean，假设Bean之间的依赖都需要我们手动设置，那将是一个巨大的工作量，如何减少这种工作量、快速准确的进行装配呢？这就用到了自动装配。
 
 何为自动装配？自动装配是满足Bean之间依赖的一种方法，Spring框架会根据变量类型自动寻找相匹配的Bean并进行赋值引用。自动装配是利用 @Autowired 注解来完成的。
 
-##### 31.2.2. 注解自动装配使用
+##### <span id="head169">31.2.2. 注解自动装配使用</span>
 
 ```java
 1.package com.baobaotao;       
@@ -7822,7 +8118,7 @@ applicationContext.xml:
 
 在这个例子中，我们对成员变量 car 、office 使用了@Autowired注解，那么在Boss 初始化的时候，Spring容器就回去寻找类型为Car、Office的bean，并自动给这两个成员变量赋值。
 
-##### 31.2.3 自动装配对象
+##### <span id="head170">31.2.3 自动装配对象</span>
 
 我们不仅可以对成员变量进行自动装配，还可以对构造器和方法进行自动装配。
 
@@ -7998,7 +8294,7 @@ Person.java
 
 注意一个细节，我们的两个Phone的实现类，一个标注了@Order注解，一个实现了Ordered，这个什么作用呢？其实用用来设置在集合装配时在集合中的顺序的，根据上述结果可以看出顺序的设置对List有效，对Map无效。
 
-##### 31.2.4. 自动装配冲突
+##### <span id="head171">31.2.4. 自动装配冲突</span>
 
 假设现在要给某个成员变量设置自动装配，但是这个成员变量类型对应的Bean有多个，那么将会如何装配呢？也就是该成员变量引用哪个Bean，其实这个时候会报错的，因为框架不知道到底给引用哪个，妥妥的选择困难症啊。。。
 
@@ -8054,7 +8350,7 @@ Person.java
 
 我们可以利用自定义注解标注要被引用的bean，然后在自动装配的时候指定要装配这个bean。具体例子见下一小节。
 
-#### 31.3. **自定义注解**
+#### <span id="head172">31.3. 自定义注解</span>
 
 自定义的注解 @Apple
 
@@ -8127,7 +8423,7 @@ Person.java
 
 这样在自动装配的时候会寻找标注@Apple注解的bean，并设置引用。
 
-### 34. Java代码装配
+### <span id="head173">34. Java代码装配</span>
 
 前面介绍了XML和注解的方式声明Bean，其中XML的方式可以自行独立声明完成装配，但是注解的方式因为需要使用到自动扫描所以需要借助一个XML配置文件。
 
@@ -8216,9 +8512,9 @@ StoreConfig.java：
     }  
 ```
 
-### 35. **代理**
+### <span id="head174">35. 代理</span>
 
-#### 35.1.说明
+#### <span id="head175"> 35.1.说明</span>
 
 我们要学习spring 的AOP，在学习之前我们先学习一下代理。那么这个是什么东西呢？
 
@@ -8226,11 +8522,11 @@ StoreConfig.java：
 
 Spring的AOP可以解决此类问题，不过我们先从最开始的演化说起。
 
-#### 35.2. **静态代理**
+#### <span id="head176">35.2. 静态代理</span>
 
 * 利用静态代理可以解决上述问题。
 
-  1) 工程文件
+1) 工程文件
 
 ![1498479974940](README.assets/1498479974940.png)
 
@@ -8323,15 +8619,15 @@ ProxyTest.java
 
 * 分析说明
 
-  在该工程中我们创建了一个测试目标类PersonDaoImpl,实现了接口PersonDao,其中简单的设置了一个更新数据的操作，这个操作需要事务的控制。我们新建代理类Proxy ，构造方法实例化目标类和事务类，同样实现了PersonDao接口，在目标方法中实现事务操作。这个其实就是利用代理类对我们的目标方法进行了一层封装，当我们实际需要进行操作目标方法时，就是利用代理类来进行操作，也就是测试方法中proxy.updataPerson()的操作。
+在该工程中我们创建了一个测试目标类PersonDaoImpl,实现了接口PersonDao,其中简单的设置了一个更新数据的操作，这个操作需要事务的控制。我们新建代理类Proxy ，构造方法实例化目标类和事务类，同样实现了PersonDao接口，在目标方法中实现事务操作。这个其实就是利用代理类对我们的目标方法进行了一层封装，当我们实际需要进行操作目标方法时，就是利用代理类来进行操作，也就是测试方法中proxy.updataPerson()的操作。
 
-  这样我们以后凡是PersonDao实现类的updatePerson的操作都可以利用这个代理类，简单方便。
+这样我们以后凡是PersonDao实现类的updatePerson的操作都可以利用这个代理类，简单方便。
 
-  但是我们仔细分析一下，这个是最好的方法吗？显然不是，明显存在以下缺点：一是如果我们有其他的目标类需要实现事务呢？还需要写代理类。二是如果对于同一个目标类但是有很多目标方法呢？每个目标方法都需要单独控制。三是如果有多个像事务操作这样的动作增加呢?很明显这几个缺点都是因为不灵活而产生的，一个变需要大量的改变文件，不可取。
+但是我们仔细分析一下，这个是最好的方法吗？显然不是，明显存在以下缺点：一是如果我们有其他的目标类需要实现事务呢？还需要写代理类。二是如果对于同一个目标类但是有很多目标方法呢？每个目标方法都需要单独控制。三是如果有多个像事务操作这样的动作增加呢?很明显这几个缺点都是因为不灵活而产生的，一个变需要大量的改变文件，不可取。
 
-#### 35.3.  **动态代理**
+#### <span id="head177">35.3.  动态代理</span>
 
-##### 35.3.1. 工程文件
+##### <span id="head178">35.3.1. 工程文件</span>
 
 ![1498571670288](README.assets/1498571670288.png)
 
@@ -8431,7 +8727,7 @@ MyInterceptor.java:
 45.}  
 ```
 
-##### 35.3.2. 分析
+##### <span id="head179">35.3.2. 分析</span>
 
 动态代理依然是利用代理类来实现对目标方法的事务操作的，只不过静态代理直接实现目标类实现的接口，这样当目标类执行时直接运行代理类的方法，而动态代理使用的是jskproxy,利用反射来实现事务操作。
 
@@ -8441,9 +8737,9 @@ MyInterceptor.java:
 
 可以看出动态代理拥有了一些拥抱变化的特征，例如对多个类具有相同的事务操作的情况下，可以使用同一个代理类进行操作。当然缺点也明显，例如在invoke方法中判断方法名称，显然是写死了。
 
-### 36. Spring  **AOP**
+### <span id="head180">36. Spring  AOP</span>
 
-#### 36.1. **AOP的概念**
+#### <span id="head181">36.1. AOP的概念</span>
 
 **1) 概述**
 
@@ -8465,9 +8761,9 @@ MyInterceptor.java:
 
 > 切入点：目标方法执行的前提条件，就是代理类对目标方法进行封装，但是在什么情况下才代理是需要一定的条件的。
 
-#### 36.2. **AOP配置使用**
+#### <span id="head182">36.2. AOP配置使用</span>
 
-##### 36.2.1. 工程文件
+##### <span id="head183">36.2.1. 工程文件</span>
 
 使用spring AOP需要导入一些jar包，spring AOP 底层的依赖实现就是cglib这些东西。
 
@@ -8528,7 +8824,7 @@ ApplicationContext.xml
 18.}  
 ```
 
-##### 36.2.2. 分析说明
+##### <span id="head184">36.2.2. 分析说明</span>
 
 其实spring 的AOP底层实现也是动态代理、cglib这些技术，只不过它进行了深层的封装，我们要想使用不需要自己亲自写复杂的代理类，只需要进行相关的配置就行，spring在运行的时候自动读取配置文件，处理生成对应的代理对象。
 
@@ -8542,7 +8838,7 @@ ApplicationContext.xml
 
 这样我们在客户端使用的时候，我们不用关注具体的代理过程啥的，我们只需要根据bean获取目标对象，然后执行目标方法即可。其实这也就实现了纯粹的面向对象编程的思想，只关心目标对象，其它的实现处理细节不管。
 
-##### 36.2.3. 切面的通知
+##### <span id="head185">36.2.3. 切面的通知</span>
 
 切面中的方法不仅仅有在目标方法执行之前、后运行的方法，还可以配置在目标方法产生异常等情况下执行的方法。
 
@@ -8677,19 +8973,19 @@ ApplicationContext.xml
 
 可以看到后置通知没有执行，因为目标方法产生异常。
 
-#### 36.3. **AOP注解**
+#### <span id="head186">36.3. AOP注解</span>
 
-##### 36.3.1. 概述
+##### <span id="head187">36.3.1. 概述</span>
 
 我们使用spring的进行各种操作，将AOP的操作配置在xml配置文件中，其实也可以利用注解实现AOP，例如事务的管理。
 
-##### 36.3.2. 工程
+##### <span id="head188">36.3.2. 工程</span>
 
 ![1498896728007](README.assets/1498896728007.png)
 
 注意相关jar包的引入
 
-##### 36.3.3. 代码
+##### <span id="head189">36.3.3. 代码</span>
 
 配置文件：
 
@@ -8757,13 +9053,13 @@ ApplicationContext.xml
 10.}  
 ```
 
-#### 36.4. 多切面
+#### <span id="head190">36.4. 多切面</span>
 
-##### 36.4.1. 说明
+##### <span id="head191">36.4.1. 说明</span>
 
 Spring的多切面只需要在配置文件中依次声明相关切面即可。
 
-##### 36.4.2. 代码
+##### <span id="head192">36.4.2. 代码</span>
 
 ```xml
 1.<?xml version="1.0" encoding="UTF-8"?>  
@@ -8801,15 +9097,15 @@ Spring的多切面只需要在配置文件中依次声明相关切面即可。
 33.</beans>  
 ```
 
-### 37. Spring与JDBC
+### <span id="head193">37. Spring与JDBC</span>
 
-#### 37.1. 工程
+#### <span id="head194">37.1. 工程</span>
 
 ![1498977537532](README.assets/1498977537532.png)
 
-#### 37.2. **代码**
+#### <span id="head195">37.2. 代码</span>
 
-##### 37.2.1. 自定义
+##### <span id="head196">37.2.1. 自定义</span>
 
 自己实现数据库操作：对应jdbc1包
 
@@ -8922,7 +9218,7 @@ PersonDao.java:
 
 这种方式需要我们自己获取数据源操作数据库，比较麻烦，好在jdbc已经给我们做好了这些事，例子如下……
 
-##### 37.2.2. jdbc提供
+##### <span id="head197">37.2.2. jdbc提供</span>
 
 配置：     
 
@@ -8960,7 +9256,7 @@ xml1.<?xml version="1.0" encoding="UTF-8"?>  
 31.</beans>  
 ```
 
- PersonDao.java:
+PersonDao.java:
 
 ```java
 1.package com.example.jdbc2;  
@@ -8995,21 +9291,21 @@ xml1.<?xml version="1.0" encoding="UTF-8"?>  
 16.}  
 ```
 
-##### 37.2.3. 结果
+##### <span id="head198">37.2.3. 结果</span>
 
 ![1499087589855](README.assets/1499087589855.png)
 
-### 38. **MyBatis初识**
+### <span id="head199">38. MyBatis初识</span>
 
-#### 38.1. **MyBatis简介**
+#### <span id="head200">38.1. MyBatis简介</span>
 
 MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过程以及高级映射。MyBatis 避免了几乎所有的 JDBC 代码和手动设置参数以及获取结果集。MyBatis 可以使用简单的 XML 或注解来配置和映射原生信息，将接口和 Java 的 POJOs(Plain Old Java Objects,普通的 Java对象)映射成数据库中的记录。
 
 简单来说，我们在实际应用开发过程中进行持久层操作的话，可以直接使用原生的JDBC的方式来操作，但是这样方式很繁琐，而且不具有面向对象开发的特征；另一种方式是使用面向对象的方式操作持久层，例如Hibernate，但是存粹面向对象的开发方式有时又不是那么的灵活，例如我们需要一段复杂查询的时候，使用面向对象的方式不容易实现，但是明明只是一句SQL解决的事情。那么有没有一种可以结合SQL操作和面向对象操作方式的持久层操作模型或者框架呢？MyBatis就是在这样的需求下诞生的，可以称为半自动话的持久层操作。
 
-#### **38.2.** **MyBatis框架优缺点**
+#### <span id="head201">38.2. MyBatis框架优缺点</span>
 
-##### 38.2.1. 优点
+##### <span id="head202">38.2.1. 优点</span>
 
 * 与JDBC相比，减少了50%以上的代码量。
 
@@ -9021,31 +9317,31 @@ MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过�
 
 * 提供映射标签，支持对象与[数据库](http://lib.csdn.net/base/mysql)的ORM字段关系映射。
 
-##### 38.2.2. 缺点
+##### <span id="head203">38.2.2. 缺点</span>
 
 * SQL语句的编写工作量较大，尤其是字段多、关联表多时，更是如此，对开发人员编写SQL语句的功底有一定要求。
 
 * SQL语句依赖于数据库，导致数据库移植性差，不能随意更换数据库。
 
-#### 38.3.**MyBatis框架适用场景**
+#### <span id="head204"> 38.3.MyBatis框架适用场景</span>
 
 * MyBatis专注于SQL本身，是一个足够灵活的DAO层解决方案。
 
-  对性能的要求很高，或者需求变化较多的项目，如互联网项目，MyBatis将是不错的选择。
+对性能的要求很高，或者需求变化较多的项目，如互联网项目，MyBatis将是不错的选择。
 
-### 39. MyBatis环境搭建与入门
+### <span id="head205">39. MyBatis环境搭建与入门</span>
 
 好啦，说这么多，心动不如心动，那就让我们来搭建一个MyBatis环境啦，写个Demo，输出个Hello World出来溜溜~~~
 
-#### **39.1.** 数据库环境搭建
+#### <span id="head206">39.1. 数据库环境搭建</span>
 
 “工欲善其事必先利其器”，要操作持久层，没有对应的数据库还操作啥呢？来，我们先建个数据库、创建一些表、创造一些数据压压惊。这里我们以MySql为例。
 
-##### 39.1.1. 数据库建表
+##### <span id="head207">39.1.1. 数据库建表</span>
 
 ![1504920958373](README.assets/1504920958373.png)
 
-##### 39.1.2. 设置数据
+##### <span id="head208">39.1.2. 设置数据</span>
 
 我们随便插入一些数据：
 
@@ -9055,7 +9351,7 @@ MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过�
 
 
 
-#### 39.2. **创建Web工程**
+#### <span id="head209">39.2. 创建Web工程</span>
 
 ![1504921112512](README.assets/1504921112512.png)
 
@@ -9063,15 +9359,15 @@ MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过�
 
 具体一步步往下就行，这里就不再截图。
 
-#### 39.3. 导入jar包
+#### <span id="head210">39.3. 导入jar包</span>
 
-##### 39.3.1. JAR包下载
+##### <span id="head211">39.3.1. JAR包下载</span>
 
 官方下载：https://github.com/mybatis/mybatis-3/releases
 
 这里下载的是MyBatis官方的jar包，需要注意的是，因为我们操作数据库，所以还需要数据库连接驱动jar包，我们这里连接MySql使用：mysql-connector-java-5.1.44.jar包。 
 
-##### 39.3.2. JAR包依赖
+##### <span id="head212">39.3.2. JAR包依赖</span>
 
 将jar包复制到工程的lib目录下
 
@@ -9081,7 +9377,7 @@ MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过�
 
 ![img](README.assets/wps2.jpg) 
 
-#### 39.4. **日志设置**
+#### <span id="head213">39.4. 日志设置</span>
 
 因为MyBatis框架用到日志框架，所以需要添加对应的日志配置文件，以方便的输出运行过程的日志信息。
 
@@ -9098,7 +9394,7 @@ MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过�
 6.log4j.appender.stdout.layout.ConversionPattern=%5p [%t] - %m%n  
 ```
 
-#### 39.5. **配置数据源连接**
+#### <span id="head214">39.5. 配置数据源连接</span>
 
 既然要操作数据库，那么程序肯定需要要操作的数据库到底是哪一个，所以我们需要配置下程序中的数据源连接。我们同样在src目录下创建数据源连接文件：database.properties
 
@@ -9121,7 +9417,7 @@ MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过�
 
 ![img](README.assets/wps9-1504921440140.png) jdbc.password：数据库连接密码
 
-#### 39.6. **设置POJO**
+#### <span id="head215">39.6. 设置POJO</span>
 
 MyBatis是一种半自动话的ORM框架，虽然实际的SQL操作直接采用原生SQL语句，但是对于查询入参、查询结果的封装是采用面向对象的方式的，例如将查询结果匹配赋值到一个POJO对象，我们获取到这个结果对象后，就可以直接拿来用了。
 
@@ -9129,7 +9425,7 @@ MyBatis是一种半自动话的ORM框架，虽然实际的SQL操作直接采用�
 
 ![img](README.assets/wps10.jpg) 
 
- 
+
 
 ```java
 1.package com.example.sky.pojo;  
@@ -9154,11 +9450,11 @@ MyBatis是一种半自动话的ORM框架，虽然实际的SQL操作直接采用�
 
 这里省略了相关的set**、get**以及构造方法，POJO类名和数据库表一致，属性字段和数据库表字段一致。
 
-#### 39.7. **创建SQL及映射文件**
+#### <span id="head216">39.7. 创建SQL及映射文件</span>
 
 MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层与持久层交互来说还是采用面向对象的方式的，就是说对于逻辑层来说，操作数据库是感觉不到SQL存在的，只知道去调用持久层的类方法而已。MyBatis实现这种模式的方式是采用映射文件的方式，具体来说，创建一个接口类，类中定义了实际操作数据库的方法，例如查询某个数据啦、新增某个数据啦；另外需要创建一个与之对应的xml映射文件，也就是SQL文件，里面定义具体的SQL。这个映射接口类名称和XML文件的名称需要一致，XML 文件中SQL的ID要和接口类中定义的方法名一致，另外当然入参、返回值都要一致，这其中有个Java类型和数据库类型对应关系，双方要按照对应关系来保持持久层类型和逻辑层Java类型保持一致。另外映射文件俗称Mapper ，我们命名时一般也以Mapper为后缀。
 
-##### 39.7.1. 映射接口
+##### <span id="head217">39.7.1. 映射接口</span>
 
 ![img](README.assets/wps11.jpg) 
 
@@ -9191,7 +9487,7 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 26.}  
 ```
 
-##### 39.7.2. SQL文件
+##### <span id="head218">39.7.2. SQL文件</span>
 
 ![img](README.assets/wps12.jpg) 
 
@@ -9218,7 +9514,7 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 20.</mapper>  
 ```
 
-#### 39.8. **MyBatis配置文件**
+#### <span id="head219">39.8. MyBatis配置文件</span>
 
 下面就要配置MyBatis的核心配置文件了，就是我们设置了数据库连接、SQL操作文件等，但是具体这些内容如何被MyBatis框架知道呢？MyBatis支持以XML文件的方式来配置相关内容的。我们在src路径下创建MyBatis核心配置文件 mybatis-config.xml文件。
 
@@ -9287,7 +9583,7 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 
 映射Mapper接口类注册是为了让MyBatis框架知道系统中SQL操作相关的方法，方便后续使用面向对象的方式调用对应持久层操作方法。注册的方法当然是通过包扫描的方式比较方便了，一个个注册肯定是繁琐的。
 
-#### 39.9. Session连接工厂
+#### <span id="head220">39.9. Session连接工厂</span>
 
 ![img](README.assets/wps15.jpg) 
 
@@ -9343,7 +9639,7 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 
 那么我们每次获取一个数据库连接都是session工厂新建连接的吗？我们在MyBatis配置文件中设置了database 的type为POOLED ，这个表示采用数据库连接池的方式，即MyBatis框架内部会维持一个数据库连接池，其中会一直维持一定数量的空闲数据库连接session，每次实际需要连接数据库时直接从其中拿就行，用完继续放回线程池，可供下次使用，避免了频繁创建数据库连接。
 
-#### 39.10. **测试类** 
+#### <span id="head221">39.10. 测试类</span>
 
 ```java
 1./** 
@@ -9385,7 +9681,7 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 37.}  
 ```
 
-##### 39.10.1. 说明
+##### <span id="head222">39.10.1. 说明</span>
 
 终于来到了最终的实际使用环节，这里我们创建一个测试用例来测试下我们的MyBatis配置框架。
 
@@ -9393,7 +9689,7 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 
 另外我们在进行增删改操作的时候需要注意事务的操作。
 
-##### 39.10.2. 测试结果
+##### <span id="head223">39.10.2. 测试结果</span>
 
 测试1：
 
@@ -9405,29 +9701,29 @@ MyBatis虽然直接与数据库交互采用SQL的方式，但是对于逻辑层�
 
 ![1505035928628](README.assets/1505035928628.png)
 
-### 40.Spring与MyBatis整合
+### <span id="head224"> 40.Spring与MyBatis整合</span>
 
-#### 40.1. 概述
+#### <span id="head225">40.1. 概述</span>
 
 在实际的Web项目开发中，需要涉及的不仅仅是持久层的开发，还要涉及视图层、控制层等，大体上可以概述为MVC架构。我们普遍选择Spring作为工程控制层、逻辑层或视图层的开发框架，持久层可以选择不同的ORM框架，如果选择MyBatis，那么如何整合Spring和MyBatis这两个框架呢？
 
-#### 40.2. **工程概览**
+#### <span id="head226">40.2. 工程概览</span>
 
 我们首先还是创建一个Web工程，导入相应的jar包，然后进行相关的配置。我们不妨先首先看下配置完整后的目录以有个整体的印象及目标。
 
 ![img](README.assets/wps18.jpg) 
 
-##### 40.2.1. 包结构定义
+##### <span id="head227">40.2.1. 包结构定义</span>
 
 com.example.sky.* 包路径下的内容其实和MyBatis一节中配置的内容是一致的，包括junit——测试包，mappers——MyBatis的mapper接口及SQL定义，pojo——Java实体定义。
 
-##### 40.2.2. Jar包引用
+##### <span id="head228">40.2.2. Jar包引用</span>
 
 WEB-INF下的lib文件夹没啥好说的，就是Spring和Mybatis框架用到的相关jar包。详细jar包引用如下（jar包中包含了JSTL或者SpringMVC前端用到的jar包，在本例子中可以删除）：
 
 ![img](README.assets/wps19.jpg)    ![img](file:///C:\Users\zhuyong\AppData\Local\Temp\ksohtml9392\wps20.jpg)
 
-##### 40.2.3. 核心配置文件
+##### <span id="head229">40.2.3. 核心配置文件</span>
 
 工程配置的核心文件很明显，便是以下四个文件：
 
@@ -9443,9 +9739,9 @@ WEB-INF下的lib文件夹没啥好说的，就是Spring和Mybatis框架用到的
 
 核心的配置文件其实也就是Spring的配置文件和MyBatis的配置文件了，下面我们详细叙述下。
 
-#### 40.3. **Spring配置文件**
+#### <span id="head230">40.3. Spring配置文件</span>
 
-##### 40.3.1. 文件内容
+##### <span id="head231">40.3.1. 文件内容</span>
 
 applicationContext.xml：
 
@@ -9499,7 +9795,7 @@ applicationContext.xml：
 47.</beans>  
 ```
 
-##### 40.3.2. 配置详解
+##### <span id="head232">40.3.2. 配置详解</span>
 
 配置文件首先加载数据源配置文件，然后设置数据库连接池，这些与在MyBatis框架中定义的配置作用是一致的。
 
@@ -9507,9 +9803,9 @@ applicationContext.xml：
 
 在MyBatis自己单独定义配置的时候，我们定义了Mapper扫描，同样在这里，我们可以直接在Spring配置文件中注册Mapper接口。方式的话有两种，一是显示的定义，显然这种方式不好，因为会累死人的~~~~ 所以当然用第二种了，包扫描方式：注入basePackage属性为我们接口定义包路径。
 
-#### 40.4. MyBatis配置文件
+#### <span id="head233">40.4. MyBatis配置文件</span>
 
-##### 40.4.1. 文件内容
+##### <span id="head234">40.4.1. 文件内容</span>
 
 ```xml
 1.<?xml version="1.0" encoding="UTF-8" ?>  
@@ -9526,11 +9822,11 @@ applicationContext.xml：
 12. </configuration>   
 ```
 
-##### 40.4.2. 配置详解
+##### <span id="head235">40.4.2. 配置详解</span>
 
 这里我们看到MyBatis的配置文件只剩下别名的定义了，其实实际当中可能还有很多其他属性的配置与定义，这里只是最简单的内容了。
 
-#### 40.5. **测试**
+#### <span id="head236">40.5. 测试</span>
 
 其实整合Spring与MyBatis后，MyBatis中的mapper已经被处理成了Spring框架中的bean对象，具体使用的时候我们可以直接获取mapper  bean，很方便。
 
@@ -9540,9 +9836,9 @@ applicationContext.xml：
 
 ![1504871592608](README.assets/1504871592608.png)
 
-### **41.** **SpringMVC初相识**
+### <span id="head237">41. SpringMVC初相识</span>
 
-#### **41.1.** **SpringMVC简介**
+#### <span id="head238">41.1. SpringMVC简介</span>
 
 Spring Web MVC是一种基于Java的实现了Web MVC设计模式的请求驱动类型的轻量级Web框架，即使用了MVC架构模式的思想，将web层进行职责解耦，基于请求驱动指的就是使用请求-响应模型，框架的目的就是帮助我们简化开发，Spring Web MVC也是要简化我们日常Web开发的。
 
@@ -9550,7 +9846,7 @@ Spring Web MVC是一种基于Java的实现了Web MVC设计模式的请求驱动�
 
 Spring Web MVC也是服务到工作者模式的实现，但进行可优化。前端控制器是DispatcherServlet；应用控制器其实拆为处理器映射器(Handler Mapping)进行处理器管理和视图解析器(View Resolver)进行视图管理；页面控制器/动作/处理器为Controller接口（仅包含ModelAndView handleRequest(request, response) 方法）的实现（也可以是任何的POJO类）；支持本地化（Locale）解析、主题（Theme）解析及文件上传等；提供了非常灵活的数据验证、格式化和数据绑定机制；提供了强大的约定大于配置（惯例优先原则）的契约式编程支持。
 
-#### **41.2.** **作用和功能**
+#### <span id="head239">41.2. 作用和功能</span>
 
 ![img](README.assets/wps13-1499256819919.png) 让我们能非常简单的设计出干净的Web层和薄薄的Web层；
 
@@ -9578,11 +9874,11 @@ Spring Web MVC也是服务到工作者模式的实现，但进行可优化。前
 
 ![img](README.assets/wps25.png) 支持Restful风格
 
-#### **41.3.** **SpringMVC架构**
+#### <span id="head240">41.3. SpringMVC架构</span>
 
 Spring Web MVC框架也是一个基于请求驱动的Web框架，并且也使用了前端控制器模式来进行设计，再根据请求映射规则分发给相应的页面控制器（动作/处理器）进行处理。首先让我们整体看一下Spring Web MVC处理请求的流程：
 
-##### 41.3.1. SpringMVC请求处理流程
+##### <span id="head241">41.3.1. SpringMVC请求处理流程</span>
 
 如图：
 
@@ -9598,7 +9894,7 @@ Spring Web MVC框架也是一个基于请求驱动的Web框架，并且也使用
 
 4) 前端控制器再次收回控制权，将响应返回给用户，图中的步骤8；至此整个结束。
 
-##### 41.3.2. SpringMVC架构
+##### <span id="head242">41.3.2. SpringMVC架构</span>
 
 Spring Web MVC核心架构图，如图：
 
@@ -9620,7 +9916,7 @@ Spring Web MVC核心架构图，如图：
 
 7) 返回控制权给DispatcherServlet，由DispatcherServlet返回响应给用户，到此流程结束。
 
-#### 41.4. **SpringMVC优势**
+#### <span id="head243">41.4. SpringMVC优势</span>
 
 ![img](README.assets/wps27-1499344831213.png) 清晰的角色划分：前端控制器（DispatcherServlet）、请求到处理器映射（HandlerMapping）、处理器适配器（HandlerAdapter）、视图解析器（ViewResolver）、处理器或页面控制器（Controller）、验证器（Validator）、命令对象（Command  请求参数绑定到的对象就叫命令对象）、表单对象（Form Object 提供给表单展示和提交到的对象就叫表单对象）；
 
@@ -9650,19 +9946,19 @@ Spring Web MVC核心架构图，如图：
 
 ![img](README.assets/wps40.png) 基于注解的零配置支持等等。
 
-### 42. **SpringMVC入门示例**
+### <span id="head244">42. SpringMVC入门示例</span>
 
 按照契约式的精神，我们要写的第一个程序是啥呢？那肯定是—— Hello World啦！所以我们来开发我们的基于SpringMVC的第一个程序——Hello World 。
 
-#### 42.1.**环境**
+#### <span id="head245"> 42.1.环境</span>
 
 1) 开发环境：IntelliJ IDEA
 
 2) 程序环境: Tomcat8 + Java8
 
-#### 42.2.**步骤**
+#### <span id="head246"> 42.2.步骤</span>
 
-##### 42.2.1. 创建web应用
+##### <span id="head247">42.2.1. 创建web应用</span>
 
 应用名称：SpringMVC_HelloWorld
 
@@ -9680,7 +9976,7 @@ Spring Web MVC核心架构图，如图：
 
 可以看出工程目录结构，包括基础的jar包依赖，以及web工程所需要的web.xml等文件，这里由于IDEA太智能，在web.xml中已经配置好相关设置，并创建了其他两个xml文件（先忽略这两个文件）。但是我们刚开始还是需要自动手动写，来加强学习。
 
-##### 42.2.2. web.xml设置
+##### <span id="head248">42.2.2. web.xml设置</span>
 
 前端控制器： DispatcherServlet。在web.xml文件中配置内容如下：
 
@@ -9714,7 +10010,7 @@ Spring Web MVC核心架构图，如图：
 
 这里我们定义了一个servlet，拦截所有的请求，通过DispatcherServlet前端控制器来分发请求，并且我们设置了初始化参数，加载springmvc配置文件，并且在tomcat容器一启动的时候就进行初始化。
 
-##### 42.2.3. SpringMVC配置文件
+##### <span id="head249">42.2.3. SpringMVC配置文件</span>
 
 springmvc-config.xml：
 
@@ -9743,7 +10039,7 @@ springmvc-config.xml：
 
 同时配置了处理映射器、处理适配器、识图解析器，如果Spring的版本是4.0以后，不用设置，容器会使用默认的适配器、解析器。
 
-##### 42.2.4. 处理控制器
+##### <span id="head250">42.2.4. 处理控制器</span>
 
 Controller实现类
 
@@ -9785,7 +10081,7 @@ HelloController处理类实现了Controller接口，实现了handleRequest方法
 
 需要注意的是，我们这种实现接口的方式，类只能处理单一的请求，即只能处理/hello请求，因为我们只能实现一个接口的方法，后续说的利用注解的方式可以处理多个请求，就是可以定义不同的方法处理不同的请求，就是类似于REST请求的处理方式。
 
-##### 42.2.5. 视图页面
+##### <span id="head251">42.2.5. 视图页面</span>
 
 Welcome.jsp
 
@@ -9802,7 +10098,7 @@ Welcome.jsp
 
 在展示页面中我们简单的输出在控制层往模型视图对象中添加的参数信息。
 
-##### 42.2.6. 运行访问
+##### <span id="head252">42.2.6. 运行访问</span>
 
 我们部署并启动应用，在浏览器中输入访问：
 
@@ -9812,15 +10108,15 @@ Welcome.jsp
 
 有木有感觉很开心？……不开心…呜呜呜…第一次使用IDEA，各种不顺心，配置各种烦，另外我们从浏览器的访问地址能看出啥？我去，竟然不用输入应用名称，直接跟着我们定义的/hello请求……直接一直有应用名称，死活没用……我也是醉了…这个回头要好好研究下为啥。
 
-### 43. **SpringMVC注解应用**
+### <span id="head253">43. SpringMVC注解应用</span>
 
-#### 43.1. **前言**
+#### <span id="head254">43.1. 前言</span>
 
 前面已经说了Controller利用实现接口的方式来完成对请求的处理只能处理单一的请求，我们可以利用注解的方式来配置一个类处理多个请求。另外利用注解的方式，也简化了工程的配置，可以很快捷清晰的看出类方法处理的是哪个请求。
 
 下面我们就来看下如何利用注解的方式写一个SpringMVC应用。
 
-#### 43.2. **步骤**
+#### <span id="head255">43.2. 步骤</span>
 
 开发IDE： Eclipse for J2EE
 
@@ -9828,7 +10124,7 @@ Welcome.jsp
 
 ![img](README.assets/wps45.jpg)
 
-##### 43.2.1. SpringMVC配置文件
+##### <span id="head256">43.2.1. SpringMVC配置文件</span>
 
 springmvc.xml：
 
@@ -9858,7 +10154,7 @@ springmvc.xml：
 
 该配置文件相比较第一个HelloWorld中，删除了对于 /hello bean的定义，增加了Spring扫描配置，目的是为了扫描目标类路径下的配置了注解的类，将他们注册到bean容器中。
 
-##### 43.2.2. Controller配置类
+##### <span id="head257">43.2.2. Controller配置类</span>
 
 ```java
 1.package com.jsm.controller;  
@@ -9896,15 +10192,15 @@ springmvc.xml：
 
 本controller类不采用实现接口的方式，而是使用了注解的方式，注解 @Controller表明HelloController类是SpringMVC的控制器类。方法 hello() 使用了@RequestMapping() 来表明要对应处理哪个访问请求，这里表明要处理的请求是 /hello 。
 
-##### 43.2.3. 访问测试
+##### <span id="head258">43.2.3. 访问测试</span>
 
 部署请求  hello：
 
 ![1500795971548](README.assets/1500795971548.png)
 
-#### **43.3.**SpringMVC配置文件
+#### <span id="head259">43.3. SpringMVC配置文件</span>
 
-##### 43.3.1. 映射器等配置
+##### <span id="head260">43.3.1. 映射器等配置</span>
 
 在上面的例子中，我们在SpringMVC 的配置文件中设置了处理映射器、试图解析器等：
 
@@ -9912,7 +10208,7 @@ springmvc.xml：
 
 其实这些解析器我们可以不显示的设置，因为这里用的都是SpringMVC框架默认的，即使不写也是用的这些。当然我们也可以自定义自己的处理映射器等，那就需要显示的声明了。
 
-##### 43.3.2. 视图前后缀
+##### <span id="head261">43.3.2. 视图前后缀</span>
 
 我们在控制器中返回试图的路径的时候，是直接返回相对路径的，并且也指定文件后缀。其实在实际开发中jsp页面会有很多，假设每次都要写下这个，很费精力，所以我们可以直接在SpringMVC配置文件中直接定义试图解析器的路径以及后缀：
 
@@ -9922,7 +10218,7 @@ springmvc.xml：
 
 ![img](README.assets/wps48.jpg) 
 
-#### 43.4.**web.xml配置**
+#### <span id="head262"> 43.4.web.xml配置</span>
 
 我们启动了web应用，然后浏览器输入请求地址，就可以请求了，SpringMVC框架是依赖于SpringMVC配置文件的，但是我们好像也没有在哪显示的定义加载这个配置文件啊，那么程序怎么读取并加载SpringMVC文件的呢？
 
@@ -9932,11 +10228,11 @@ springmvc.xml：
 
 我们定义拦截所有的后缀为.action的请求，然后交由默认的转发控制器处理，同时注入我们的SpringMVC配置文件，配置文件中定义了请求具体由哪个控制器来处理以及视图适配器等。
 
-### 44.**SpringMVC注解**
+### <span id="head263"> 44.SpringMVC注解</span>
 
-#### 44.1. **@Controller注解**
+#### <span id="head264">44.1. @Controller注解</span>
 
-##### 44.1.1. 说明
+##### <span id="head265">44.1.1. 说明</span>
 
 @Controller注解用于标注一个Java类，表明注解的类将作为Spring容器的一个Bean，不过这个Bean有点特殊，不同于普通的Bean，它是一个SpringMVC控制器对象，用于处理应用请求。和REST类似，我们用注解标注一个类及方法，当实际请求的时候，就会根据URL路径格式来对应匹配对应的处理类及方法。不同的是Spring	MVC中的请求后需要返回模型视图对象，以便于用于前端页面解析渲染展示。
 
@@ -9959,7 +10255,7 @@ springmvc.xml：
 12.</beans>  
 ```
 
-##### 44.1.2. 注解使用
+##### <span id="head266">44.1.2. 注解使用</span>
 
 1) Springmvc-config.xml
 
@@ -10015,7 +10311,7 @@ springmvc.xml：
 
 这里控制器处理的请求为 /hellospring  ，然后往模型视图中添加了一个名称为“message”的字符串对象。最后返回 welcome 字符串，这个不是普通字符串，而是目标视图页面名称，即和上面的配置文件中描述的视图解析器结合，最终的目标页面就是——
 
- WEB-INF/content/welcome.jsp
+WEB-INF/content/welcome.jsp
 
 在welcome.jsp页面中可以利用request来获取在控制器里往模型里新增的message的值。
 
@@ -10025,13 +10321,13 @@ springmvc.xml：
 
 ![1501155689990](README.assets/1501155689990.png)
 
-#### 44.2. **@RequestMapping**
+#### <span id="head267">44.2. @RequestMapping</span>
 
-##### 44.2.1. 说明
+##### <span id="head268">44.2.1. 说明</span>
 
 @RequestMapping注解用于注解类或方法，指示用哪个类的哪个方法来处理目标请求。@RequestMapping注解控制器类的时候，相当于定义一个高一级访问请求，而定义到方法的则是低级的请求。
 
-##### 44.2.2. 注解使用
+##### <span id="head269">44.2.2. 注解使用</span>
 
 ```java
 1./** 
@@ -10073,7 +10369,7 @@ springmvc.xml：
 
 这里我们在控制器类上面加注解 @RequestMapping，定义类一级处理的请求是 /user。类与方法结合而成的访问路径对应应用请求时的URL，即 /user/register , /user/login。
 
-##### 44.2.3. 注解支持属性
+##### <span id="head270">44.2.3. 注解支持属性</span>
 
 使用@RequestMapping注解支持一下列表所示属性：
 
@@ -10109,7 +10405,7 @@ Value属性执行类或方法处理的请求名称，例如
 
 * 任意方式
 
-  如果没有定义请求方式，则可以处理任意方式的请求。
+如果没有定义请求方式，则可以处理任意方式的请求。
 
 **2) consumes属性**
 
@@ -10137,7 +10433,7 @@ Value属性执行类或方法处理的请求名称，例如
 
 
 
-##### 44.2.4. 控制器请求处理方法可出现参数类型
+##### <span id="head271">44.2.4. 控制器请求处理方法可出现参数类型</span>
 
 我们的请求处理方法可以传递不同类型的参数。例如之前的示例中参数Model，我们可以自由的定义使用。同样的如果我们需要HttpServletRequest或者HttpSession参数对象，我们也可以在方法参数中定义。
 
@@ -10151,7 +10447,7 @@ Value属性执行类或方法处理的请求名称，例如
 
 ![img](README.assets/wps61.jpg) 
 
-##### 44.2.5. 请求方法可返回类型
+##### <span id="head272">44.2.5. 请求方法可返回类型</span>
 
 请求方法可返回类型列表：
 
@@ -10165,13 +10461,13 @@ Spring提供了多种方式将模型数据传递给视图：
 
 ![img](README.assets/wps63.jpg) 
 
-#### 44.3. **参数绑定注解**
+#### <span id="head273">44.3. 参数绑定注解</span>
 
 在实际的请求中，会有一些参数提交到处理控制器方法，那么方法如何获取提交的参数呢？这里就要用到参数绑定注解了，下面我们具体看下有哪些参数绑定注解以及他们的使用。
 
-##### 44.3.1. @RequestParam
+##### <span id="head274">44.3.1. @RequestParam</span>
 
-###### 44.3.1.1. **说明**
+###### <span id="head275">44.3.1.1. 说明</span>
 
 @RequestParam用于将请求参数赋值给方法中的形参。
 
@@ -10189,13 +10485,13 @@ Spring提供了多种方式将模型数据传递给视图：
 
 同样的请求中的password对应的值：123被赋值给方法login中的password参数。
 
- 
+
 
 这里示例没有用到其他属性，只用到了name，因此可以像上面不写属性名称，当然如果有多个属性，就需要明确指定了，例如：
 
 ![img](README.assets/wps66.jpg) 
 
-###### **44.3.1.2.** **示例程序**
+###### <span id="head276">44.3.1.2. 示例程序</span>
 
 现在我们写个简单的登录小程序，模拟用户登录操作。
 
@@ -10256,7 +10552,7 @@ User.java
 
 3) 实际访问效果
 
- 
+
 
 登录界面：
 
@@ -10274,7 +10570,7 @@ User.java
 
 这个例子中，我们在页面输入用户名、密码，然后表单提交，根据form的action，决定提交的请求，然后根据/user/login路径交由User类的login()方法处理，login()方法利用@RequestParam获取表单提交的参数值，经过验证,最后跳转到登录成功界面。
 
-##### 44.3.2. @PathVariable
+##### <span id="head277">44.3.2. @PathVariable</span>
 
 @PathVariable用于获取URL请求中的动态参数，例如：
 
@@ -10284,7 +10580,7 @@ User.java
 
 @PathVariable只支持一个属性value，类型String。如果不指定的话，那么默认是参数同名值。
 
-##### 44.3.3. @RequestHeader
+##### <span id="head278">44.3.3. @RequestHeader</span>
 
 @RequestHeader注解用于将请求头信息区中的数据绑定到方法参数。
 
@@ -10296,7 +10592,7 @@ User.java
 
 示例程序会将对应请求的请求头信息中的“User-Agent”赋值给userAgent参数，“Accept”赋值给accepts参数。
 
-##### 44.3.4. @CookieValue
+##### <span id="head279">44.3.4. @CookieValue</span>
 
 @CookieValue用于将Cookie数据绑定到方法参数。
 
@@ -10308,7 +10604,7 @@ User.java
 
 JSESSIONID的值会被赋值到方法中的sessionId参数。
 
-##### 44.3.5. @PathVariable、@RequestHeader、@CookieValue测试
+##### <span id="head280">44.3.5. @PathVariable、@RequestHeader、@CookieValue测试</span>
 
 1) 工程
 
@@ -10399,9 +10695,9 @@ JSESSIONID的值会被赋值到方法中的sessionId参数。
 
 ![1502714672509](README.assets/1502714672509.png)
 
-##### 44.3.6. @SessionAttributes
+##### <span id="head281">44.3.6. @SessionAttributes</span>
 
-###### 44.3.6.1. **说明**
+###### <span id="head282">44.3.6.1. 说明</span>
 
 @SessionAttributes注解指定Model中的哪些属性需要保存到HttpSession对象中。
 
@@ -10413,7 +10709,7 @@ JSESSIONID的值会被赋值到方法中的sessionId参数。
 
 @SessionAttributes注解**只能声明在类上**，不能声明在方法上。
 
-###### 44.3.6.2. **示例**
+###### <span id="head283">44.3.6.2. 示例</span>
 
 1) 工程
 
@@ -10526,13 +10822,13 @@ JSESSIONID的值会被赋值到方法中的sessionId参数。
 
 ![img](README.assets/wps78.jpg) 
 
- 
+
 
 ![img](README.assets/wps79.jpg) 
 
-##### 44.3.7. @ModelAttribute
+##### <span id="head284">44.3.7. @ModelAttribute</span>
 
-###### 44.3.7.1. **说明**
+###### <span id="head285">44.3.7.1. 说明</span>
 
 @ModelAttribute注解将请求的参数绑定到Model对象。
 
@@ -10550,7 +10846,7 @@ JSESSIONID的值会被赋值到方法中的sessionId参数。
 
 *![img](README.assets/wps84.png)* *注解一个参数方法*
 
-###### 44.3.7.2. **示例**
+###### <span id="head286">44.3.7.2. 示例</span>
 
 我们这里只给出：@ModelAttribute(value=””)注解返回具体值的方法
 
@@ -10610,7 +10906,7 @@ login3.jsp
 
 ![img](README.assets/wps86.jpg)
 
- 
+
 
 ![img](README.assets/wps87.jpg) 
 
@@ -10632,9 +10928,9 @@ login3.jsp
 
 结果证实保存到Model中的键值对就是：  name——1111
 
-### 45. SSM三大框架整合
+### <span id="head287">45. SSM三大框架整合</span>
 
-#### 45.1. **概述**
+#### <span id="head288">45.1. 概述</span>
 
 终于迎来了激动人心的时刻了，终于到了要将三巨头整合的时刻了！
 
@@ -10644,15 +10940,15 @@ login3.jsp
 
 说了这么多，早已急不可耐啦，我们还是赶快开始吧~ ~ ~
 
-#### 45.2. **整合步骤**
+#### <span id="head289">45.2. 整合步骤</span>
 
-##### 45.2.1. 导入jar包
+##### <span id="head290">45.2.1. 导入jar包</span>
 
 别的不说，首先上来直接导入jar包，当然后期可以直接考虑使用Maven，以此来极大的提高开发效率，我们现在还是用简单的方法。
 
 ![img](README.assets/wps28.jpg) ![img](file:///C:\Users\zhuyong\AppData\Local\Temp\ksohtml9392\wps29.jpg)
 
-##### 45.2.2. 创建工程包
+##### <span id="head291">45.2.2. 创建工程包</span>
 
 ![img](README.assets/wps30.jpg) 
 
@@ -10670,13 +10966,13 @@ login3.jsp
 
 ![img](README.assets/wps36.jpg) 
 
-##### 45.2.3. 日志配置
+##### <span id="head292">45.2.3. 日志配置</span>
 
 src / log4j.properties：
 
 ![img](README.assets/wps37.jpg) 
 
-##### 45.2.4. MyBatis配置
+##### <span id="head293">45.2.4. MyBatis配置</span>
 
 1) 数据源
 
@@ -10692,25 +10988,25 @@ src / mybatis-config.xml：
 
 ![img](README.assets/wps39.jpg) 
 
-##### 45.2.5. SpringMVC配置
+##### <span id="head294">45.2.5. SpringMVC配置</span>
 
 src /springmvc.xml ：
 
 ![1522156383061](README.assets/1522156383061.png) 
 
-##### 45.2.6. Spring配置
+##### <span id="head295">45.2.6. Spring配置</span>
 
 src /applicationContext.xml ：
 
 ![1522156438407](README.assets/1522156438407.png)
 
-##### 45.2.7. web.xml 配置
+##### <span id="head296">45.2.7. web.xml 配置</span>
 
 核心配置文件web.xml，因为我们之前的测试都是写测试单元去手动加载框架的，但是在实际web项目中肯定不是我们手动去启动Spring框架了，所以我们在web.xml中配置框架的自启动以及相关初始化设置。
 
 ![1522156511548](README.assets/1522156511548.png)
 
-##### 45.2.8. 具体程序编写
+##### <span id="head297">45.2.8. 具体程序编写</span>
 
 整合完框架后，下面就是具体程序的编写了。例如我们现在做一个从数据库查询所有用户并页面展示的功能。
 
@@ -10724,7 +11020,7 @@ src /applicationContext.xml ：
 
 ![img](README.assets/wps45-1522156532076.jpg) 
 
- 
+
 
 3) UserMapper.xml
 
@@ -10736,8 +11032,8 @@ src /applicationContext.xml ：
 
 5) showuser.jsp
 
- ![1522236369004](README.assets/1522236369004.png)
+![1522236369004](README.assets/1522236369004.png)
 
 6) 结果
 
-![1522236382791](README.assets/1522236382791.png) 
+![1522236382791](README.assets/1522236382791.png)
